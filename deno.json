@@ -7,11 +7,12 @@
     "dev": "deno run --allow-run --allow-env --allow-read --watch src/cli.ts",
     "generate": "deno run --allow-run --allow-env --allow-read --allow-net src/cli.ts generate",
     "status": "deno run --allow-run --allow-env --allow-read src/cli.ts status",
-    "install": "deno install --global --allow-run --allow-env --allow-read --name git-commit-ai src/cli.ts",
+    "install": "deno task build && deno install -f --global --allow-run --allow-env --allow-read --allow-net --name git-commit-ai build/cli.js",
     "test": "deno test --allow-run --allow-env --allow-read",
     "check": "deno check src/cli.ts",
     "lint": "deno lint",
-    "fmt": "deno fmt"
+    "fmt": "deno fmt",
+    "build": "deno run --allow-run --allow-write --allow-read --allow-env npm:mkdirp build && deno bundle --platform=deno src/cli.ts -o build/cli.js"
   },
   "imports": {
     "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.8",
