@@ -1,11 +1,11 @@
 # Git Commit AI 🤖
 
-An AI-powered git commit message generator that follows conventional commit guidelines using TypeScript and Deno with Llama 3.2 3B via OpenRouter.
+An AI-powered git commit message generator that follows conventional commit guidelines using TypeScript and Deno via OpenRouter.
 
 ## Features
 
 - 🎯 **Conventional Commits**: Automatically generates standardized commit messages
-- 🧠 **AI-Powered**: Uses Llama 3.2 3B model for intelligent analysis
+- 🧠 **AI-Powered**: Uses AI for intelligent analysis
 - 📁 **File Analysis**: Analyzes staged changes and file modifications
 - 🎨 **Beautiful CLI**: Colorful and intuitive command-line interface
 - 🔍 **Smart Detection**: Identifies the type of changes (feat, fix, docs, etc.)
@@ -195,7 +195,7 @@ This app requires the following Deno permissions:
 This project uses:
 
 - **[OpenRouter](https://openrouter.ai/)**: AI model access via HTTP API
-- **Meta Llama 3.2 3B**: The AI model for text generation
+- **AI Model**: The AI model for text generation
 - **Deno Standard Library**: Built-in utilities and formatting
 - **Cliffy**: Modern CLI framework for Deno
 
@@ -288,15 +288,10 @@ Feel free to contribute! Some ideas:
 - Batch processing for multiple commits
 - Web UI interface
 
-## Known Issues
-- [ ] model selection from env doesn't seem to be picked up
-- [x] add build command to run on preinstall
-- [x] make default command to `generate`
-
 ## License
 
 MIT License - feel free to use this project however you'd like!
 
 ---
 
-Made with ❤️ using Deno, TypeScript, and Llama 3.2 3B
+Made with ❤️ using Deno and TypeScript
