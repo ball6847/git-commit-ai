@@ -14,10 +14,19 @@ import type { CLIOptions } from './types.ts';
 
 /**
  * Ask user for confirmation
+ * @param question - The question to ask the user
+ * @param defaultValue - The default value to return if user doesn't provide an answer
+ *                      (true for 'y'/'yes', false for 'n'/'no')
  */
-async function askForConfirmation(question: string): Promise<boolean> {
+async function askForConfirmation(
+  question: string,
+  defaultValue: boolean = false,
+): Promise<boolean> {
   const input = prompt(question);
-  return input?.toLowerCase() === 'y' || input?.toLowerCase() === 'yes';
+  if (input === '' || input === null) {
+    return defaultValue;
+  }
+  return input.toLowerCase() === 'y' || input.toLowerCase() === 'yes';
 }
 
 /**
@@ -125,9 +134,11 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       Deno.exit(0);
     }
 
-    // Ask for confirmation before committing
+    // Ask for confirmation before committing.
+    // Default to 'no' if no answer is provided
     const shouldCommit = await askForConfirmation(
-      yellow('Would you like to commit with this message? (y/N): '),
+      yellow('Would you like to commit with this message? (Y/n): '),
+      false,
     );
 
     if (shouldCommit) {
