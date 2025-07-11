@@ -291,7 +291,7 @@ Feel free to contribute! Some ideas:
 ## Known Issues
 - [ ] model selection from env doesn't seem to be picked up
 - [x] add build command to run on preinstall
-- [ ] make default command to `generate`
+- [x] make default command to `generate`
 
 ## License
 

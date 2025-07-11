@@ -189,11 +189,13 @@ function statusHandler(): void {
 const cli = new Command()
   .name('git-commit-ai')
   .version('1.0.0')
-  .description('AI-powered git commit message generator using conventional commit guidelines');
+  .description('AI-powered git commit message generator using conventional commit guidelines')
+  .default('generate');
 
 // Generate command
 cli.command('generate', 'Generate a conventional commit message for staged changes')
   .alias('gen')
+  .alias('g')
   .option('-m, --model <model:string>', 'OpenRouter model to use', {
     default: 'meta-llama/llama-3.2-3b-instruct',
   })
@@ -205,6 +207,7 @@ cli.command('generate', 'Generate a conventional commit message for staged chang
 
 // Status command
 cli.command('status', 'Show current git status and staged changes')
+  .alias('s')
   .action(() => {
     statusHandler();
   });
