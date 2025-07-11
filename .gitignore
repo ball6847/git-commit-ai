@@ -43,7 +43,6 @@ Thumbs.db
 
 # Build outputs (if any)
 dist/
-build/
 
 # Legacy Node.js files (removed in Deno conversion)
 node_modules/
