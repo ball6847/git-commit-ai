@@ -12,7 +12,7 @@ import type {
  */
 export function initializeAI(
   apiKey: string,
-  model = 'meta-llama/llama-3.2-3b-instruct',
+  model = 'mistralai/mistral-7b-instruct:free',
 ): AIConfig {
   if (!apiKey) {
     throw new Error(
