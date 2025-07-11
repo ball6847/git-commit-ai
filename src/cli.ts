@@ -135,10 +135,10 @@ async function generateHandler(options: CLIOptions): Promise<void> {
     }
 
     // Ask for confirmation before committing.
-    // Default to 'no' if no answer is provided
+    // Default to 'Yes' if no answer is provided
     const shouldCommit = await askForConfirmation(
       yellow('Would you like to commit with this message? (Y/n): '),
-      false,
+      true,
     );
 
     if (shouldCommit) {
