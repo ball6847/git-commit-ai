@@ -1,0 +1,10 @@
+{
+	"deno.enable": true,
+	"[typescript]": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "denoland.vscode-deno"
+	},
+	"cSpell.words": [
+		"OPENROUTER"
+	]
+}

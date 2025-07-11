@@ -1,0 +1,44 @@
+{
+  "name": "@ball6/git-commit-ai",
+  "version": "1.0.0",
+  "exports": "./src/cli.ts",
+  "tasks": {
+    "start": "deno run --allow-run --allow-env --allow-read src/cli.ts",
+    "dev": "deno run --allow-run --allow-env --allow-read --watch src/cli.ts",
+    "generate": "deno run --allow-run --allow-env --allow-read src/cli.ts generate",
+    "status": "deno run --allow-run --allow-env --allow-read src/cli.ts status",
+    "install": "deno install --allow-run --allow-env --allow-read --name git-commit-ai src/cli.ts",
+    "test": "deno test --allow-run --allow-env --allow-read",
+    "check": "deno check src/cli.ts",
+    "lint": "deno lint",
+    "fmt": "deno fmt"
+  },
+  "imports": {
+    "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.8",
+    "@std/fmt/colors": "jsr:@std/fmt@^1.0.8/colors",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
+    "@std/path": "jsr:@std/path@^1.1.1"
+  },
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "lib": ["deno.ns", "dom", "es2022"],
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
+}
