@@ -115,7 +115,9 @@ FILES CHANGED (${changeSummary.totalFiles} files):
 ${filesList}
 
 GIT DIFF:
+\`\`\`diff
 ${gitDiff}
+\`\`\`
 
 Generate a single, concise conventional commit message that best describes these changes.`;
 }
