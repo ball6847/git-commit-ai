@@ -135,7 +135,7 @@ RULES:
 4. Use lowercase for description
 5. No period at the end
 6. Be specific and concise
-7. Focus on WHAT changed, not HOW
+7. Focus on functional changes and their impact
 
 EXAMPLES:
 - feat(auth): add user login validation
