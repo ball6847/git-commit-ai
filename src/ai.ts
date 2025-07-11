@@ -10,10 +10,7 @@ import type {
 /**
  * Initialize AI configuration for OpenRouter
  */
-export function initializeAI(
-  apiKey: string,
-  model = 'mistralai/mistral-7b-instruct:free',
-): AIConfig {
+export function initializeAI(apiKey: string, model: string): AIConfig {
   if (!apiKey) {
     throw new Error(
       'OpenRouter API key is required. Please set OPENROUTER_API_KEY in your .env file.',

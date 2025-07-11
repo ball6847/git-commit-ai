@@ -12,6 +12,8 @@ import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository 
 import { displayCommitMessage, generateCommitMessage, initializeAI } from './ai.ts';
 import type { CLIOptions } from './types.ts';
 
+const DEFAULT_MODEL = 'mistralai/mistral-7b-instruct:free';
+
 /**
  * Ask user for confirmation
  * @param question - The question to ask the user
@@ -99,6 +101,13 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       console.log(yellow('Debug: Git diff preview:'));
       console.log(yellow(diff.substring(0, 500) + '...'));
       console.log();
+    }
+
+    if (!options.model) {
+      console.log(
+        red('❌ Error: No model specified. Please provide a model using the --model option.'),
+      );
+      Deno.exit(1);
     }
 
     // Initialize AI
@@ -197,11 +206,15 @@ cli.command('generate', 'Generate a conventional commit message for staged chang
   .alias('gen')
   .alias('g')
   .option('-m, --model <model:string>', 'OpenRouter model to use', {
-    default: 'meta-llama/llama-3.2-3b-instruct',
+    default: DEFAULT_MODEL,
   })
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')
   .action(async (options: CLIOptions) => {
+    // Ensure the model option has a default value
+    if (!options.model) {
+      options.model = DEFAULT_MODEL;
+    }
     await generateHandler(options);
   });
 
