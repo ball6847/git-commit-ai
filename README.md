@@ -23,14 +23,14 @@ An AI-powered git commit message generator that follows conventional commit guid
 
 1. **Clone and setup the project:**
    ```bash
-   cd C:\Users\ball6\Projects\personal\git-commit-ai
+   cd path/to/your/project
    ```
 
 2. **Configure environment variables:**
    ```bash
    copy .env.example .env
    ```
-   
+
 3. **Add your OpenRouter API key to `.env`:**
    ```env
    OPENROUTER_API_KEY=your_openrouter_api_key_here
@@ -134,11 +134,11 @@ deno task generate
 # Output:
 # 📁 Files to be committed (1):
 #   A hello.ts (added)
-# 
+#
 # 🤖 Analyzing changes with AI...
 # ✨ Generated Commit Message:
 # "feat: add hello world console log"
-# 
+#
 # Would you like to commit with this message? (y/N): y
 # ✅ Successfully committed!
 ```
