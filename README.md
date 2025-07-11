@@ -288,6 +288,10 @@ Feel free to contribute! Some ideas:
 - Batch processing for multiple commits
 - Web UI interface
 
+## Known Issues
+- [ ] model selection from env doesn't seem to be picked up
+- [ ] add build command to run on preinstall
+
 ## License
 
 MIT License - feel free to use this project however you'd like!
