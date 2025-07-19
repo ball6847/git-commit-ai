@@ -9,6 +9,7 @@ export interface FileChange {
 export interface ChangeSummary {
   files: FileChange[];
   totalFiles: number;
+  allDeletions: boolean;
 }
 
 export interface OpenRouterMessage {
