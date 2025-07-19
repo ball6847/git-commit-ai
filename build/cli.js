@@ -1,4 +1,9 @@
 #!/usr/bin/env -S deno run --allow-run --allow-env --allow-read
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
 
 // deno:https://jsr.io/@std/text/1.0.15/levenshtein_distance.ts
 var { ceil } = Math;
@@ -855,6 +860,11 @@ function italic(str) {
     3
   ], 23));
 }
+function underline(str) {
+  return run(str, code([
+    4
+  ], 24));
+}
 function red(str) {
   return run(str, code([
     31
@@ -1138,8 +1148,8 @@ var TooManyArgumentsError = class _TooManyArgumentsError extends ValidationError
 
 // deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/exit.ts
 function exit(code2) {
-  const { Deno: Deno3, process } = globalThis;
-  const exit2 = Deno3?.exit ?? process?.exit;
+  const { Deno: Deno4, process: process2 } = globalThis;
+  const exit2 = Deno4?.exit ?? process2?.exit;
   if (exit2) {
     exit2(code2);
   }
@@ -1148,17 +1158,17 @@ function exit(code2) {
 
 // deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/get_args.ts
 function getArgs() {
-  const { Deno: Deno3, process } = globalThis;
-  return Deno3?.args ?? process?.argv.slice(2) ?? [];
+  const { Deno: Deno4, process: process2 } = globalThis;
+  return Deno4?.args ?? process2?.argv.slice(2) ?? [];
 }
 
 // deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/get_env.ts
 function getEnv(name) {
-  const { Deno: Deno3, process } = globalThis;
-  if (Deno3) {
-    return Deno3.env.get(name);
-  } else if (process) {
-    return process.env[name];
+  const { Deno: Deno4, process: process2 } = globalThis;
+  if (Deno4) {
+    return Deno4.env.get(name);
+  } else if (process2) {
+    return process2.env[name];
   }
   throw new Error("unsupported runtime");
 }
@@ -1388,8 +1398,8 @@ var Column = class _Column {
     return this;
   }
   /** Set column padding. */
-  padding(padding) {
-    this.opts.padding = padding;
+  padding(padding3) {
+    this.opts.padding = padding3;
     return this;
   }
   /** Set column alignment. */
@@ -1675,7 +1685,7 @@ var TableLayout = class {
         }
       }
     }
-    const padding = [];
+    const padding3 = [];
     const width = [];
     for (let colIndex = 0; colIndex < columns; colIndex++) {
       const column = this.options.columns.at(colIndex);
@@ -1683,10 +1693,10 @@ var TableLayout = class {
       const maxColWidth = column?.getMaxWidth() ?? (Array.isArray(this.options.maxColWidth) ? this.options.maxColWidth[colIndex] : this.options.maxColWidth);
       const colWidth = longest(colIndex, rows, maxColWidth);
       width[colIndex] = Math.min(maxColWidth, Math.max(minColWidth, colWidth));
-      padding[colIndex] = column?.getPadding() ?? (Array.isArray(this.options.padding) ? this.options.padding[colIndex] : this.options.padding);
+      padding3[colIndex] = column?.getPadding() ?? (Array.isArray(this.options.padding) ? this.options.padding[colIndex] : this.options.padding);
     }
     return {
-      padding,
+      padding: padding3,
       width,
       rows,
       columns,
@@ -2263,9 +2273,9 @@ var Table = class _Table extends Array {
    * @param padding   Cell padding.
    * @param override  Override existing value.
    */
-  padding(padding, override = true) {
+  padding(padding3, override = true) {
     if (override || typeof this.options.padding === "undefined") {
-      this.options.padding = padding;
+      this.options.padding = padding3;
     }
     return this;
   }
@@ -2361,8 +2371,8 @@ var Table = class _Table extends Array {
 
 // deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/inspect.ts
 function inspect(value, colors) {
-  const { Deno: Deno3 } = globalThis;
-  return Deno3?.inspect(value, {
+  const { Deno: Deno4 } = globalThis;
+  return Deno4?.inspect(value, {
     depth: 1,
     colors,
     trailingComma: false
@@ -4235,6 +4245,1961 @@ function findFlag(flags) {
   return flags[0];
 }
 
+// deno:https://jsr.io/@std/assert/1.0.13/equal.ts
+var Temporal = globalThis.Temporal ?? new Proxy({}, {
+  get: () => {
+  }
+});
+var stringComparablePrototypes = new Set([
+  Intl.Locale,
+  RegExp,
+  Temporal.Duration,
+  Temporal.Instant,
+  Temporal.PlainDate,
+  Temporal.PlainDateTime,
+  Temporal.PlainTime,
+  Temporal.PlainYearMonth,
+  Temporal.PlainMonthDay,
+  Temporal.ZonedDateTime,
+  URL,
+  URLSearchParams
+].filter((x) => x != null).map((x) => x.prototype));
+var TypedArray = Object.getPrototypeOf(Uint8Array);
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/get_os.ts
+function getOs() {
+  const { Deno: Deno4, process: process2 } = globalThis;
+  if (Deno4) {
+    return Deno4.build.os;
+  } else if (process2) {
+    return process2.platform;
+  } else {
+    throw new Error("unsupported runtime");
+  }
+}
+
+// deno:https://jsr.io/@cliffy/prompt/1.0.0-rc.8/_figures.ts
+var main = {
+  ARROW_UP: "\u2191",
+  ARROW_DOWN: "\u2193",
+  ARROW_LEFT: "\u2190",
+  ARROW_RIGHT: "\u2192",
+  ARROW_UP_LEFT: "\u2196",
+  ARROW_UP_RIGHT: "\u2197",
+  ARROW_DOWN_RIGHT: "\u2198",
+  ARROW_DOWN_LEFT: "\u2199",
+  RADIO_ON: "\u25C9",
+  RADIO_OFF: "\u25EF",
+  TICK: "\u2714",
+  CROSS: "\u2718",
+  ELLIPSIS: "\u2026",
+  POINTER_SMALL: "\u203A",
+  POINTER_SMALL_LEFT: "\u2039",
+  LINE: "\u2500",
+  POINTER: "\u276F",
+  POINTER_LEFT: "\u276E",
+  INFO: "\u2139",
+  TAB_LEFT: "\u21E4",
+  TAB_RIGHT: "\u21E5",
+  ESCAPE: "\u238B",
+  BACKSPACE: "\u232B",
+  PAGE_UP: "\u21DE",
+  PAGE_DOWN: "\u21DF",
+  ENTER: "\u21B5",
+  SEARCH: "\u{1F50E}",
+  FOLDER: "\u{1F4C1}",
+  FOLDER_OPEN: "\u{1F4C2}"
+};
+var win = {
+  ...main,
+  RADIO_ON: "(*)",
+  RADIO_OFF: "( )",
+  TICK: "\u221A",
+  CROSS: "\xD7",
+  POINTER_SMALL: "\xBB"
+};
+var Figures = getOs() === "windows" ? win : main;
+var keyMap = {
+  up: "ARROW_UP",
+  down: "ARROW_DOWN",
+  left: "ARROW_LEFT",
+  right: "ARROW_RIGHT",
+  pageup: "PAGE_UP",
+  pagedown: "PAGE_DOWN",
+  tab: "TAB_RIGHT",
+  enter: "ENTER",
+  return: "ENTER"
+};
+function getFiguresByKeys(keys) {
+  const figures = [];
+  for (const key of keys) {
+    const figure = Figures[keyMap[key]] ?? key;
+    if (!figures.includes(figure)) {
+      figures.push(figure);
+    }
+  }
+  return figures;
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/read_sync.ts
+var { Deno: Deno3, process, Buffer: Buffer2 } = globalThis;
+var { readSync: readSyncNode } = process ? await import("node:fs") : {
+  readSync: null
+};
+function readSync(data2) {
+  if (Deno3) {
+    return Deno3.stdin.readSync(data2);
+  } else if (readSyncNode) {
+    const buffer = Buffer2.alloc(data2.byteLength);
+    const bytesRead = readSyncNode(process.stdout.fd, buffer, 0, buffer.length, null);
+    for (let i = 0; i < bytesRead; i++) {
+      data2[i] = buffer[i];
+    }
+    return bytesRead;
+  } else {
+    throw new Error("unsupported runtime");
+  }
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/set_raw.ts
+function setRaw(mode, { cbreak } = {}) {
+  const { Deno: Deno4, process: process2 } = globalThis;
+  if (Deno4) {
+    Deno4.stdin.setRaw(mode, {
+      cbreak
+    });
+  } else if (process2) {
+    process2.stdin.setRawMode(mode);
+  } else {
+    throw new Error("unsupported runtime");
+  }
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/write_sync.ts
+function writeSync(data2) {
+  const { Deno: Deno4, process: process2 } = globalThis;
+  if (Deno4) {
+    return Deno4.stdout.writeSync(data2);
+  } else if (process2) {
+    process2.stdout.write(data2);
+    return data2.byteLength;
+  } else {
+    throw new Error("unsupported runtime");
+  }
+}
+
+// deno:https://jsr.io/@cliffy/ansi/1.0.0-rc.8/ansi_escapes.ts
+var ansi_escapes_exports = {};
+__export(ansi_escapes_exports, {
+  bel: () => bel,
+  clearScreen: () => clearScreen,
+  clearTerminal: () => clearTerminal,
+  cursorBackward: () => cursorBackward,
+  cursorDown: () => cursorDown,
+  cursorForward: () => cursorForward,
+  cursorHide: () => cursorHide,
+  cursorLeft: () => cursorLeft,
+  cursorMove: () => cursorMove,
+  cursorNextLine: () => cursorNextLine,
+  cursorPosition: () => cursorPosition,
+  cursorPrevLine: () => cursorPrevLine,
+  cursorRestore: () => cursorRestore,
+  cursorSave: () => cursorSave,
+  cursorShow: () => cursorShow,
+  cursorTo: () => cursorTo,
+  cursorUp: () => cursorUp,
+  eraseDown: () => eraseDown,
+  eraseLine: () => eraseLine,
+  eraseLineEnd: () => eraseLineEnd,
+  eraseLineStart: () => eraseLineStart,
+  eraseLines: () => eraseLines,
+  eraseScreen: () => eraseScreen,
+  eraseUp: () => eraseUp,
+  image: () => image,
+  link: () => link,
+  scrollDown: () => scrollDown,
+  scrollUp: () => scrollUp
+});
+
+// deno:https://jsr.io/@std/encoding/1.0.10/_common64.ts
+var padding = "=".charCodeAt(0);
+var alphabet = {
+  base64: new TextEncoder().encode("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"),
+  base64url: new TextEncoder().encode("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_")
+};
+var rAlphabet = {
+  base64: new Uint8Array(128).fill(64),
+  base64url: new Uint8Array(128).fill(64)
+};
+alphabet.base64.forEach((byte, i) => rAlphabet.base64[byte] = i);
+alphabet.base64url.forEach((byte, i) => rAlphabet.base64url[byte] = i);
+function calcSizeBase64(originalSize) {
+  return ((originalSize + 2) / 3 | 0) * 4;
+}
+function encode(buffer, i, o, alphabet3, padding3) {
+  i += 2;
+  for (; i < buffer.length; i += 3) {
+    const x = buffer[i - 2] << 16 | buffer[i - 1] << 8 | buffer[i];
+    buffer[o++] = alphabet3[x >> 18];
+    buffer[o++] = alphabet3[x >> 12 & 63];
+    buffer[o++] = alphabet3[x >> 6 & 63];
+    buffer[o++] = alphabet3[x & 63];
+  }
+  switch (i) {
+    case buffer.length + 1: {
+      const x = buffer[i - 2] << 16;
+      buffer[o++] = alphabet3[x >> 18];
+      buffer[o++] = alphabet3[x >> 12 & 63];
+      buffer[o++] = padding3;
+      buffer[o++] = padding3;
+      break;
+    }
+    case buffer.length: {
+      const x = buffer[i - 2] << 16 | buffer[i - 1] << 8;
+      buffer[o++] = alphabet3[x >> 18];
+      buffer[o++] = alphabet3[x >> 12 & 63];
+      buffer[o++] = alphabet3[x >> 6 & 63];
+      buffer[o++] = padding3;
+      break;
+    }
+  }
+  return o;
+}
+
+// deno:https://jsr.io/@std/encoding/1.0.10/_common_detach.ts
+function detach(buffer, maxSize) {
+  const originalSize = buffer.length;
+  if (buffer.byteOffset) {
+    const b = new Uint8Array(buffer.buffer);
+    b.set(buffer);
+    buffer = b.subarray(0, originalSize);
+  }
+  buffer = new Uint8Array(buffer.buffer.transfer(maxSize));
+  buffer.set(buffer.subarray(0, originalSize), maxSize - originalSize);
+  return [
+    buffer,
+    maxSize - originalSize
+  ];
+}
+
+// deno:https://jsr.io/@std/encoding/1.0.10/base64.ts
+var padding2 = "=".charCodeAt(0);
+var alphabet2 = new TextEncoder().encode("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+var rAlphabet2 = new Uint8Array(128).fill(64);
+alphabet2.forEach((byte, i) => rAlphabet2[byte] = i);
+function encodeBase64(data2) {
+  if (typeof data2 === "string") {
+    data2 = new TextEncoder().encode(data2);
+  } else if (data2 instanceof ArrayBuffer) data2 = new Uint8Array(data2).slice();
+  else data2 = data2.slice();
+  const [output, i] = detach(data2, calcSizeBase64(data2.length));
+  encode(output, i, 0, alphabet2, padding2);
+  return new TextDecoder().decode(output);
+}
+
+// deno:https://jsr.io/@cliffy/ansi/1.0.0-rc.8/ansi_escapes.ts
+var ESC = "\x1B";
+var CSI = `${ESC}[`;
+var OSC = `${ESC}]`;
+var SEP = ";";
+var bel = "\x07";
+var cursorPosition = `${CSI}6n`;
+function cursorTo(x, y) {
+  if (typeof y !== "number") {
+    return `${CSI}${x}G`;
+  }
+  return `${CSI}${y};${x}H`;
+}
+function cursorMove(x, y) {
+  let ret = "";
+  if (x < 0) {
+    ret += `${CSI}${-x}D`;
+  } else if (x > 0) {
+    ret += `${CSI}${x}C`;
+  }
+  if (y < 0) {
+    ret += `${CSI}${-y}A`;
+  } else if (y > 0) {
+    ret += `${CSI}${y}B`;
+  }
+  return ret;
+}
+function cursorUp(count = 1) {
+  return `${CSI}${count}A`;
+}
+function cursorDown(count = 1) {
+  return `${CSI}${count}B`;
+}
+function cursorForward(count = 1) {
+  return `${CSI}${count}C`;
+}
+function cursorBackward(count = 1) {
+  return `${CSI}${count}D`;
+}
+function cursorNextLine(count = 1) {
+  return `${CSI}E`.repeat(count);
+}
+function cursorPrevLine(count = 1) {
+  return `${CSI}F`.repeat(count);
+}
+var cursorLeft = `${CSI}G`;
+var cursorHide = `${CSI}?25l`;
+var cursorShow = `${CSI}?25h`;
+var cursorSave = `${ESC}7`;
+var cursorRestore = `${ESC}8`;
+function scrollUp(count = 1) {
+  return `${CSI}S`.repeat(count);
+}
+function scrollDown(count = 1) {
+  return `${CSI}T`.repeat(count);
+}
+var eraseScreen = `${CSI}2J`;
+function eraseUp(count = 1) {
+  return `${CSI}1J`.repeat(count);
+}
+function eraseDown(count = 1) {
+  return `${CSI}0J`.repeat(count);
+}
+var eraseLine = `${CSI}2K`;
+var eraseLineEnd = `${CSI}0K`;
+var eraseLineStart = `${CSI}1K`;
+function eraseLines(count) {
+  let clear = "";
+  for (let i = 0; i < count; i++) {
+    clear += eraseLine + (i < count - 1 ? cursorUp() : "");
+  }
+  clear += cursorLeft;
+  return clear;
+}
+var clearScreen = "\x1Bc";
+var clearTerminal = getOs() === "windows" ? `${eraseScreen}${CSI}0f` : `${eraseScreen}${CSI}3J${CSI}H`;
+function link(text, url) {
+  return [
+    OSC,
+    "8",
+    SEP,
+    SEP,
+    url,
+    bel,
+    text,
+    OSC,
+    "8",
+    SEP,
+    SEP,
+    bel
+  ].join("");
+}
+function image(buffer, options) {
+  let ret = `${OSC}1337;File=inline=1`;
+  if (options?.width) {
+    ret += `;width=${options.width}`;
+  }
+  if (options?.height) {
+    ret += `;height=${options.height}`;
+  }
+  if (options?.preserveAspectRatio === false) {
+    ret += ";preserveAspectRatio=0";
+  }
+  return ret + ":" + encodeBase64(buffer) + bel;
+}
+
+// deno:https://jsr.io/@cliffy/ansi/1.0.0-rc.8/cursor_position.ts
+var encoder = new TextEncoder();
+var decoder = new TextDecoder();
+function getCursorPosition({ reader = {
+  readSync,
+  setRaw
+}, writer = {
+  writeSync
+} } = {}) {
+  const data2 = new Uint8Array(8);
+  reader.setRaw(true);
+  writer.writeSync(encoder.encode(cursorPosition));
+  reader.readSync(data2);
+  reader.setRaw(false);
+  const [y, x] = decoder.decode(data2).match(/\[(\d+);(\d+)R/)?.slice(1, 3).map(Number) ?? [
+    0,
+    0
+  ];
+  return {
+    x,
+    y
+  };
+}
+
+// deno:https://jsr.io/@cliffy/ansi/1.0.0-rc.8/tty.ts
+var tty = factory();
+var encoder2 = new TextEncoder();
+function factory(options) {
+  let result = "";
+  let stack = [];
+  const writer = options?.writer ?? {
+    writeSync
+  };
+  const reader = options?.reader ?? {
+    readSync,
+    setRaw
+  };
+  const tty2 = function(...args) {
+    if (this) {
+      update(args);
+      writer.writeSync(encoder2.encode(result));
+      return this;
+    }
+    return factory(args[0] ?? options);
+  };
+  tty2.text = function(text) {
+    stack.push([
+      text,
+      []
+    ]);
+    update();
+    writer.writeSync(encoder2.encode(result));
+    return this;
+  };
+  tty2.getCursorPosition = () => getCursorPosition({
+    writer,
+    reader
+  });
+  const methodList = Object.entries(ansi_escapes_exports);
+  for (const [name, method] of methodList) {
+    if (name === "cursorPosition") {
+      continue;
+    }
+    Object.defineProperty(tty2, name, {
+      get() {
+        stack.push([
+          method,
+          []
+        ]);
+        return this;
+      }
+    });
+  }
+  return tty2;
+  function update(args) {
+    if (!stack.length) {
+      return;
+    }
+    if (args) {
+      stack[stack.length - 1][1] = args;
+    }
+    result = stack.reduce((prev, [cur, args2]) => prev + (typeof cur === "string" ? cur : cur.call(tty2, ...args2)), "");
+    stack = [];
+  }
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/runtime_name.ts
+function getRuntimeName() {
+  switch (true) {
+    case "Deno" in globalThis:
+      return "deno";
+    case "Bun" in globalThis:
+      return "bun";
+    case "process" in globalThis:
+      return "node";
+    default:
+      throw new Error("unsupported runtime");
+  }
+}
+
+// deno:https://jsr.io/@cliffy/keycode/1.0.0-rc.8/_key_codes.ts
+var KeyMap = {
+  /* xterm/gnome ESC [ letter (with modifier) */
+  "[P": "f1",
+  "[Q": "f2",
+  "[R": "f3",
+  "[S": "f4",
+  /* xterm/gnome ESC O letter (without modifier) */
+  "OP": "f1",
+  "OQ": "f2",
+  "OR": "f3",
+  "OS": "f4",
+  /* xterm/rxvt ESC [ number ~ */
+  "[11~": "f1",
+  "[12~": "f2",
+  "[13~": "f3",
+  "[14~": "f4",
+  /* from Cygwin and used in libuv */
+  "[[A": "f1",
+  "[[B": "f2",
+  "[[C": "f3",
+  "[[D": "f4",
+  "[[E": "f5",
+  /* common */
+  "[15~": "f5",
+  "[17~": "f6",
+  "[18~": "f7",
+  "[19~": "f8",
+  "[20~": "f9",
+  "[21~": "f10",
+  "[23~": "f11",
+  "[24~": "f12",
+  /* xterm ESC [ letter */
+  "[A": "up",
+  "[B": "down",
+  "[C": "right",
+  "[D": "left",
+  "[E": "clear",
+  "[F": "end",
+  "[H": "home",
+  /* xterm/gnome ESC O letter */
+  "OA": "up",
+  "OB": "down",
+  "OC": "right",
+  "OD": "left",
+  "OE": "clear",
+  "OF": "end",
+  "OH": "home",
+  /* xterm/rxvt ESC [ number ~ */
+  "[1~": "home",
+  "[2~": "insert",
+  "[3~": "delete",
+  "[4~": "end",
+  "[5~": "pageup",
+  "[6~": "pagedown",
+  /* putty */
+  "[[5~": "pageup",
+  "[[6~": "pagedown",
+  /* rxvt */
+  "[7~": "home",
+  "[8~": "end"
+};
+var KeyMapShift = {
+  /* rxvt keys with modifiers */
+  "[a": "up",
+  "[b": "down",
+  "[c": "right",
+  "[d": "left",
+  "[e": "clear",
+  "[2$": "insert",
+  "[3$": "delete",
+  "[5$": "pageup",
+  "[6$": "pagedown",
+  "[7$": "home",
+  "[8$": "end",
+  "[Z": "tab"
+};
+var KeyMapCtrl = {
+  /* rxvt keys with modifiers */
+  "Oa": "up",
+  "Ob": "down",
+  "Oc": "right",
+  "Od": "left",
+  "Oe": "clear",
+  "[2^": "insert",
+  "[3^": "delete",
+  "[5^": "pageup",
+  "[6^": "pagedown",
+  "[7^": "home",
+  "[8^": "end"
+};
+var SpecialKeyMap = {
+  "\r": "return",
+  "\n": "enter",
+  "	": "tab",
+  "\b": "backspace",
+  "\x7F": "backspace",
+  "\x1B": "escape",
+  " ": "space"
+};
+
+// deno:https://jsr.io/@cliffy/keycode/1.0.0-rc.8/key_code.ts
+var kUTF16SurrogateThreshold = 65536;
+var kEscape = "\x1B";
+function parse(data2) {
+  let index = -1;
+  const keys = [];
+  const input = data2 instanceof Uint8Array ? new TextDecoder().decode(data2) : data2;
+  const hasNext = () => input.length - 1 >= index + 1;
+  const next = () => input[++index];
+  parseNext();
+  return keys;
+  function parseNext() {
+    let ch = next();
+    let s = ch;
+    let escaped = false;
+    const key = {
+      name: void 0,
+      char: void 0,
+      sequence: void 0,
+      code: void 0,
+      ctrl: false,
+      meta: false,
+      shift: false
+    };
+    if (ch === kEscape && hasNext()) {
+      escaped = true;
+      s += ch = next();
+      if (ch === kEscape) {
+        s += ch = next();
+      }
+    }
+    if (escaped && (ch === "O" || ch === "[")) {
+      let code2 = ch;
+      let modifier = 0;
+      if (ch === "O") {
+        s += ch = next();
+        if (ch >= "0" && ch <= "9") {
+          modifier = (Number(ch) >> 0) - 1;
+          s += ch = next();
+        }
+        code2 += ch;
+      } else if (ch === "[") {
+        s += ch = next();
+        if (ch === "[") {
+          code2 += ch;
+          s += ch = next();
+        }
+        const cmdStart = s.length - 1;
+        if (ch >= "0" && ch <= "9") {
+          s += ch = next();
+          if (ch >= "0" && ch <= "9") {
+            s += ch = next();
+          }
+        }
+        if (ch === ";") {
+          s += ch = next();
+          if (ch >= "0" && ch <= "9") {
+            s += next();
+          }
+        }
+        const cmd = s.slice(cmdStart);
+        let match;
+        if (match = cmd.match(/^(\d\d?)(;(\d))?([~^$])$/)) {
+          code2 += match[1] + match[4];
+          modifier = (Number(match[3]) || 1) - 1;
+        } else if (match = cmd.match(/^((\d;)?(\d))?([A-Za-z])$/)) {
+          code2 += match[4];
+          modifier = (Number(match[3]) || 1) - 1;
+        } else {
+          code2 += cmd;
+        }
+      }
+      key.ctrl = !!(modifier & 4);
+      key.meta = !!(modifier & 10);
+      key.shift = !!(modifier & 1);
+      key.code = code2;
+      if (code2 in KeyMap) {
+        key.name = KeyMap[code2];
+      } else if (code2 in KeyMapShift) {
+        key.name = KeyMapShift[code2];
+        key.shift = true;
+      } else if (code2 in KeyMapCtrl) {
+        key.name = KeyMapCtrl[code2];
+        key.ctrl = true;
+      } else {
+        key.name = "undefined";
+      }
+    } else if (ch in SpecialKeyMap) {
+      key.name = SpecialKeyMap[ch];
+      key.meta = escaped;
+      if (key.name === "space") {
+        key.char = ch;
+      }
+    } else if (!escaped && ch <= "") {
+      key.name = String.fromCharCode(ch.charCodeAt(0) + "a".charCodeAt(0) - 1);
+      key.ctrl = true;
+      key.char = key.name;
+    } else if (/^[0-9A-Za-z]$/.test(ch)) {
+      key.name = ch.toLowerCase();
+      key.shift = /^[A-Z]$/.test(ch);
+      key.meta = escaped;
+      key.char = ch;
+    } else if (escaped) {
+      key.name = ch.length ? void 0 : "escape";
+      key.meta = true;
+    } else {
+      key.name = ch;
+      key.char = ch;
+    }
+    key.sequence = s;
+    if (s.length !== 0 && (key.name !== void 0 || escaped) || charLengthAt(s, 0) === s.length) {
+      keys.push(key);
+    } else {
+      throw new Error("Unrecognized or broken escape sequence");
+    }
+    if (hasNext()) {
+      parseNext();
+    }
+  }
+}
+function charLengthAt(str, i) {
+  const pos = str.codePointAt(i);
+  if (typeof pos === "undefined") {
+    return 1;
+  }
+  return pos >= kUTF16SurrogateThreshold ? 2 : 1;
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/get_columns.ts
+function getColumns() {
+  try {
+    const { Deno: Deno4, process: process2 } = globalThis;
+    if (Deno4) {
+      return Deno4.consoleSize().columns ?? null;
+    } else if (process2) {
+      return process2.stdout.columns ?? null;
+    }
+  } catch (_error) {
+    return null;
+  }
+  throw new Error("unsupported runtime");
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/is_terminal.ts
+function isTerminal() {
+  const { Deno: Deno4, process: process2 } = globalThis;
+  if (Deno4) {
+    return Deno4.stdin.isTerminal();
+  } else if (process2) {
+    return process2.stdin.isTTY;
+  } else {
+    throw new Error("unsupported runtime");
+  }
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/read.ts
+async function read(data2) {
+  const { Deno: Deno4, Bun, process: process2 } = globalThis;
+  if (Deno4) {
+    return await Deno4.stdin.read(data2);
+  } else if (Bun) {
+    const reader = Bun.stdin.stream().getReader();
+    const { value: buffer } = await reader.read();
+    await reader.cancel();
+    for (let i = 0; i < buffer.length; i++) {
+      data2[i] = buffer[i];
+    }
+    return buffer.length;
+  } else if (process2) {
+    return await new Promise((resolve3, reject) => {
+      process2.stdin.once("readable", () => {
+        try {
+          const buffer = process2.stdin.read();
+          if (buffer === null) {
+            return resolve3(null);
+          }
+          for (let i = 0; i < buffer.length; i++) {
+            data2[i] = buffer[i];
+          }
+          resolve3(buffer.length);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  } else {
+    throw new Error("unsupported runtime");
+  }
+}
+
+// deno:https://jsr.io/@cliffy/prompt/1.0.0-rc.8/_generic_prompt.ts
+var GenericPrompt = class _GenericPrompt {
+  static injectedValue;
+  cursor = {
+    x: 0,
+    y: 0
+  };
+  #value;
+  #lastError;
+  #isFirstRun = true;
+  #encoder = new TextEncoder();
+  /**
+   * Inject prompt value. If called, the prompt doesn't prompt for an input and
+   * returns immediately the injected value. Can be used for unit tests or pre
+   * selections.
+   *
+   * @param value Input value.
+   */
+  static inject(value) {
+    _GenericPrompt.injectedValue = value;
+  }
+  getDefaultSettings(options) {
+    return {
+      ...options,
+      tty: tty({
+        // Stdin is only used by getCursorPosition which we don't need.
+        reader: {
+          readSync,
+          setRaw
+        },
+        writer: options.writer ?? {
+          writeSync
+        }
+      }),
+      cbreak: options.cbreak ?? false,
+      reader: options.reader ?? {
+        read,
+        setRaw,
+        isTerminal
+      },
+      writer: options.writer ?? {
+        writeSync
+      },
+      pointer: options.pointer ?? brightBlue(Figures.POINTER_SMALL),
+      prefix: options.prefix ?? yellow("? "),
+      indent: options.indent ?? "",
+      keys: {
+        submit: [
+          "enter",
+          "return"
+        ],
+        ...options.keys ?? {}
+      }
+    };
+  }
+  /** Execute the prompt. */
+  async prompt() {
+    try {
+      return await this.#execute();
+    } finally {
+      this.settings.tty.cursorShow();
+    }
+  }
+  /** Clear prompt output. */
+  clear() {
+    this.settings.tty.cursorLeft.eraseDown();
+  }
+  /** Execute the prompt. */
+  #execute = async () => {
+    if (typeof _GenericPrompt.injectedValue !== "undefined" && this.#lastError) {
+      throw new Error(this.error());
+    }
+    await this.render();
+    this.#lastError = void 0;
+    if (!await this.read()) {
+      return this.#execute();
+    }
+    if (typeof this.#value === "undefined") {
+      throw new Error("internal error: failed to read value");
+    }
+    this.clear();
+    const successMessage = this.success(this.#value);
+    if (successMessage) {
+      this.settings.writer.writeSync(this.#encoder.encode(successMessage + "\n"));
+    }
+    _GenericPrompt.injectedValue = void 0;
+    this.settings.tty.cursorShow();
+    return this.#value;
+  };
+  /** Render prompt. */
+  async render() {
+    const result = await Promise.all([
+      this.message(),
+      this.body?.(),
+      this.footer()
+    ]);
+    const content = result.filter(Boolean).join("\n");
+    const lines = content.split("\n");
+    const columns = getColumns();
+    const linesCount = columns ? lines.reduce((prev, next) => {
+      const length = stripAnsiCode(next).length;
+      return prev + (length > columns ? Math.ceil(length / columns) : 1);
+    }, 0) : content.split("\n").length;
+    const y = linesCount - this.cursor.y - 1;
+    if (!this.#isFirstRun || this.#lastError) {
+      this.clear();
+    }
+    this.#isFirstRun = false;
+    this.settings.writer.writeSync(this.#encoder.encode(content));
+    if (y) {
+      this.settings.tty.cursorUp(y);
+    }
+    this.settings.tty.cursorTo(this.cursor.x);
+  }
+  /** Read user input from stdin, handle events and validate user input. */
+  async read() {
+    if (typeof _GenericPrompt.injectedValue !== "undefined") {
+      const value = _GenericPrompt.injectedValue;
+      await this.#validateValue(value);
+    } else {
+      const events = await this.#readKey();
+      if (!events.length) {
+        return false;
+      }
+      for (const event of events) {
+        await this.handleEvent(event);
+      }
+    }
+    return typeof this.#value !== "undefined";
+  }
+  submit() {
+    return this.#validateValue(this.getValue());
+  }
+  message() {
+    return `${this.settings.indent}${this.settings.prefix}` + bold(this.settings.message) + this.defaults();
+  }
+  defaults() {
+    let defaultMessage = "";
+    if (typeof this.settings.default !== "undefined" && !this.settings.hideDefault) {
+      defaultMessage += dim(` (${this.format(this.settings.default)})`);
+    }
+    return defaultMessage;
+  }
+  /** Get prompt success message. */
+  success(value) {
+    return `${this.settings.indent}${this.settings.prefix}` + bold(this.settings.message) + this.defaults() + " " + this.settings.pointer + " " + green(this.format(value));
+  }
+  footer() {
+    return this.error() ?? this.hint();
+  }
+  error() {
+    return this.#lastError ? this.settings.indent + red(bold(`${Figures.CROSS} `) + this.#lastError) : void 0;
+  }
+  hint() {
+    return this.settings.hint ? this.settings.indent + italic(brightBlue(dim(`${Figures.POINTER} `) + this.settings.hint)) : void 0;
+  }
+  setErrorMessage(message) {
+    this.#lastError = message;
+  }
+  /**
+   * Handle user input event.
+   * @param event Key event.
+   */
+  async handleEvent(event) {
+    switch (true) {
+      case (event.name === "c" && event.ctrl):
+        this.clear();
+        this.settings.tty.cursorShow();
+        exit(130);
+        return;
+      case this.isKey(this.settings.keys, "submit", event):
+        await this.submit();
+        break;
+    }
+  }
+  /** Read user input from stdin and pars ansi codes. */
+  #readKey = async () => {
+    const data2 = await this.#readChar();
+    return data2.length ? parse(data2) : [];
+  };
+  /** Read user input from stdin. */
+  #readChar = async () => {
+    const buffer = new Uint8Array(getRuntimeName() === "deno" ? 8 : 4096);
+    const isTty = this.settings.reader.isTerminal();
+    if (isTty) {
+      this.settings.reader.setRaw(true, {
+        cbreak: this.settings.cbreak
+      });
+    }
+    const nread = await this.settings.reader.read(buffer);
+    if (isTty) {
+      this.settings.reader.setRaw(false);
+    }
+    if (nread === null) {
+      return buffer;
+    }
+    return buffer.subarray(0, nread);
+  };
+  /**
+   * Map input value to output value. If a custom transform handler ist set, the
+   * custom handler will be executed, otherwise the default transform handler
+   * from the prompt will be executed.
+   * @param value The value to transform.
+   */
+  #transformValue = (value) => {
+    return this.settings.transform ? this.settings.transform(value) : this.transform(value);
+  };
+  /**
+   * Validate input value. Set error message if validation fails and transform
+   * output value on success.
+   * If a default value is set, the default will be used as value without any
+   * validation.
+   * If a custom validation handler ist set, the custom handler will
+   * be executed, otherwise a prompt specific default validation handler will be
+   * executed.
+   * @param value The value to validate.
+   */
+  #validateValue = async (value) => {
+    if (!value && typeof this.settings.default !== "undefined") {
+      this.#value = this.settings.default;
+      return;
+    }
+    this.#value = void 0;
+    this.#lastError = void 0;
+    const validation = await (this.settings.validate ? this.settings.validate(value) : this.validate(value));
+    if (validation === false) {
+      this.#lastError = `Invalid answer.`;
+    } else if (typeof validation === "string") {
+      this.#lastError = validation;
+    } else {
+      this.#value = this.#transformValue(value);
+    }
+  };
+  /**
+   * Check if key event has given name or sequence.
+   * @param keys  Key map.
+   * @param name  Key name.
+   * @param event Key event.
+   */
+  isKey(keys, name, event) {
+    const keyNames = keys?.[name];
+    return typeof keyNames !== "undefined" && (typeof event.name !== "undefined" && keyNames.indexOf(event.name) !== -1 || typeof event.sequence !== "undefined" && keyNames.indexOf(event.sequence) !== -1);
+  }
+};
+
+// deno:https://jsr.io/@cliffy/prompt/1.0.0-rc.8/_generic_input.ts
+var GenericInput = class extends GenericPrompt {
+  inputValue = "";
+  inputIndex = 0;
+  getDefaultSettings(options) {
+    const settings = super.getDefaultSettings(options);
+    return {
+      ...settings,
+      keys: {
+        moveCursorLeft: [
+          "left"
+        ],
+        moveCursorRight: [
+          "right"
+        ],
+        deleteCharLeft: [
+          "backspace"
+        ],
+        deleteCharRight: [
+          "delete"
+        ],
+        ...settings.keys ?? {}
+      }
+    };
+  }
+  getCurrentInputValue() {
+    return this.inputValue;
+  }
+  message() {
+    const message = super.message() + " " + this.settings.pointer + " ";
+    this.cursor.x = stripAnsiCode(message).length + this.inputIndex + 1;
+    return message + this.input();
+  }
+  input() {
+    return underline(this.inputValue);
+  }
+  highlight(value, color1 = dim, color2 = brightBlue) {
+    value = value.toString();
+    const inputLowerCase = this.getCurrentInputValue().toLowerCase();
+    const valueLowerCase = value.toLowerCase();
+    const index = valueLowerCase.indexOf(inputLowerCase);
+    const matched = value.slice(index, index + inputLowerCase.length);
+    return index >= 0 ? color1(value.slice(0, index)) + color2(matched) + color1(value.slice(index + inputLowerCase.length)) : value;
+  }
+  /**
+   * Handle user input event.
+   * @param event Key event.
+   */
+  async handleEvent(event) {
+    switch (true) {
+      case this.isKey(this.settings.keys, "moveCursorLeft", event):
+        this.moveCursorLeft();
+        break;
+      case this.isKey(this.settings.keys, "moveCursorRight", event):
+        this.moveCursorRight();
+        break;
+      case this.isKey(this.settings.keys, "deleteCharRight", event):
+        this.deleteCharRight();
+        break;
+      case this.isKey(this.settings.keys, "deleteCharLeft", event):
+        this.deleteChar();
+        break;
+      case (event.char && !event.meta && !event.ctrl):
+        this.addChar(event.char);
+        break;
+      default:
+        await super.handleEvent(event);
+    }
+  }
+  /** Add character to current input. */
+  addChar(char) {
+    this.inputValue = this.inputValue.slice(0, this.inputIndex) + char + this.inputValue.slice(this.inputIndex);
+    this.inputIndex++;
+  }
+  /** Move prompt cursor left. */
+  moveCursorLeft() {
+    if (this.inputIndex > 0) {
+      this.inputIndex--;
+    }
+  }
+  /** Move prompt cursor right. */
+  moveCursorRight() {
+    if (this.inputIndex < this.inputValue.length) {
+      this.inputIndex++;
+    }
+  }
+  /** Delete char left. */
+  deleteChar() {
+    if (this.inputIndex > 0) {
+      this.inputIndex--;
+      this.deleteCharRight();
+    }
+  }
+  /** Delete char right. */
+  deleteCharRight() {
+    if (this.inputIndex < this.inputValue.length) {
+      this.inputValue = this.inputValue.slice(0, this.inputIndex) + this.inputValue.slice(this.inputIndex + 1);
+    }
+  }
+};
+
+// deno:https://jsr.io/@std/path/1.0.9/_os.ts
+var isWindows = globalThis.Deno?.build.os === "windows" || globalThis.navigator?.platform?.startsWith("Win") || globalThis.process?.platform?.startsWith("win") || false;
+
+// deno:https://jsr.io/@std/path/1.0.9/_common/assert_path.ts
+function assertPath(path) {
+  if (typeof path !== "string") {
+    throw new TypeError(`Path must be a string, received "${JSON.stringify(path)}"`);
+  }
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/_common/strip_trailing_separators.ts
+function stripTrailingSeparators(segment, isSep) {
+  if (segment.length <= 1) {
+    return segment;
+  }
+  let end = segment.length;
+  for (let i = segment.length - 1; i > 0; i--) {
+    if (isSep(segment.charCodeAt(i))) {
+      end = i;
+    } else {
+      break;
+    }
+  }
+  return segment.slice(0, end);
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/_common/constants.ts
+var CHAR_UPPERCASE_A = 65;
+var CHAR_LOWERCASE_A = 97;
+var CHAR_UPPERCASE_Z = 90;
+var CHAR_LOWERCASE_Z = 122;
+var CHAR_DOT = 46;
+var CHAR_FORWARD_SLASH = 47;
+var CHAR_BACKWARD_SLASH = 92;
+var CHAR_COLON = 58;
+
+// deno:https://jsr.io/@std/path/1.0.9/posix/_util.ts
+function isPosixPathSeparator(code2) {
+  return code2 === CHAR_FORWARD_SLASH;
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/windows/_util.ts
+function isPosixPathSeparator2(code2) {
+  return code2 === CHAR_FORWARD_SLASH;
+}
+function isPathSeparator(code2) {
+  return code2 === CHAR_FORWARD_SLASH || code2 === CHAR_BACKWARD_SLASH;
+}
+function isWindowsDeviceRoot(code2) {
+  return code2 >= CHAR_LOWERCASE_A && code2 <= CHAR_LOWERCASE_Z || code2 >= CHAR_UPPERCASE_A && code2 <= CHAR_UPPERCASE_Z;
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/_common/dirname.ts
+function assertArg(path) {
+  assertPath(path);
+  if (path.length === 0) return ".";
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/posix/dirname.ts
+function dirname(path) {
+  assertArg(path);
+  let end = -1;
+  let matchedNonSeparator = false;
+  for (let i = path.length - 1; i >= 1; --i) {
+    if (isPosixPathSeparator(path.charCodeAt(i))) {
+      if (matchedNonSeparator) {
+        end = i;
+        break;
+      }
+    } else {
+      matchedNonSeparator = true;
+    }
+  }
+  if (end === -1) {
+    return isPosixPathSeparator(path.charCodeAt(0)) ? "/" : ".";
+  }
+  return stripTrailingSeparators(path.slice(0, end), isPosixPathSeparator);
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/windows/dirname.ts
+function dirname2(path) {
+  assertArg(path);
+  const len = path.length;
+  let rootEnd = -1;
+  let end = -1;
+  let matchedSlash = true;
+  let offset = 0;
+  const code2 = path.charCodeAt(0);
+  if (len > 1) {
+    if (isPathSeparator(code2)) {
+      rootEnd = offset = 1;
+      if (isPathSeparator(path.charCodeAt(1))) {
+        let j = 2;
+        let last = j;
+        for (; j < len; ++j) {
+          if (isPathSeparator(path.charCodeAt(j))) break;
+        }
+        if (j < len && j !== last) {
+          last = j;
+          for (; j < len; ++j) {
+            if (!isPathSeparator(path.charCodeAt(j))) break;
+          }
+          if (j < len && j !== last) {
+            last = j;
+            for (; j < len; ++j) {
+              if (isPathSeparator(path.charCodeAt(j))) break;
+            }
+            if (j === len) {
+              return path;
+            }
+            if (j !== last) {
+              rootEnd = offset = j + 1;
+            }
+          }
+        }
+      }
+    } else if (isWindowsDeviceRoot(code2)) {
+      if (path.charCodeAt(1) === CHAR_COLON) {
+        rootEnd = offset = 2;
+        if (len > 2) {
+          if (isPathSeparator(path.charCodeAt(2))) rootEnd = offset = 3;
+        }
+      }
+    }
+  } else if (isPathSeparator(code2)) {
+    return path;
+  }
+  for (let i = len - 1; i >= offset; --i) {
+    if (isPathSeparator(path.charCodeAt(i))) {
+      if (!matchedSlash) {
+        end = i;
+        break;
+      }
+    } else {
+      matchedSlash = false;
+    }
+  }
+  if (end === -1) {
+    if (rootEnd === -1) return ".";
+    else end = rootEnd;
+  }
+  return stripTrailingSeparators(path.slice(0, end), isPosixPathSeparator2);
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/dirname.ts
+function dirname3(path) {
+  return isWindows ? dirname2(path) : dirname(path);
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/_common/normalize.ts
+function assertArg4(path) {
+  assertPath(path);
+  if (path.length === 0) return ".";
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/_common/normalize_string.ts
+function normalizeString(path, allowAboveRoot, separator, isPathSeparator2) {
+  let res = "";
+  let lastSegmentLength = 0;
+  let lastSlash = -1;
+  let dots = 0;
+  let code2;
+  for (let i = 0; i <= path.length; ++i) {
+    if (i < path.length) code2 = path.charCodeAt(i);
+    else if (isPathSeparator2(code2)) break;
+    else code2 = CHAR_FORWARD_SLASH;
+    if (isPathSeparator2(code2)) {
+      if (lastSlash === i - 1 || dots === 1) {
+      } else if (lastSlash !== i - 1 && dots === 2) {
+        if (res.length < 2 || lastSegmentLength !== 2 || res.charCodeAt(res.length - 1) !== CHAR_DOT || res.charCodeAt(res.length - 2) !== CHAR_DOT) {
+          if (res.length > 2) {
+            const lastSlashIndex = res.lastIndexOf(separator);
+            if (lastSlashIndex === -1) {
+              res = "";
+              lastSegmentLength = 0;
+            } else {
+              res = res.slice(0, lastSlashIndex);
+              lastSegmentLength = res.length - 1 - res.lastIndexOf(separator);
+            }
+            lastSlash = i;
+            dots = 0;
+            continue;
+          } else if (res.length === 2 || res.length === 1) {
+            res = "";
+            lastSegmentLength = 0;
+            lastSlash = i;
+            dots = 0;
+            continue;
+          }
+        }
+        if (allowAboveRoot) {
+          if (res.length > 0) res += `${separator}..`;
+          else res = "..";
+          lastSegmentLength = 2;
+        }
+      } else {
+        if (res.length > 0) res += separator + path.slice(lastSlash + 1, i);
+        else res = path.slice(lastSlash + 1, i);
+        lastSegmentLength = i - lastSlash - 1;
+      }
+      lastSlash = i;
+      dots = 0;
+    } else if (code2 === CHAR_DOT && dots !== -1) {
+      ++dots;
+    } else {
+      dots = -1;
+    }
+  }
+  return res;
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/posix/normalize.ts
+function normalize(path) {
+  assertArg4(path);
+  const isAbsolute3 = isPosixPathSeparator(path.charCodeAt(0));
+  const trailingSeparator = isPosixPathSeparator(path.charCodeAt(path.length - 1));
+  path = normalizeString(path, !isAbsolute3, "/", isPosixPathSeparator);
+  if (path.length === 0 && !isAbsolute3) path = ".";
+  if (path.length > 0 && trailingSeparator) path += "/";
+  if (isAbsolute3) return `/${path}`;
+  return path;
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/posix/join.ts
+function join(...paths) {
+  if (paths.length === 0) return ".";
+  paths.forEach((path) => assertPath(path));
+  const joined = paths.filter((path) => path.length > 0).join("/");
+  return joined === "" ? "." : normalize(joined);
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/windows/normalize.ts
+function normalize2(path) {
+  assertArg4(path);
+  const len = path.length;
+  let rootEnd = 0;
+  let device;
+  let isAbsolute3 = false;
+  const code2 = path.charCodeAt(0);
+  if (len > 1) {
+    if (isPathSeparator(code2)) {
+      isAbsolute3 = true;
+      if (isPathSeparator(path.charCodeAt(1))) {
+        let j = 2;
+        let last = j;
+        for (; j < len; ++j) {
+          if (isPathSeparator(path.charCodeAt(j))) break;
+        }
+        if (j < len && j !== last) {
+          const firstPart = path.slice(last, j);
+          last = j;
+          for (; j < len; ++j) {
+            if (!isPathSeparator(path.charCodeAt(j))) break;
+          }
+          if (j < len && j !== last) {
+            last = j;
+            for (; j < len; ++j) {
+              if (isPathSeparator(path.charCodeAt(j))) break;
+            }
+            if (j === len) {
+              return `\\\\${firstPart}\\${path.slice(last)}\\`;
+            } else if (j !== last) {
+              device = `\\\\${firstPart}\\${path.slice(last, j)}`;
+              rootEnd = j;
+            }
+          }
+        }
+      } else {
+        rootEnd = 1;
+      }
+    } else if (isWindowsDeviceRoot(code2)) {
+      if (path.charCodeAt(1) === CHAR_COLON) {
+        device = path.slice(0, 2);
+        rootEnd = 2;
+        if (len > 2) {
+          if (isPathSeparator(path.charCodeAt(2))) {
+            isAbsolute3 = true;
+            rootEnd = 3;
+          }
+        }
+      }
+    }
+  } else if (isPathSeparator(code2)) {
+    return "\\";
+  }
+  let tail;
+  if (rootEnd < len) {
+    tail = normalizeString(path.slice(rootEnd), !isAbsolute3, "\\", isPathSeparator);
+  } else {
+    tail = "";
+  }
+  if (tail.length === 0 && !isAbsolute3) tail = ".";
+  if (tail.length > 0 && isPathSeparator(path.charCodeAt(len - 1))) {
+    tail += "\\";
+  }
+  if (device === void 0) {
+    if (isAbsolute3) {
+      if (tail.length > 0) return `\\${tail}`;
+      else return "\\";
+    }
+    return tail;
+  } else if (isAbsolute3) {
+    if (tail.length > 0) return `${device}\\${tail}`;
+    else return `${device}\\`;
+  }
+  return device + tail;
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/windows/join.ts
+function join2(...paths) {
+  paths.forEach((path) => assertPath(path));
+  paths = paths.filter((path) => path.length > 0);
+  if (paths.length === 0) return ".";
+  let needsReplace = true;
+  let slashCount = 0;
+  const firstPart = paths[0];
+  if (isPathSeparator(firstPart.charCodeAt(0))) {
+    ++slashCount;
+    const firstLen = firstPart.length;
+    if (firstLen > 1) {
+      if (isPathSeparator(firstPart.charCodeAt(1))) {
+        ++slashCount;
+        if (firstLen > 2) {
+          if (isPathSeparator(firstPart.charCodeAt(2))) ++slashCount;
+          else {
+            needsReplace = false;
+          }
+        }
+      }
+    }
+  }
+  let joined = paths.join("\\");
+  if (needsReplace) {
+    for (; slashCount < joined.length; ++slashCount) {
+      if (!isPathSeparator(joined.charCodeAt(slashCount))) break;
+    }
+    if (slashCount >= 2) joined = `\\${joined.slice(slashCount)}`;
+  }
+  return normalize2(joined);
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/join.ts
+function join3(...paths) {
+  return isWindows ? join2(...paths) : join(...paths);
+}
+
+// deno:https://jsr.io/@std/path/1.0.9/normalize.ts
+function normalize3(path) {
+  return isWindows ? normalize2(path) : normalize(path);
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/stat.ts
+async function stat(input) {
+  const { Deno: Deno4 } = globalThis;
+  if (Deno4) {
+    return Deno4.stat(input);
+  }
+  const { statSync } = await import("node:fs");
+  const stats = statSync(input);
+  return {
+    get isDirectory() {
+      return stats.isDirectory();
+    }
+  };
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/is_directory.ts
+async function isDirectory(path) {
+  try {
+    const { isDirectory: isDirectory2 } = await stat(path);
+    return isDirectory2;
+  } catch {
+    return false;
+  }
+}
+
+// deno:https://jsr.io/@cliffy/internal/1.0.0-rc.8/runtime/read_dir.ts
+async function readDir(path) {
+  const { Deno: Deno4 } = globalThis;
+  path ||= ".";
+  if (Deno4) {
+    const array = [];
+    for await (const item of Deno4.readDir(path)) {
+      array.push(item);
+    }
+    return array;
+  }
+  const fs = await import("node:fs");
+  return new Promise((resolve3, reject) => {
+    fs.readdir(path, (err, files) => err ? reject(err) : resolve3(files.map((name) => ({
+      name
+    }))));
+  });
+}
+
+// deno:https://jsr.io/@cliffy/prompt/1.0.0-rc.8/_generic_suggestions.ts
+var sep = getOs() === "windows" ? "\\" : "/";
+var GenericSuggestions = class extends GenericInput {
+  suggestionsIndex = -1;
+  suggestionsOffset = 0;
+  suggestions = [];
+  #envPermissions = {};
+  #hasReadPermissions;
+  getDefaultSettings(options) {
+    const settings = super.getDefaultSettings(options);
+    return {
+      ...settings,
+      listPointer: options.listPointer ?? brightBlue(Figures.POINTER),
+      maxRows: options.maxRows ?? 8,
+      keys: {
+        complete: [
+          "tab"
+        ],
+        next: [
+          "up"
+        ],
+        previous: [
+          "down"
+        ],
+        nextPage: [
+          "pageup"
+        ],
+        previousPage: [
+          "pagedown"
+        ],
+        ...settings.keys ?? {}
+      }
+    };
+  }
+  get localStorage() {
+    if (this.settings.id && "localStorage" in window) {
+      try {
+        return window.localStorage;
+      } catch (_) {
+      }
+    }
+    return null;
+  }
+  loadSuggestions() {
+    if (this.settings.id) {
+      const json = this.localStorage?.getItem(this.settings.id);
+      const suggestions = json ? JSON.parse(json) : [];
+      if (!Array.isArray(suggestions)) {
+        return [];
+      }
+      return suggestions;
+    }
+    return [];
+  }
+  saveSuggestions(...suggestions) {
+    if (this.settings.id) {
+      this.localStorage?.setItem(this.settings.id, JSON.stringify([
+        ...suggestions,
+        ...this.loadSuggestions()
+      ].filter(uniqueSuggestions)));
+    }
+  }
+  async render() {
+    if (this.settings.files && this.#hasReadPermissions === void 0) {
+      const status = await globalThis.Deno?.permissions.request({
+        name: "read"
+      });
+      this.#hasReadPermissions = !status || status.state === "granted";
+    }
+    if (this.#isFileModeEnabled()) {
+      await this.#expandInputValue(this.inputValue);
+    }
+    await this.match();
+    return super.render();
+  }
+  async match() {
+    this.suggestions = await this.getSuggestions();
+    this.suggestionsIndex = Math.max(this.getCurrentInputValue().trim().length === 0 ? -1 : 0, Math.min(this.suggestions.length - 1, this.suggestionsIndex));
+    this.suggestionsOffset = Math.max(0, Math.min(this.suggestions.length - this.getListHeight(), this.suggestionsOffset));
+  }
+  input() {
+    return super.input() + dim(this.getSuggestion());
+  }
+  getSuggestion() {
+    return this.suggestions[this.suggestionsIndex]?.toString().substr(this.getCurrentInputValue().length) ?? "";
+  }
+  async getUserSuggestions(input) {
+    return typeof this.settings.suggestions === "function" ? await this.settings.suggestions(input) : this.settings.suggestions ?? [];
+  }
+  #isFileModeEnabled() {
+    return !!this.settings.files && this.#hasReadPermissions === true;
+  }
+  async getFileSuggestions(input) {
+    if (!this.#isFileModeEnabled()) {
+      return [];
+    }
+    const path = await stat(input).then((file) => file.isDirectory ? input : dirname3(input)).catch(() => dirname3(input));
+    try {
+      return await listDir(path, this.settings.files);
+    } catch (error) {
+      if (error instanceof Deno.errors.NotFound || error instanceof Deno.errors.PermissionDenied) {
+        this.setErrorMessage(error.message);
+        return [];
+      }
+      throw error;
+    }
+  }
+  async getSuggestions() {
+    const input = this.getCurrentInputValue();
+    const suggestions = [
+      ...this.loadSuggestions(),
+      ...await this.getUserSuggestions(input),
+      ...await this.getFileSuggestions(input)
+    ].filter(uniqueSuggestions);
+    if (!input.length) {
+      return suggestions;
+    }
+    return suggestions.filter((value) => stripAnsiCode(value.toString()).toLowerCase().startsWith(input.toLowerCase())).sort((a, b) => levenshteinDistance((a || a).toString(), input) - levenshteinDistance((b || b).toString(), input));
+  }
+  body() {
+    return this.getList() + this.getInfo();
+  }
+  getInfo() {
+    if (!this.settings.info) {
+      return "";
+    }
+    const selected = this.suggestionsIndex + 1;
+    const matched = this.suggestions.length;
+    const actions = [];
+    if (this.suggestions.length) {
+      if (this.settings.list) {
+        actions.push([
+          "Next",
+          getFiguresByKeys(this.settings.keys?.next ?? [])
+        ], [
+          "Previous",
+          getFiguresByKeys(this.settings.keys?.previous ?? [])
+        ], [
+          "Next Page",
+          getFiguresByKeys(this.settings.keys?.nextPage ?? [])
+        ], [
+          "Previous Page",
+          getFiguresByKeys(this.settings.keys?.previousPage ?? [])
+        ]);
+      } else {
+        actions.push([
+          "Next",
+          getFiguresByKeys(this.settings.keys?.next ?? [])
+        ], [
+          "Previous",
+          getFiguresByKeys(this.settings.keys?.previous ?? [])
+        ]);
+      }
+      actions.push([
+        "Complete",
+        getFiguresByKeys(this.settings.keys?.complete ?? [])
+      ]);
+    }
+    actions.push([
+      "Submit",
+      getFiguresByKeys(this.settings.keys?.submit ?? [])
+    ]);
+    let info = this.settings.indent;
+    if (this.suggestions.length) {
+      info += brightBlue(Figures.INFO) + bold(` ${selected}/${matched} `);
+    }
+    info += actions.map((cur) => `${cur[0]}: ${bold(cur[1].join(" "))}`).join(", ");
+    return info;
+  }
+  getList() {
+    if (!this.suggestions.length || !this.settings.list) {
+      return "";
+    }
+    const list = [];
+    const height = this.getListHeight();
+    for (let i = this.suggestionsOffset; i < this.suggestionsOffset + height; i++) {
+      list.push(this.getListItem(this.suggestions[i], this.suggestionsIndex === i));
+    }
+    if (list.length && this.settings.info) {
+      list.push("");
+    }
+    return list.join("\n");
+  }
+  /**
+   * Render option.
+   * @param value        Option.
+   * @param isSelected  Set to true if option is selected.
+   */
+  getListItem(value, isSelected) {
+    let line = this.settings.indent ?? "";
+    line += isSelected ? `${this.settings.listPointer} ` : "  ";
+    if (isSelected) {
+      line += underline(this.highlight(value));
+    } else {
+      line += this.highlight(value);
+    }
+    return line;
+  }
+  /** Get suggestions row height. */
+  getListHeight(suggestions = this.suggestions) {
+    return Math.min(suggestions.length, this.settings.maxRows || suggestions.length);
+  }
+  /**
+   * Handle user input event.
+   * @param event Key event.
+   */
+  async handleEvent(event) {
+    switch (true) {
+      case this.isKey(this.settings.keys, "next", event):
+        if (this.settings.list) {
+          this.selectPreviousSuggestion();
+        } else {
+          this.selectNextSuggestion();
+        }
+        break;
+      case this.isKey(this.settings.keys, "previous", event):
+        if (this.settings.list) {
+          this.selectNextSuggestion();
+        } else {
+          this.selectPreviousSuggestion();
+        }
+        break;
+      case this.isKey(this.settings.keys, "nextPage", event):
+        if (this.settings.list) {
+          this.selectPreviousSuggestionsPage();
+        } else {
+          this.selectNextSuggestionsPage();
+        }
+        break;
+      case this.isKey(this.settings.keys, "previousPage", event):
+        if (this.settings.list) {
+          this.selectNextSuggestionsPage();
+        } else {
+          this.selectPreviousSuggestionsPage();
+        }
+        break;
+      case this.isKey(this.settings.keys, "complete", event):
+        await this.#completeValue();
+        break;
+      case this.isKey(this.settings.keys, "moveCursorRight", event):
+        if (this.inputIndex < this.inputValue.length) {
+          this.moveCursorRight();
+        } else {
+          await this.#completeValue();
+        }
+        break;
+      default:
+        await super.handleEvent(event);
+    }
+  }
+  /** Delete char right. */
+  deleteCharRight() {
+    if (this.inputIndex < this.inputValue.length) {
+      super.deleteCharRight();
+      if (!this.getCurrentInputValue().length) {
+        this.suggestionsIndex = -1;
+        this.suggestionsOffset = 0;
+      }
+    }
+  }
+  async #completeValue() {
+    const inputValue = await this.complete();
+    this.setInputValue(inputValue);
+  }
+  setInputValue(inputValue) {
+    this.inputValue = inputValue;
+    this.inputIndex = this.inputValue.length;
+    this.suggestionsIndex = 0;
+    this.suggestionsOffset = 0;
+  }
+  async complete() {
+    let input = this.getCurrentInputValue();
+    const suggestion = this.suggestions[this.suggestionsIndex]?.toString();
+    if (this.settings.complete) {
+      input = await this.settings.complete(input, suggestion);
+    } else if (this.#isFileModeEnabled() && input.at(-1) !== sep && await isDirectory(input) && (this.getCurrentInputValue().at(-1) !== "." || this.getCurrentInputValue().endsWith(".."))) {
+      input += sep;
+    } else if (suggestion) {
+      input = suggestion;
+    }
+    return this.#isFileModeEnabled() ? normalize3(input) : input;
+  }
+  /** Select previous suggestion. */
+  selectPreviousSuggestion() {
+    if (this.suggestions.length) {
+      if (this.suggestionsIndex > -1) {
+        this.suggestionsIndex--;
+        if (this.suggestionsIndex < this.suggestionsOffset) {
+          this.suggestionsOffset--;
+        }
+      }
+    }
+  }
+  /** Select next suggestion. */
+  selectNextSuggestion() {
+    if (this.suggestions.length) {
+      if (this.suggestionsIndex < this.suggestions.length - 1) {
+        this.suggestionsIndex++;
+        if (this.suggestionsIndex >= this.suggestionsOffset + this.getListHeight()) {
+          this.suggestionsOffset++;
+        }
+      }
+    }
+  }
+  /** Select previous suggestions page. */
+  selectPreviousSuggestionsPage() {
+    if (this.suggestions.length) {
+      const height = this.getListHeight();
+      if (this.suggestionsOffset >= height) {
+        this.suggestionsIndex -= height;
+        this.suggestionsOffset -= height;
+      } else if (this.suggestionsOffset > 0) {
+        this.suggestionsIndex -= this.suggestionsOffset;
+        this.suggestionsOffset = 0;
+      }
+    }
+  }
+  /** Select next suggestions page. */
+  selectNextSuggestionsPage() {
+    if (this.suggestions.length) {
+      const height = this.getListHeight();
+      if (this.suggestionsOffset + height + height < this.suggestions.length) {
+        this.suggestionsIndex += height;
+        this.suggestionsOffset += height;
+      } else if (this.suggestionsOffset + height < this.suggestions.length) {
+        const offset = this.suggestions.length - height;
+        this.suggestionsIndex += offset - this.suggestionsOffset;
+        this.suggestionsOffset = offset;
+      }
+    }
+  }
+  async #expandInputValue(path) {
+    if (!path.startsWith("~")) {
+      return;
+    }
+    const envVar = getHomeDirEnvVar();
+    const hasEnvPermissions = await this.#hasEnvPermissions(envVar);
+    if (!hasEnvPermissions) {
+      return;
+    }
+    const homeDir = getHomeDir();
+    if (homeDir) {
+      path = path.replace("~", homeDir);
+      this.setInputValue(path);
+    }
+  }
+  async #hasEnvPermissions(variable) {
+    if (this.#envPermissions[variable]) {
+      return this.#envPermissions[variable];
+    }
+    const desc = {
+      name: "env",
+      variable
+    };
+    const currentStatus = await Deno.permissions.query(desc);
+    this.#envPermissions[variable] = currentStatus.state === "granted";
+    if (!this.#envPermissions[variable]) {
+      this.clear();
+      const newStatus = await Deno.permissions.request(desc);
+      this.#envPermissions[variable] = newStatus.state === "granted";
+    }
+    return this.#envPermissions[variable];
+  }
+};
+function uniqueSuggestions(value, index, self) {
+  return typeof value !== "undefined" && value !== "" && self.indexOf(value) === index;
+}
+async function listDir(path, mode) {
+  const fileNames = [];
+  for (const file of await readDir(path)) {
+    if (mode === true && (file.name.startsWith(".") || file.name.endsWith("~"))) {
+      continue;
+    }
+    const filePath = join3(path, file.name);
+    if (mode instanceof RegExp && !mode.test(filePath)) {
+      continue;
+    }
+    fileNames.push(filePath);
+  }
+  return fileNames.sort(function(a, b) {
+    return a.toLowerCase().localeCompare(b.toLowerCase());
+  });
+}
+function getHomeDirEnvVar() {
+  return Deno.build.os === "windows" ? "USERPROFILE" : "HOME";
+}
+function getHomeDir() {
+  return Deno.env.get(getHomeDirEnvVar());
+}
+
+// deno:https://jsr.io/@cliffy/prompt/1.0.0-rc.8/input.ts
+var Input = class extends GenericSuggestions {
+  settings;
+  /** Execute the prompt with provided options. */
+  static prompt(options) {
+    return new this(options).prompt();
+  }
+  /**
+   * Inject prompt value. If called, the prompt doesn't prompt for an input and
+   * returns immediately the injected value. Can be used for unit tests or pre
+   * selections.
+   *
+   * @param value Input value.
+   */
+  static inject(value) {
+    GenericPrompt.inject(value);
+  }
+  constructor(options) {
+    super();
+    if (typeof options === "string") {
+      options = {
+        message: options
+      };
+    }
+    this.settings = this.getDefaultSettings(options);
+  }
+  getDefaultSettings(options) {
+    return {
+      ...super.getDefaultSettings(options),
+      minLength: options.minLength ?? 0,
+      maxLength: options.maxLength ?? Infinity
+    };
+  }
+  success(value) {
+    this.saveSuggestions(value);
+    return super.success(value);
+  }
+  /** Get input value. */
+  getValue() {
+    return this.settings.files && this.inputValue ? normalize3(this.inputValue) : this.inputValue;
+  }
+  /**
+   * Validate input value.
+   * @param value User input value.
+   * @return True on success, false or error message on error.
+   */
+  validate(value) {
+    if (typeof value !== "string") {
+      return false;
+    }
+    if (value.length < this.settings.minLength) {
+      return `Value must be longer than ${this.settings.minLength} but has a length of ${value.length}.`;
+    }
+    if (value.length > this.settings.maxLength) {
+      return `Value can't be longer than ${this.settings.maxLength} but has a length of ${value.length}.`;
+    }
+    return true;
+  }
+  /**
+   * Map input value to output value.
+   * @param value Input value.
+   * @return Output value.
+   */
+  transform(value) {
+    return value.trim();
+  }
+  /**
+   * Format output value.
+   * @param value Output value.
+   */
+  format(value) {
+    return value;
+  }
+};
+
 // deno:https://jsr.io/@std/dotenv/0.225.5/parse.ts
 var RE_KEY_VALUE = /^\s*(?:export\s+)?(?<key>[^\s=#]+?)\s*=[\ \t]*('\r?\n?(?<notInterpolated>(.|\r\n|\n)*?)\r?\n?'|"\r?\n?(?<interpolated>(.|\r\n|\n)*?)\r?\n?"|(?<unquoted>[^\r\n#]*)) *#*.*$/gm;
 var RE_VALID_KEY = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
@@ -4263,7 +6228,7 @@ function expand(str, variablesMap) {
     return str;
   }
 }
-function parse(text) {
+function parse4(text) {
   const env = /* @__PURE__ */ Object.create(null);
   let match;
   const keysForExpandCheck = [];
@@ -4301,7 +6266,7 @@ async function load(options = {}) {
 }
 async function parseFile(filepath) {
   try {
-    return parse(await Deno.readTextFile(filepath));
+    return parse4(await Deno.readTextFile(filepath));
   } catch (e) {
     if (e instanceof Deno.errors.NotFound) return {};
     throw e;
@@ -4545,12 +6510,36 @@ await load({
   export: true
 });
 var DEFAULT_MODEL = "mistralai/mistral-7b-instruct:free";
-function askForConfirmation(question, defaultValue = false) {
-  const input = prompt(question);
-  if (input === "" || input === null) {
-    return Promise.resolve(defaultValue);
+function setupSignalHandlers() {
+  let ctrlCCount = 0;
+  Deno.addSignalListener("SIGINT", () => {
+    ctrlCCount++;
+    if (ctrlCCount === 1) {
+      console.log(yellow("\n\u26A0\uFE0F  Press Ctrl+C again to cancel without committing..."));
+    } else {
+      console.log(blue("\n\u{1F4CB} Operation cancelled. No commit was made."));
+      Deno.exit(0);
+    }
+    setTimeout(() => {
+      ctrlCCount = 0;
+    }, 3e3);
+  });
+}
+async function promptForCommitMessage(generatedMessage) {
+  try {
+    console.log(green("\u270F\uFE0F  Edit the commit message below (press Enter to commit, Ctrl+C twice to cancel):"));
+    console.log(yellow("\u{1F4A1} Tip: You can modify the message before pressing Enter\n"));
+    const finalMessage = await Input.prompt({
+      message: "Commit message:",
+      default: generatedMessage,
+      suggestions: [
+        generatedMessage
+      ]
+    });
+    return finalMessage.trim();
+  } catch (_error) {
+    return null;
   }
-  return Promise.resolve(input.toLowerCase() === "y" || input.toLowerCase() === "yes");
 }
 function commitChanges(commitMessage) {
   try {
@@ -4577,6 +6566,7 @@ function commitChanges(commitMessage) {
 }
 async function generateHandler(options) {
   try {
+    setupSignalHandlers();
     console.log(cyan(bold("\n\u{1F680} Git Commit AI - Conventional Commit Generator\n")));
     if (!isGitRepository()) {
       console.log(red("\u274C Error: Not in a git repository."));
@@ -4632,12 +6622,16 @@ async function generateHandler(options) {
       console.log(blue("\u{1F3C3} Dry run completed. Use without --dry-run to commit."));
       Deno.exit(0);
     }
-    const shouldCommit = await askForConfirmation(yellow("Would you like to commit with this message? (Y/n): "), true);
-    if (shouldCommit) {
-      commitChanges(commitMessage);
-    } else {
-      console.log(blue("\u{1F4CB} Commit cancelled. You can copy the message above if needed."));
+    const finalMessage = await promptForCommitMessage(commitMessage);
+    if (!finalMessage) {
+      console.log(blue("\u{1F4CB} Commit cancelled. No commit was made."));
+      Deno.exit(0);
     }
+    if (finalMessage.trim() === "") {
+      console.log(red("\u274C Empty commit message. Commit cancelled."));
+      Deno.exit(1);
+    }
+    commitChanges(finalMessage);
   } catch (error) {
     console.log(red(`\u274C Unexpected error: ${error instanceof Error ? error.message : "Unknown error"}`));
     if (options.debug && error instanceof Error) {
