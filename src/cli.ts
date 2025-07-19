@@ -1,16 +1,14 @@
 #!/usr/bin/env -S deno run --allow-run --allow-env --allow-read
 
 import { Command } from '@cliffy/command';
-import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { load } from '@std/dotenv';
+import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
+import { displayCommitMessage, generateCommitMessage, initializeAI } from './ai.ts';
+import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from './git.ts';
+import type { CLIOptions } from './types.ts';
 
 // Load environment variables
 await load({ export: true });
-
-// Import our modules
-import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from './git.ts';
-import { displayCommitMessage, generateCommitMessage, initializeAI } from './ai.ts';
-import type { CLIOptions } from './types.ts';
 
 const DEFAULT_MODEL = 'mistralai/mistral-7b-instruct:free';
 
@@ -20,15 +18,15 @@ const DEFAULT_MODEL = 'mistralai/mistral-7b-instruct:free';
  * @param defaultValue - The default value to return if user doesn't provide an answer
  *                      (true for 'y'/'yes', false for 'n'/'no')
  */
-async function askForConfirmation(
+function askForConfirmation(
   question: string,
   defaultValue: boolean = false,
 ): Promise<boolean> {
   const input = prompt(question);
   if (input === '' || input === null) {
-    return defaultValue;
+    return Promise.resolve(defaultValue);
   }
-  return input.toLowerCase() === 'y' || input.toLowerCase() === 'yes';
+  return Promise.resolve(input.toLowerCase() === 'y' || input.toLowerCase() === 'yes');
 }
 
 /**
@@ -81,11 +79,13 @@ async function generateHandler(options: CLIOptions): Promise<void> {
     }
 
     // Get staged changes
-    let diff: string;
+    let diff = '';
     let changeSummary;
     try {
-      diff = getStagedDiff();
       changeSummary = getChangeSummary();
+      if (!changeSummary.allDeletions) {
+        diff = getStagedDiff();
+      }
     } catch (error) {
       console.log(red(`❌ ${error instanceof Error ? error.message : 'Unknown error'}`));
       if (error instanceof Error && error.message.includes('No staged changes')) {

@@ -284,7 +284,7 @@ deno task generate --debug
 - [ ] Allow OpenRouter model to be provided via environment variable, prioritize lower than command line argument
 - [ ] Ask if user wants to push to current tracking remote and branch, default to No
 - [ ] Add non-interactive flag `-y` to accept all prompts with default behavior
-- [ ] Be smarter about detecting deleted files/code, and not detect feature removal as implementation
+- [x] Be smarter about detecting deleted files/code, and not detect feature removal as implementation
 
 ## Contributing
 

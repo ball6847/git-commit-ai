@@ -7,7 +7,7 @@ import type { ChangeSummary, FileChange, GitStatus } from './types.ts';
 export function getStagedDiff(): string {
   try {
     const command = new Deno.Command('git', {
-      args: ['diff', '--cached'],
+      args: ['diff', '--cached', '--diff-filter=d'],
       stdout: 'piped',
       stderr: 'piped',
     });
@@ -58,7 +58,7 @@ export function getChangeSummary(): ChangeSummary {
     const statusOutput = new TextDecoder().decode(stdout);
 
     if (!statusOutput.trim()) {
-      return { files: [], totalFiles: 0 };
+      return { files: [], totalFiles: 0, allDeletions: false };
     }
 
     const files: FileChange[] = statusOutput.trim().split('\n').map((line) => {
@@ -73,6 +73,7 @@ export function getChangeSummary(): ChangeSummary {
     return {
       files,
       totalFiles: files.length,
+      allDeletions: files.length > 0 && files.every((f) => f.status === 'D'),
     };
   } catch (error) {
     if (error instanceof Error) {
