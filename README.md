@@ -285,6 +285,7 @@ deno task generate --debug
 - [ ] Ask if user wants to push to current tracking remote and branch, default to No
 - [ ] Add non-interactive flag `-y` to accept all prompts with default behavior
 - [x] Be smarter about detecting deleted files/code, and not detect feature removal as implementation
+- [x] Allow user to edit commit message before committing, with Ctrl+C to cancel
 
 ## Contributing
 

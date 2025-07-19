@@ -1,6 +1,7 @@
 #!/usr/bin/env -S deno run --allow-run --allow-env --allow-read
 
 import { Command } from '@cliffy/command';
+import { Input } from '@cliffy/prompt';
 import { load } from '@std/dotenv';
 import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { displayCommitMessage, generateCommitMessage, initializeAI } from './ai.ts';
@@ -13,25 +14,49 @@ await load({ export: true });
 const DEFAULT_MODEL = 'mistralai/mistral-7b-instruct:free';
 
 /**
- * Ask user for confirmation
- * @param question - The question to ask the user
- * @param defaultValue - The default value to return if user doesn't provide an answer
- *                      (true for 'y'/'yes', false for 'n'/'no')
+ * Setup signal handlers for graceful cancellation
  */
-function askForConfirmation(
-  question: string,
-  defaultValue: boolean = false,
-): Promise<boolean> {
-  const input = prompt(question);
-  if (input === '' || input === null) {
-    return Promise.resolve(defaultValue);
-  }
-  return Promise.resolve(input.toLowerCase() === 'y' || input.toLowerCase() === 'yes');
+function setupSignalHandlers(): void {
+  let ctrlCCount = 0;
+
+  Deno.addSignalListener('SIGINT', () => {
+    ctrlCCount++;
+    if (ctrlCCount === 1) {
+      console.log(yellow('\n⚠️  Press Ctrl+C again to cancel without committing...'));
+    } else {
+      console.log(blue('\n📋 Operation cancelled. No commit was made.'));
+      Deno.exit(0);
+    }
+
+    // Reset counter after 3 seconds
+    setTimeout(() => {
+      ctrlCCount = 0;
+    }, 3000);
+  });
 }
 
 /**
- * Commit changes with the generated message
+ * Prompt user to edit the commit message
  */
+async function promptForCommitMessage(generatedMessage: string): Promise<string | null> {
+  try {
+    console.log(
+      green('✏️  Edit the commit message below (press Enter to commit, Ctrl+C twice to cancel):'),
+    );
+    console.log(yellow('💡 Tip: You can modify the message before pressing Enter\n'));
+
+    const finalMessage = await Input.prompt({
+      message: 'Commit message:',
+      default: generatedMessage,
+      suggestions: [generatedMessage],
+    });
+
+    return finalMessage.trim();
+  } catch (_error) {
+    // User pressed Ctrl+C during input
+    return null;
+  }
+}
 function commitChanges(commitMessage: string): void {
   try {
     const command = new Deno.Command('git', {
@@ -61,6 +86,9 @@ function commitChanges(commitMessage: string): void {
  */
 async function generateHandler(options: CLIOptions): Promise<void> {
   try {
+    // Setup signal handlers for graceful cancellation
+    setupSignalHandlers();
+
     // Print header
     console.log(cyan(bold('\n🚀 Git Commit AI - Conventional Commit Generator\n')));
 
@@ -143,18 +171,21 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       Deno.exit(0);
     }
 
-    // Ask for confirmation before committing.
-    // Default to 'Yes' if no answer is provided
-    const shouldCommit = await askForConfirmation(
-      yellow('Would you like to commit with this message? (Y/n): '),
-      true,
-    );
+    // Prompt user to edit the commit message
+    const finalMessage = await promptForCommitMessage(commitMessage);
 
-    if (shouldCommit) {
-      commitChanges(commitMessage);
-    } else {
-      console.log(blue('📋 Commit cancelled. You can copy the message above if needed.'));
+    if (!finalMessage) {
+      console.log(blue('📋 Commit cancelled. No commit was made.'));
+      Deno.exit(0);
     }
+
+    if (finalMessage.trim() === '') {
+      console.log(red('❌ Empty commit message. Commit cancelled.'));
+      Deno.exit(1);
+    }
+
+    // Commit with the final message (original or edited)
+    commitChanges(finalMessage);
   } catch (error) {
     console.log(
       red(`❌ Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`),
