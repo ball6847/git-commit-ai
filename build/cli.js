@@ -6278,6 +6278,9 @@ function initializeAI(apiKey, model) {
   if (!apiKey) {
     throw new Error("OpenRouter API key is required. Please set OPENROUTER_API_KEY in your .env file.");
   }
+  if (!model) {
+    throw new Error("Model is required. Please set OPENROUTER_MODEL in your .env file or use --model flag.");
+  }
   return {
     apiKey,
     model,
@@ -6596,6 +6599,7 @@ async function generateHandler(options) {
     if (options.debug) {
       console.log(yellow("Debug: Git diff preview:"));
       console.log(yellow(diff.substring(0, 500) + "..."));
+      console.log(yellow(`Debug: Using model: ${options.model}`));
       console.log();
     }
     if (!options.model) {
@@ -6622,14 +6626,18 @@ async function generateHandler(options) {
       console.log(blue("\u{1F3C3} Dry run completed. Use without --dry-run to commit."));
       Deno.exit(0);
     }
-    const finalMessage = await promptForCommitMessage(commitMessage);
-    if (!finalMessage) {
-      console.log(blue("\u{1F4CB} Commit cancelled. No commit was made."));
-      Deno.exit(0);
-    }
-    if (finalMessage.trim() === "") {
-      console.log(red("\u274C Empty commit message. Commit cancelled."));
-      Deno.exit(1);
+    let finalMessage = commitMessage;
+    if (!options.yes) {
+      const promptedMessage = await promptForCommitMessage(commitMessage);
+      if (!promptedMessage) {
+        console.log(blue("\u{1F4CB} Commit cancelled. No commit was made."));
+        Deno.exit(0);
+      }
+      if (promptedMessage.trim() === "") {
+        console.log(red("\u274C Empty commit message. Commit cancelled."));
+        Deno.exit(1);
+      }
+      finalMessage = promptedMessage;
     }
     commitChanges(finalMessage);
   } catch (error) {
@@ -6661,9 +6669,9 @@ function statusHandler() {
   }
 }
 var cli = new Command().name("git-commit-ai").version("1.0.0").description("AI-powered git commit message generator using conventional commit guidelines").default("generate");
-cli.command("generate", "Generate a conventional commit message for staged changes").alias("gen").alias("g").option("-m, --model <model:string>", "OpenRouter model to use", {
-  default: DEFAULT_MODEL
-}).option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").action(async (options) => {
+cli.command("generate", "Generate a conventional commit message for staged changes").alias("gen").alias("g").option("-m, --model <model:string>", "OpenRouter model to use (overrides OPENROUTER_MODEL)", {
+  default: Deno.env.get("OPENROUTER_MODEL") || DEFAULT_MODEL
+}).option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").option("-y, --yes", "Auto-accept generated message without prompting").action(async (options) => {
   if (!options.model) {
     options.model = DEFAULT_MODEL;
   }
