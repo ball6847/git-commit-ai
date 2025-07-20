@@ -176,19 +176,27 @@ The model selection uses this cascading priority system:
 
 #### Commands
 
-- `generate`
-  Description: Generates a commit message from staged changes using AI
+- `generate` (aliases: gen, g)
+  Description: Generates a conventional commit message from staged changes using AI
   Arguments: None
   Flags:
-  - `--dry-run` - Show what would be committed without actually creating a commit
-  - `--debug` - Enable verbose logging for debugging, including displaying the currently selected model
   - `--model <model-name>` - Specify which AI model to use (highest priority)
-  - `-y` - Non-interactive mode, accept all prompts with default behavior
+  - `--debug` - Enable verbose logging for debugging, including displaying the currently selected model
+  - `--dry-run` - Show what would be committed without actually creating a commit
+  - `-y, --yes` - Non-interactive mode, accept all prompts with default behavior
+  - `-p, --push` - Push changes to remote after successful commit
 
-- `status`
+- `status` (aliases: s)
   Description: Shows the current repository status and staged changes
   Arguments: None
   Flags: None
+
+**Additional Features:**
+- Interactive commit message editing before finalizing
+- Automatic push option after successful commit
+- Graceful SIGINT handling (Ctrl+C) with cancellation confirmation
+- Detailed change summary display
+- Conventional commit format validation
 
 #### Exit Codes
 
