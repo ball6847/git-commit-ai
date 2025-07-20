@@ -1,7 +1,7 @@
 #!/usr/bin/env -S deno run --allow-run --allow-env --allow-read
 
 import { Command } from '@cliffy/command';
-import { Input } from '@cliffy/prompt';
+import { Confirm, Input } from '@cliffy/prompt';
 import { load } from '@std/dotenv';
 import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { displayCommitMessage, generateCommitMessage, initializeAI } from './ai.ts';
@@ -57,7 +57,36 @@ async function promptForCommitMessage(generatedMessage: string): Promise<string 
     return null;
   }
 }
-function commitChanges(commitMessage: string): void {
+async function pushChanges(): Promise<void> {
+  // Prompt for push confirmation
+  const shouldPush = await Confirm.prompt({
+    message: 'Push changes to remote?',
+    default: false,
+  });
+
+  if (!shouldPush) {
+    console.log(blue('📋 Push cancelled.'));
+    Deno.exit(0);
+  }
+
+  // Execute git push
+  const pushCommand = new Deno.Command('git', {
+    args: ['push'],
+    stdout: 'inherit',
+    stderr: 'inherit',
+  });
+
+  const { success: pushSuccess } = pushCommand.outputSync();
+
+  if (pushSuccess) {
+    console.log(green('🚀 Successfully pushed changes!'));
+  } else {
+    console.log(red('❌ Push failed'));
+    Deno.exit(1);
+  }
+}
+
+async function commitChanges(commitMessage: string): Promise<void> {
   try {
     const command = new Deno.Command('git', {
       args: ['commit', '-m', commitMessage],
@@ -75,7 +104,7 @@ function commitChanges(commitMessage: string): void {
     }
   } catch (error) {
     console.log(
-      red(`❌ Commit failed: ${error instanceof Error ? error.message : 'Unknown error'}`),
+      red(`❌ Operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`),
     );
     Deno.exit(1);
   }
@@ -171,6 +200,12 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       console.log(blue('🏃 Dry run completed. Use without --dry-run to commit.'));
       Deno.exit(0);
     }
+
+    // Commit changes
+    await commitChanges(commitMessage);
+
+    // Push changes if commit was successful
+    await pushChanges();
 
     // Handle auto-accept or prompt for confirmation
     let finalMessage: string = commitMessage;
