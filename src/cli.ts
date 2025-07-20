@@ -128,6 +128,7 @@ async function generateHandler(options: CLIOptions): Promise<void> {
     if (options.debug) {
       console.log(yellow('Debug: Git diff preview:'));
       console.log(yellow(diff.substring(0, 500) + '...'));
+      console.log(yellow(`Debug: Using model: ${options.model}`));
       console.log();
     }
 
@@ -241,8 +242,8 @@ const cli = new Command()
 cli.command('generate', 'Generate a conventional commit message for staged changes')
   .alias('gen')
   .alias('g')
-  .option('-m, --model <model:string>', 'OpenRouter model to use', {
-    default: DEFAULT_MODEL,
+  .option('-m, --model <model:string>', 'OpenRouter model to use (overrides OPENROUTER_MODEL)', {
+    default: Deno.env.get('OPENROUTER_MODEL') || DEFAULT_MODEL,
   })
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')
