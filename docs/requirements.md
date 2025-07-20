@@ -100,7 +100,7 @@
 
 ### CLI Interface
 - **Commands**: `generate`, `status`
-- **Flags**: `--dry-run`, `--debug`, `--model <model-name>`
+- **Flags**: `--dry-run`, `--debug`, `--model <model-name>`, `-y` (non-interactive, accept all prompts with default behavior)
 - **Exit Codes**: 0 (success), 1 (error), 2 (validation failure)
 
 ### Git Integration

@@ -59,6 +59,7 @@ export interface CLIOptions {
   model?: string;
   debug?: boolean;
   dryRun?: boolean;
+  yes?: boolean;
 }
 
 export interface GitStatus {

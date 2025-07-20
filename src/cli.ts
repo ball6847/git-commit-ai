@@ -171,17 +171,22 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       Deno.exit(0);
     }
 
-    // Prompt user to edit the commit message
-    const finalMessage = await promptForCommitMessage(commitMessage);
+    // Handle auto-accept or prompt for confirmation
+    let finalMessage: string = commitMessage;
+    if (!options.yes) {
+      const promptedMessage = await promptForCommitMessage(commitMessage);
 
-    if (!finalMessage) {
-      console.log(blue('📋 Commit cancelled. No commit was made.'));
-      Deno.exit(0);
-    }
+      if (!promptedMessage) {
+        console.log(blue('📋 Commit cancelled. No commit was made.'));
+        Deno.exit(0);
+      }
 
-    if (finalMessage.trim() === '') {
-      console.log(red('❌ Empty commit message. Commit cancelled.'));
-      Deno.exit(1);
+      if (promptedMessage.trim() === '') {
+        console.log(red('❌ Empty commit message. Commit cancelled.'));
+        Deno.exit(1);
+      }
+
+      finalMessage = promptedMessage;
     }
 
     // Commit with the final message (original or edited)
@@ -241,6 +246,7 @@ cli.command('generate', 'Generate a conventional commit message for staged chang
   })
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')
+  .option('-y, --yes', 'Auto-accept generated message without prompting')
   .action(async (options: CLIOptions) => {
     // Ensure the model option has a default value
     if (!options.model) {
