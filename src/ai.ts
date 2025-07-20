@@ -17,6 +17,12 @@ export function initializeAI(apiKey: string, model: string): AIConfig {
     );
   }
 
+  if (!model) {
+    throw new Error(
+      'Model is required. Please set OPENROUTER_MODEL in your .env file or use --model flag.',
+    );
+  }
+
   return {
     apiKey,
     model,

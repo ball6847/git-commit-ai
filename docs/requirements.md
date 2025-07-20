@@ -3,8 +3,8 @@
 ## 1. User Stories & Acceptance Criteria
 
 ### US1: Generate Conventional Commit Messages
-**As a** developer  
-**I want to** automatically generate conventional commit messages from my staged changes  
+**As a** developer
+**I want to** automatically generate conventional commit messages from my staged changes
 **So that** my commit history follows team standards and is easily readable
 
 **Acceptance Criteria:**
@@ -15,8 +15,8 @@
 - System validates generated messages against conventional commit regex
 
 ### US2: AI-Powered Message Analysis
-**As a** developer  
-**I want to** leverage AI to analyze my code changes  
+**As a** developer
+**I want to** leverage AI to analyze my code changes
 **So that** the commit message accurately reflects the nature and impact of my changes
 
 **Acceptance Criteria:**
@@ -27,8 +27,8 @@
 - Generates contextually appropriate commit messages
 
 ### US3: Interactive Commit Workflow
-**As a** developer  
-**I want to** review and edit generated commit messages before committing  
+**As a** developer
+**I want to** review and edit generated commit messages before committing
 **So that** I maintain control over my commit history
 
 **Acceptance Criteria:**
@@ -38,8 +38,8 @@
 - Shows Git status and staged changes before generation
 
 ### US4: Configuration Management
-**As a** developer  
-**I want to** configure the tool for my specific needs  
+**As a** developer
+**I want to** configure the tool for my specific needs
 **So that** it works with my development environment and preferences
 
 **Acceptance Criteria:**
@@ -118,7 +118,7 @@ The model selection uses this cascading priority system:
   Arguments: None
   Flags:
     - `--dry-run` - Show what would be committed without actually creating a commit
-    - `--debug` - Enable verbose logging for debugging
+    - `--debug` - Enable verbose logging for debugging, including displaying the currently selected model
     - `--model <model-name>` - Specify which AI model to use (highest priority)
     - `-y` - Non-interactive mode, accept all prompts with default behavior
 
