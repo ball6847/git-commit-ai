@@ -23,7 +23,7 @@
 - Analyzes Git diffs and file changes to determine commit type
 - Uses OpenRouter API for AI-driven generation
 - Supports configurable AI models via environment variable or CLI flag
-- Default model: mistralai/mistral-7b-instruct
+- Default model: mistralai/mistral-7b-instruct:free
 - Generates contextually appropriate commit messages
 
 ### US3: Interactive Commit Workflow
@@ -99,9 +99,38 @@
 ## 4. Technical Requirements
 
 ### CLI Interface
-- **Commands**: `generate`, `status`
-- **Flags**: `--dry-run`, `--debug`, `--model <model-name>`, `-y` (non-interactive, accept all prompts with default behavior)
-- **Exit Codes**: 0 (success), 1 (error), 2 (validation failure)
+
+**Model Selection Priority:**
+
+The model selection uses this cascading priority system:
+1. **Explicit `--model` flag** (highest priority) - Temporary override for specific operations
+2. **`OPENROUTER_MODEL` environment variable** - Persistent configuration across runs
+3. **Default: `mistralai/mistral-7b-instruct:free`** - Reliable fallback (free & capable for commit messages)
+
+#### Environment Variables
+
+- `OPENROUTER_API_KEY` - OpenRouter API key required for AI-powered commit message generation
+- `OPENROUTER_MODEL` - (Optional) Specifies which AI model to use for generating commit messages
+
+#### Commands
+- `generate`
+  Description: Generates a commit message from staged changes using AI
+  Arguments: None
+  Flags:
+    - `--dry-run` - Show what would be committed without actually creating a commit
+    - `--debug` - Enable verbose logging for debugging
+    - `--model <model-name>` - Specify which AI model to use (highest priority)
+    - `-y` - Non-interactive mode, accept all prompts with default behavior
+
+- `status`
+  Description: Shows the current repository status and staged changes
+  Arguments: None
+  Flags: None
+
+#### Exit Codes
+- 0: Success
+- 1: Error
+- 2: Validation failure
 
 ### Git Integration
 - Detect staged changes using `git diff --staged`
