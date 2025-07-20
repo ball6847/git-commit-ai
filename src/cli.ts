@@ -57,9 +57,10 @@ async function promptForCommitMessage(generatedMessage: string): Promise<string 
     return null;
   }
 }
-async function pushChanges(): Promise<void> {
-  // Prompt for push confirmation
-  const shouldPush = await Confirm.prompt({
+
+async function pushChanges(options?: CLIOptions): Promise<void> {
+  // Determine if we should push (either via flag or confirmation)
+  const shouldPush = options?.push || await Confirm.prompt({
     message: 'Push changes to remote?',
     default: false,
   });
@@ -201,12 +202,6 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       Deno.exit(0);
     }
 
-    // Commit changes
-    await commitChanges(commitMessage);
-
-    // Push changes if commit was successful
-    await pushChanges();
-
     // Handle auto-accept or prompt for confirmation
     let finalMessage: string = commitMessage;
     if (!options.yes) {
@@ -225,8 +220,11 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       finalMessage = promptedMessage;
     }
 
-    // Commit with the final message (original or edited)
-    commitChanges(finalMessage);
+    // Commit changes with the final message
+    await commitChanges(finalMessage);
+
+    // Push changes if commit was successful
+    await pushChanges(options);
   } catch (error) {
     console.log(
       red(`❌ Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`),
@@ -283,6 +281,7 @@ cli.command('generate', 'Generate a conventional commit message for staged chang
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')
   .option('-y, --yes', 'Auto-accept generated message without prompting')
+  .option('-p, --push', 'Push changes to remote after commit')
   .action(async (options: CLIOptions) => {
     // Ensure the model option has a default value
     if (!options.model) {
