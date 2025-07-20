@@ -6125,6 +6125,104 @@ function getHomeDir() {
   return Deno.env.get(getHomeDirEnvVar());
 }
 
+// deno:https://jsr.io/@cliffy/prompt/1.0.0-rc.8/confirm.ts
+var Confirm = class extends GenericSuggestions {
+  settings;
+  /** Execute the prompt with provided options. */
+  static prompt(options) {
+    return new this(options).prompt();
+  }
+  /**
+   * Inject prompt value. If called, the prompt doesn't prompt for an input and
+   * returns immediately the injected value. Can be used for unit tests or pre
+   * selections.
+   *
+   * @param value Input value.
+   */
+  static inject(value) {
+    GenericPrompt.inject(value);
+  }
+  constructor(options) {
+    super();
+    if (typeof options === "string") {
+      options = {
+        message: options
+      };
+    }
+    this.settings = this.getDefaultSettings(options);
+  }
+  getDefaultSettings(options) {
+    return {
+      ...super.getDefaultSettings(options),
+      active: options.active || "Yes",
+      inactive: options.inactive || "No",
+      files: false,
+      complete: void 0,
+      suggestions: [
+        options.active || "Yes",
+        options.inactive || "No"
+      ],
+      list: false,
+      info: false
+    };
+  }
+  defaults() {
+    let defaultMessage = "";
+    if (this.settings.default === true) {
+      defaultMessage += this.settings.active[0].toUpperCase() + "/" + this.settings.inactive[0].toLowerCase();
+    } else if (this.settings.default === false) {
+      defaultMessage += this.settings.active[0].toLowerCase() + "/" + this.settings.inactive[0].toUpperCase();
+    } else {
+      defaultMessage += this.settings.active[0].toLowerCase() + "/" + this.settings.inactive[0].toLowerCase();
+    }
+    return defaultMessage ? dim(` (${defaultMessage})`) : "";
+  }
+  success(value) {
+    this.saveSuggestions(this.format(value));
+    return super.success(value);
+  }
+  /** Get input input. */
+  getValue() {
+    return this.inputValue;
+  }
+  /**
+   * Validate input value.
+   * @param value User input value.
+   * @return True on success, false or error message on error.
+   */
+  validate(value) {
+    return typeof value === "string" && [
+      this.settings.active[0].toLowerCase(),
+      this.settings.active.toLowerCase(),
+      this.settings.inactive[0].toLowerCase(),
+      this.settings.inactive.toLowerCase()
+    ].indexOf(value.toLowerCase()) !== -1;
+  }
+  /**
+   * Map input value to output value.
+   * @param value Input value.
+   * @return Output value.
+   */
+  transform(value) {
+    switch (value.toLowerCase()) {
+      case this.settings.active[0].toLowerCase():
+      case this.settings.active.toLowerCase():
+        return true;
+      case this.settings.inactive[0].toLowerCase():
+      case this.settings.inactive.toLowerCase():
+        return false;
+    }
+    return;
+  }
+  /**
+   * Format output value.
+   * @param value Output value.
+   */
+  format(value) {
+    return value ? this.settings.active : this.settings.inactive;
+  }
+};
+
 // deno:https://jsr.io/@cliffy/prompt/1.0.0-rc.8/input.ts
 var Input = class extends GenericSuggestions {
   settings;
@@ -6544,7 +6642,31 @@ async function promptForCommitMessage(generatedMessage) {
     return null;
   }
 }
-function commitChanges(commitMessage) {
+async function pushChanges(options) {
+  const shouldPush = options?.push || await Confirm.prompt({
+    message: "Push changes to remote?",
+    default: false
+  });
+  if (!shouldPush) {
+    console.log(blue("\u{1F4CB} Push cancelled."));
+    Deno.exit(0);
+  }
+  const pushCommand = new Deno.Command("git", {
+    args: [
+      "push"
+    ],
+    stdout: "inherit",
+    stderr: "inherit"
+  });
+  const { success: pushSuccess } = pushCommand.outputSync();
+  if (pushSuccess) {
+    console.log(green("\u{1F680} Successfully pushed changes!"));
+  } else {
+    console.log(red("\u274C Push failed"));
+    Deno.exit(1);
+  }
+}
+async function commitChanges(commitMessage) {
   try {
     const command = new Deno.Command("git", {
       args: [
@@ -6563,7 +6685,7 @@ function commitChanges(commitMessage) {
       Deno.exit(1);
     }
   } catch (error) {
-    console.log(red(`\u274C Commit failed: ${error instanceof Error ? error.message : "Unknown error"}`));
+    console.log(red(`\u274C Operation failed: ${error instanceof Error ? error.message : "Unknown error"}`));
     Deno.exit(1);
   }
 }
@@ -6639,7 +6761,8 @@ async function generateHandler(options) {
       }
       finalMessage = promptedMessage;
     }
-    commitChanges(finalMessage);
+    await commitChanges(finalMessage);
+    await pushChanges(options);
   } catch (error) {
     console.log(red(`\u274C Unexpected error: ${error instanceof Error ? error.message : "Unknown error"}`));
     if (options.debug && error instanceof Error) {
@@ -6671,7 +6794,7 @@ function statusHandler() {
 var cli = new Command().name("git-commit-ai").version("1.0.0").description("AI-powered git commit message generator using conventional commit guidelines").default("generate");
 cli.command("generate", "Generate a conventional commit message for staged changes").alias("gen").alias("g").option("-m, --model <model:string>", "OpenRouter model to use (overrides OPENROUTER_MODEL)", {
   default: Deno.env.get("OPENROUTER_MODEL") || DEFAULT_MODEL
-}).option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").option("-y, --yes", "Auto-accept generated message without prompting").action(async (options) => {
+}).option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").option("-y, --yes", "Auto-accept generated message without prompting").option("-p, --push", "Push changes to remote after commit").action(async (options) => {
   if (!options.model) {
     options.model = DEFAULT_MODEL;
   }
