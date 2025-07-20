@@ -42,6 +42,8 @@
 - Supports dry-run mode to preview without committing
 - Allows commit execution with generated/edited messages
 - Shows Git status and staged changes before generation
+- Commit should only occur after user confirmation or editing
+- Cancelling during message editing should abort the entire commit operation
 
 ### US4: Configuration Management
 
@@ -68,6 +70,32 @@
 - Defaults to 'no' for push confirmation
 - Exits program if user does not confirm push
 - Maintains existing functionality for commit message acceptance
+- Push confirmation should only be shown after successful user-confirmed commit
+- `-p/--push`: Optional flag that bypasses push confirmation when provided
+- When flag is omitted, maintains default confirmation flow behavior
+
+### US6: Automated Commit and Push Workflow
+
+**As a** developer
+**I want to** generate commits and push changes without manual intervention
+**So that** I can automate my git workflow
+
+**Acceptance Criteria:**
+
+- Supports `-y` flag to automatically accept generated commit messages
+- Supports `-p/--push` flag to automatically confirm push operations
+- Works in both modes:
+  - **Interactive mode**: Requires commit confirmation unless `-y` specified
+  - **Non-interactive mode**: Requires `-y` for commit acceptance, `-p` for push
+- Maintains push confirmation prompt when flags not used
+- Ensures push only occurs after successful commit
+- Returns appropriate exit codes for automation
+- Preserves all validation rules from interactive mode
+
+**Example Usage:**
+- `gcai -y -p` → Auto-commit + auto-push
+- `gcai -p` → Interactive commit + auto-push
+- `gcai -y` → Existing behavior (auto-commit only)
 
 ## 2. Priority Classification
 
@@ -123,7 +151,8 @@
 4. Generate conventional commit message
 5. Validate against conventional commit format
 6. Present for user review/editing
-7. Execute Git commit (if approved)
+7. Execute Git commit only if user confirms or accepts the message
+7a. Abort operation if user cancels during message editing
 8. Prompt for push confirmation
 9. Push to remote (if confirmed) or exit
 ```
