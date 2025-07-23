@@ -11,6 +11,7 @@ import type { CLIOptions } from './types.ts';
 // Load environment variables
 await load({ export: true });
 
+const VERSION = '0.0.1-rc1';
 const DEFAULT_MODEL = 'mistralai/mistral-7b-instruct:free';
 
 /**
@@ -267,7 +268,7 @@ function statusHandler(): void {
 // Create CLI application
 const cli = new Command()
   .name('git-commit-ai')
-  .version('1.0.0')
+  .version(VERSION)
   .description('AI-powered git commit message generator using conventional commit guidelines')
   .default('generate');
 

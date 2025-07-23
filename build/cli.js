@@ -6610,6 +6610,7 @@ function displayChangeSummary(summary) {
 await load({
   export: true
 });
+var VERSION = "0.0.1-rc1";
 var DEFAULT_MODEL = "mistralai/mistral-7b-instruct:free";
 function setupSignalHandlers() {
   let ctrlCCount = 0;
@@ -6791,7 +6792,7 @@ function statusHandler() {
     Deno.exit(1);
   }
 }
-var cli = new Command().name("git-commit-ai").version("1.0.0").description("AI-powered git commit message generator using conventional commit guidelines").default("generate");
+var cli = new Command().name("git-commit-ai").version(VERSION).description("AI-powered git commit message generator using conventional commit guidelines").default("generate");
 cli.command("generate", "Generate a conventional commit message for staged changes").alias("gen").alias("g").option("-m, --model <model:string>", "OpenRouter model to use (overrides OPENROUTER_MODEL)", {
   default: Deno.env.get("OPENROUTER_MODEL") || DEFAULT_MODEL
 }).option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").option("-y, --yes", "Auto-accept generated message without prompting").option("-p, --push", "Push changes to remote after commit").action(async (options) => {
