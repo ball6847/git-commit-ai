@@ -6610,7 +6610,7 @@ function displayChangeSummary(summary) {
 await load({
   export: true
 });
-var VERSION = "0.0.1-rc1";
+var VERSION = "0.0.2";
 var DEFAULT_MODEL = "mistralai/mistral-7b-instruct:free";
 function setupSignalHandlers() {
   let ctrlCCount = 0;
@@ -6646,7 +6646,7 @@ async function promptForCommitMessage(generatedMessage) {
 async function pushChanges(options) {
   const shouldPush = options?.push || await Confirm.prompt({
     message: "Push changes to remote?",
-    default: false
+    default: true
   });
   if (!shouldPush) {
     console.log(blue("\u{1F4CB} Push cancelled."));
