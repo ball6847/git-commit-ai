@@ -11,7 +11,7 @@ import type { CLIOptions } from './types.ts';
 // Load environment variables
 await load({ export: true });
 
-const VERSION = '0.0.1-rc1';
+const VERSION = '0.0.2';
 const DEFAULT_MODEL = 'mistralai/mistral-7b-instruct:free';
 
 /**
@@ -63,7 +63,7 @@ async function pushChanges(options?: CLIOptions): Promise<void> {
   // Determine if we should push (either via flag or confirmation)
   const shouldPush = options?.push || await Confirm.prompt({
     message: 'Push changes to remote?',
-    default: false,
+    default: true,
   });
 
   if (!shouldPush) {
