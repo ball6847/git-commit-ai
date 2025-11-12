@@ -6646,6 +6646,79 @@ function findFlag(flags) {
   return flags[0];
 }
 
+// deno:https://jsr.io/@std/dotenv/0.225.5/parse.ts
+var RE_KEY_VALUE = /^\s*(?:export\s+)?(?<key>[^\s=#]+?)\s*=[\ \t]*('\r?\n?(?<notInterpolated>(.|\r\n|\n)*?)\r?\n?'|"\r?\n?(?<interpolated>(.|\r\n|\n)*?)\r?\n?"|(?<unquoted>[^\r\n#]*)) *#*.*$/gm;
+var RE_VALID_KEY = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+var RE_EXPAND_VALUE = /(\${(?<inBrackets>.+?)(\:-(?<inBracketsDefault>.+))?}|(?<!\\)\$(?<notInBrackets>\w+)(\:-(?<notInBracketsDefault>.+))?)/g;
+function expandCharacters(str) {
+  const charactersMap = {
+    "\\n": "\n",
+    "\\r": "\r",
+    "\\t": "	"
+  };
+  return str.replace(/\\([nrt])/g, ($1) => charactersMap[$1] ?? "");
+}
+function expand(str, variablesMap) {
+  if (RE_EXPAND_VALUE.test(str)) {
+    return expand(str.replace(RE_EXPAND_VALUE, function(...params) {
+      const { inBrackets, inBracketsDefault, notInBrackets, notInBracketsDefault } = params[params.length - 1];
+      const expandValue = inBrackets || notInBrackets;
+      const defaultValue = inBracketsDefault || notInBracketsDefault;
+      let value = variablesMap[expandValue];
+      if (value === void 0) {
+        value = Deno.env.get(expandValue);
+      }
+      return value === void 0 ? expand(defaultValue, variablesMap) : value;
+    }), variablesMap);
+  } else {
+    return str;
+  }
+}
+function parse(text2) {
+  const env = /* @__PURE__ */ Object.create(null);
+  let match;
+  const keysForExpandCheck = [];
+  while ((match = RE_KEY_VALUE.exec(text2)) !== null) {
+    const { key, interpolated, notInterpolated, unquoted } = match?.groups;
+    if (!RE_VALID_KEY.test(key)) {
+      console.warn(`Ignored the key "${key}" as it is not a valid identifier: The key need to match the pattern /^[a-zA-Z_][a-zA-Z0-9_]*$/.`);
+      continue;
+    }
+    if (unquoted) {
+      keysForExpandCheck.push(key);
+    }
+    env[key] = typeof notInterpolated === "string" ? notInterpolated : typeof interpolated === "string" ? expandCharacters(interpolated) : unquoted.trim();
+  }
+  const variablesMap = {
+    ...env
+  };
+  keysForExpandCheck.forEach((key) => {
+    env[key] = expand(env[key], variablesMap);
+  });
+  return env;
+}
+
+// deno:https://jsr.io/@std/dotenv/0.225.5/mod.ts
+async function load(options = {}) {
+  const { envPath = ".env", export: _export = false } = options;
+  const conf = envPath ? await parseFile(envPath) : {};
+  if (_export) {
+    for (const [key, value] of Object.entries(conf)) {
+      if (Deno.env.get(key) !== void 0) continue;
+      Deno.env.set(key, value);
+    }
+  }
+  return conf;
+}
+async function parseFile(filepath) {
+  try {
+    return parse(await Deno.readTextFile(filepath));
+  } catch (e) {
+    if (e instanceof Deno.errors.NotFound) return {};
+    throw e;
+  }
+}
+
 // deno:https://jsr.io/@std/assert/1.0.13/equal.ts
 var Temporal = globalThis.Temporal ?? new Proxy({}, {
   get: () => {
@@ -7208,7 +7281,7 @@ var SpecialKeyMap = {
 // deno:https://jsr.io/@cliffy/keycode/1.0.0-rc.8/key_code.ts
 var kUTF16SurrogateThreshold = 65536;
 var kEscape = "\x1B";
-function parse(data2) {
+function parse2(data2) {
   let index = -1;
   const keys = [];
   const input = data2 instanceof Uint8Array ? new TextDecoder().decode(data2) : data2;
@@ -7573,7 +7646,7 @@ var GenericPrompt = class _GenericPrompt {
   /** Read user input from stdin and pars ansi codes. */
   #readKey = async () => {
     const data2 = await this.#readChar();
-    return data2.length ? parse(data2) : [];
+    return data2.length ? parse2(data2) : [];
   };
   /** Read user input from stdin. */
   #readChar = async () => {
@@ -8698,79 +8771,6 @@ var Input = class extends GenericSuggestions {
     return value;
   }
 };
-
-// deno:https://jsr.io/@std/dotenv/0.225.5/parse.ts
-var RE_KEY_VALUE = /^\s*(?:export\s+)?(?<key>[^\s=#]+?)\s*=[\ \t]*('\r?\n?(?<notInterpolated>(.|\r\n|\n)*?)\r?\n?'|"\r?\n?(?<interpolated>(.|\r\n|\n)*?)\r?\n?"|(?<unquoted>[^\r\n#]*)) *#*.*$/gm;
-var RE_VALID_KEY = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-var RE_EXPAND_VALUE = /(\${(?<inBrackets>.+?)(\:-(?<inBracketsDefault>.+))?}|(?<!\\)\$(?<notInBrackets>\w+)(\:-(?<notInBracketsDefault>.+))?)/g;
-function expandCharacters(str) {
-  const charactersMap = {
-    "\\n": "\n",
-    "\\r": "\r",
-    "\\t": "	"
-  };
-  return str.replace(/\\([nrt])/g, ($1) => charactersMap[$1] ?? "");
-}
-function expand(str, variablesMap) {
-  if (RE_EXPAND_VALUE.test(str)) {
-    return expand(str.replace(RE_EXPAND_VALUE, function(...params) {
-      const { inBrackets, inBracketsDefault, notInBrackets, notInBracketsDefault } = params[params.length - 1];
-      const expandValue = inBrackets || notInBrackets;
-      const defaultValue = inBracketsDefault || notInBracketsDefault;
-      let value = variablesMap[expandValue];
-      if (value === void 0) {
-        value = Deno.env.get(expandValue);
-      }
-      return value === void 0 ? expand(defaultValue, variablesMap) : value;
-    }), variablesMap);
-  } else {
-    return str;
-  }
-}
-function parse4(text2) {
-  const env = /* @__PURE__ */ Object.create(null);
-  let match;
-  const keysForExpandCheck = [];
-  while ((match = RE_KEY_VALUE.exec(text2)) !== null) {
-    const { key, interpolated, notInterpolated, unquoted } = match?.groups;
-    if (!RE_VALID_KEY.test(key)) {
-      console.warn(`Ignored the key "${key}" as it is not a valid identifier: The key need to match the pattern /^[a-zA-Z_][a-zA-Z0-9_]*$/.`);
-      continue;
-    }
-    if (unquoted) {
-      keysForExpandCheck.push(key);
-    }
-    env[key] = typeof notInterpolated === "string" ? notInterpolated : typeof interpolated === "string" ? expandCharacters(interpolated) : unquoted.trim();
-  }
-  const variablesMap = {
-    ...env
-  };
-  keysForExpandCheck.forEach((key) => {
-    env[key] = expand(env[key], variablesMap);
-  });
-  return env;
-}
-
-// deno:https://jsr.io/@std/dotenv/0.225.5/mod.ts
-async function load(options = {}) {
-  const { envPath = ".env", export: _export = false } = options;
-  const conf = envPath ? await parseFile(envPath) : {};
-  if (_export) {
-    for (const [key, value] of Object.entries(conf)) {
-      if (Deno.env.get(key) !== void 0) continue;
-      Deno.env.set(key, value);
-    }
-  }
-  return conf;
-}
-async function parseFile(filepath) {
-  try {
-    return parse4(await Deno.readTextFile(filepath));
-  } catch (e) {
-    if (e instanceof Deno.errors.NotFound) return {};
-    throw e;
-  }
-}
 
 // node_modules/.deno/@ai-sdk+provider@2.0.0/node_modules/@ai-sdk/provider/dist/index.mjs
 var marker = "vercel.ai.error";
@@ -39207,93 +39207,10 @@ function displayChangeSummary(summary) {
   console.log();
 }
 
-// src/cli.ts
-await load({
-  export: true
-});
-var VERSION8 = "0.1.0";
-var DEFAULT_MODEL = "cerebras/zai-glm-4.6";
+// src/cmd/generate.ts
 var DEFAULT_MAX_TOKENS = 200;
 var DEFAULT_TEMPERATURE = 0.3;
-function setupSignalHandlers() {
-  let ctrlCCount = 0;
-  Deno.addSignalListener("SIGINT", () => {
-    ctrlCCount++;
-    if (ctrlCCount === 1) {
-      console.log(yellow("\n\u26A0\uFE0F  Press Ctrl+C again to cancel without committing..."));
-    } else {
-      console.log(blue("\n\u{1F4CB} Operation cancelled. No commit was made."));
-      Deno.exit(0);
-    }
-    setTimeout(() => {
-      ctrlCCount = 0;
-    }, 3e3);
-  });
-}
-async function promptForCommitMessage(generatedMessage) {
-  try {
-    console.log(green("\u270F\uFE0F  Edit the commit message below (press Enter to commit, Ctrl+C twice to cancel):"));
-    console.log(yellow("\u{1F4A1} Tip: You can modify the message before pressing Enter\n"));
-    const finalMessage = await Input.prompt({
-      message: "Commit message:",
-      default: generatedMessage,
-      suggestions: [
-        generatedMessage
-      ]
-    });
-    return finalMessage.trim();
-  } catch (_error) {
-    return null;
-  }
-}
-async function pushChanges(options) {
-  const shouldPush = options?.push || await Confirm.prompt({
-    message: "Push changes to remote?",
-    default: true
-  });
-  if (!shouldPush) {
-    console.log(blue("\u{1F4CB} Push cancelled."));
-    Deno.exit(0);
-  }
-  const pushCommand = new Deno.Command("git", {
-    args: [
-      "push"
-    ],
-    stdout: "inherit",
-    stderr: "inherit"
-  });
-  const { success: pushSuccess } = pushCommand.outputSync();
-  if (pushSuccess) {
-    console.log(green("\u{1F680} Successfully pushed changes!"));
-  } else {
-    console.log(red("\u274C Push failed"));
-    Deno.exit(1);
-  }
-}
-async function commitChanges(commitMessage) {
-  try {
-    const command = new Deno.Command("git", {
-      args: [
-        "commit",
-        "-m",
-        commitMessage
-      ],
-      stdout: "inherit",
-      stderr: "inherit"
-    });
-    const { success: success2 } = command.outputSync();
-    if (success2) {
-      console.log(green("\u2705 Successfully committed!"));
-    } else {
-      console.log(red("\u274C Commit failed"));
-      Deno.exit(1);
-    }
-  } catch (error46) {
-    console.log(red(`\u274C Operation failed: ${error46 instanceof Error ? error46.message : "Unknown error"}`));
-    Deno.exit(1);
-  }
-}
-async function generateHandler(options) {
+async function handleGenerate(options) {
   try {
     setupSignalHandlers();
     console.log(cyan(bold("\n\u{1F680} Git Commit AI - Conventional Commit Generator\n")));
@@ -39357,7 +39274,7 @@ async function generateHandler(options) {
       }
       finalMessage = promptedMessage;
     }
-    await commitChanges(finalMessage);
+    commitChanges(finalMessage);
     await pushChanges(options);
   } catch (error46) {
     console.log(red(`\u274C Unexpected error: ${error46 instanceof Error ? error46.message : "Unknown error"}`));
@@ -39367,7 +39284,129 @@ async function generateHandler(options) {
     Deno.exit(1);
   }
 }
-function modelHandler() {
+function setupSignalHandlers() {
+  let ctrlCCount = 0;
+  Deno.addSignalListener("SIGINT", () => {
+    ctrlCCount++;
+    if (ctrlCCount === 1) {
+      console.log(yellow("\n\u26A0\uFE0F  Press Ctrl+C again to cancel without committing..."));
+    } else {
+      console.log(blue("\n\u{1F4CB} Operation cancelled. No commit was made."));
+      Deno.exit(0);
+    }
+    setTimeout(() => {
+      ctrlCCount = 0;
+    }, 3e3);
+  });
+}
+async function promptForCommitMessage(generatedMessage) {
+  try {
+    console.log(green("\u270F\uFE0F  Edit the commit message below (press Enter to commit, Ctrl+C twice to cancel):"));
+    console.log(yellow("\u{1F4A1} Tip: You can modify the message before pressing Enter\n"));
+    const finalMessage = await Input.prompt({
+      message: "Commit message:",
+      default: generatedMessage,
+      suggestions: [
+        generatedMessage
+      ]
+    });
+    return finalMessage.trim();
+  } catch (_error) {
+    return null;
+  }
+}
+async function pushChanges(options) {
+  const shouldPush = options?.push || await Confirm.prompt({
+    message: "Push changes to remote?",
+    default: true
+  });
+  if (!shouldPush) {
+    console.log(blue("\u{1F4CB} Push cancelled."));
+    Deno.exit(0);
+  }
+  const pushCommand = new Deno.Command("git", {
+    args: [
+      "push"
+    ],
+    stdout: "inherit",
+    stderr: "inherit"
+  });
+  const { success: pushSuccess } = pushCommand.outputSync();
+  if (pushSuccess) {
+    console.log(green("\u{1F680} Successfully pushed changes!"));
+  } else {
+    console.log(red("\u274C Push failed"));
+    Deno.exit(1);
+  }
+}
+function commitChanges(commitMessage) {
+  try {
+    const command = new Deno.Command("git", {
+      args: [
+        "commit",
+        "-m",
+        commitMessage
+      ],
+      stdout: "inherit",
+      stderr: "inherit"
+    });
+    const { success: success2 } = command.outputSync();
+    if (success2) {
+      console.log(green("\u2705 Successfully committed!"));
+    } else {
+      console.log(red("\u274C Commit failed"));
+      Deno.exit(1);
+    }
+  } catch (error46) {
+    console.log(red(`\u274C Operation failed: ${error46 instanceof Error ? error46.message : "Unknown error"}`));
+    Deno.exit(1);
+  }
+}
+
+// src/cmd/commit.ts
+async function handleCommit(options) {
+  try {
+    const config2 = {
+      model: options.model || Deno.env.get("GIT_COMMIT_AI_MODEL") || "gpt-4",
+      maxTokens: 1e3,
+      temperature: 0.7
+    };
+    if (options.all) {
+      await new Deno.Command("git", {
+        args: [
+          "add",
+          "."
+        ]
+      }).output();
+    }
+    const diff = getStagedDiff();
+    const changeSummary = getChangeSummary();
+    if (!diff.trim()) {
+      console.log("No changes to commit.");
+      return;
+    }
+    console.log("Generating commit message...");
+    const commitMessage = await generateCommitMessage(config2, diff, changeSummary);
+    console.log(`
+${commitMessage}
+`);
+    await new Deno.Command("git", {
+      args: [
+        "commit",
+        "-m",
+        commitMessage
+      ]
+    }).output();
+    console.log("Changes committed successfully!");
+  } catch (error46) {
+    console.error("Error:", error46 instanceof Error ? error46.message : "Unknown error");
+    Deno.exit(1);
+  }
+}
+
+// src/cmd/model.ts
+var DEFAULT_MODEL = "gpt-4";
+function handleModel() {
   console.log(cyan(bold("\n\u{1F916} Available AI Models\n")));
   const modelKeys = getModelKeys();
   if (modelKeys.length < 1) {
@@ -39385,7 +39424,9 @@ function modelHandler() {
   console.log();
   console.log(blue(`Current model: ${Deno.env.get("GIT_COMMIT_AI_MODEL") || DEFAULT_MODEL}`));
 }
-function statusHandler() {
+
+// src/cmd/status.ts
+function handleStatus() {
   try {
     if (!isGitRepository()) {
       console.log(red("\u274C Not in a git repository."));
@@ -39405,30 +39446,24 @@ function statusHandler() {
     Deno.exit(1);
   }
 }
-var cli = new Command().name("git-commit-ai").version(VERSION8).description("AI-powered git commit message generator using conventional commit guidelines").option("-m, --model <model:string>", "AI model to use (overrides GIT_COMMIT_AI_MODEL)", {
-  default: Deno.env.get("GIT_COMMIT_AI_MODEL") || DEFAULT_MODEL
-}).option("--max-tokens <maxTokens:number>", "Maximum tokens for AI response", {
-  default: Number(Deno.env.get("GIT_COMMIT_AI_MAX_TOKENS")) || DEFAULT_MAX_TOKENS
-}).option("--temperature <temperature:number>", "AI temperature (0.0-1.0)", {
-  default: Number(Deno.env.get("GIT_COMMIT_AI_TEMPERATURE")) || DEFAULT_TEMPERATURE
-}).option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").option("-y, --yes", "Auto-accept generated message without prompting").option("-p, --push", "Push changes to remote after commit").default("generate").action(async (options) => {
-  await generateHandler(options);
+
+// src/cmd/version.ts
+var VERSION8 = "1.0.0";
+function handleVersion() {
+  console.log(cyan(bold(`git-commit-ai v${VERSION8}`)));
+}
+
+// src/cli.ts
+await load({
+  export: true
 });
-cli.command("generate", "Generate a conventional commit message for staged changes").alias("gen").alias("g").option("-m, --model <model:string>", "AI model to use (overrides GIT_COMMIT_AI_MODEL)", {
-  default: Deno.env.get("GIT_COMMIT_AI_MODEL") || DEFAULT_MODEL
-}).option("--max-tokens <maxTokens:number>", "Maximum tokens for AI response", {
-  default: Number(Deno.env.get("GIT_COMMIT_AI_MAX_TOKENS")) || DEFAULT_MAX_TOKENS
-}).option("--temperature <temperature:number>", "AI temperature (0.0-1.0)", {
-  default: Number(Deno.env.get("GIT_COMMIT_AI_TEMPERATURE")) || DEFAULT_TEMPERATURE
-}).option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").option("-y, --yes", "Auto-accept generated message without prompting").option("-p, --push", "Push changes to remote after commit").action(async (options) => {
-  await generateHandler(options);
-});
-cli.command("model", "List all available AI models").alias("m").action(() => {
-  modelHandler();
-});
-cli.command("status", "Show current git status and staged changes").alias("s").action(() => {
-  statusHandler();
-});
+var VERSION9 = "0.1.0";
+var cli = new Command().name("git-commit-ai").version(VERSION9).description("AI-powered git commit message generator using conventional commit guidelines");
+cli.command("generate", "Generate a conventional commit message for staged changes").alias("gen").alias("g").option("-m, --model <model:string>", "AI model to use").option("--max-tokens <maxTokens:number>", "Maximum tokens for AI response").option("--temperature <temperature:number>", "AI temperature (0.0-1.0)").option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").option("-y, --yes", "Auto-accept generated message without prompting").option("-p, --push", "Push changes to remote after commit").action(handleGenerate);
+cli.command("version", "Show version information").alias("v").action(handleVersion);
+cli.command("commit", "Generate and commit changes with AI").alias("c").option("-m, --model <model:string>", "AI model to use").option("-p, --provider <provider:string>", "AI provider to use").option("--staged", "Only commit staged changes").option("-a, --all", "Stage all changes before committing").action(handleCommit);
+cli.command("model", "List all available AI models").alias("m").action(handleModel);
+cli.command("status", "Show current git status and staged changes").alias("s").action(handleStatus);
 if (import.meta.main) {
   try {
     await cli.parse(Deno.args);
