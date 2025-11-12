@@ -193,7 +193,7 @@ export function initializeAI(model: string): AIConfig {
  * Display the generated commit message with formatting
  */
 export function displayCommitMessage(commitMessage: string): void {
-  console.log(green("\n✨ Generated Commit Message:"));
+  console.log(green('\n✨ Generated Commit Message:'));
   console.log(white(`"${commitMessage}"`));
   console.log();
 }
