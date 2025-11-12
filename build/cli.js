@@ -36670,7 +36670,7 @@ function initializeAI(model) {
 async function generateCommitMessage(config2, gitDiff, changeSummary) {
   const prompt2 = createCommitPrompt(gitDiff, changeSummary);
   try {
-    console.log(blue("\u{1F916} Analyzing changes with AI..."));
+    console.log(blue(`\u{1F916} Analyzing changes with AI using model: ${config2.model}...`));
     const models = getModels();
     const result = await generateText({
       model: models[config2.model],
