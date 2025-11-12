@@ -93,6 +93,7 @@
 - Preserves all validation rules from interactive mode
 
 **Example Usage:**
+
 - `gcai -y -p` → Auto-commit + auto-push
 - `gcai -p` → Interactive commit + auto-push
 - `gcai -y` → Existing behavior (auto-commit only)
@@ -192,6 +193,7 @@ The model selection uses this cascading priority system:
   Flags: None
 
 **Additional Features:**
+
 - Interactive commit message editing before finalizing
 - Automatic push option after successful commit
 - Graceful SIGINT handling (Ctrl+C) with cancellation confirmation

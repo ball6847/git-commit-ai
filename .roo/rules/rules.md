@@ -1,9 +1,11 @@
 Requirement Documents
+
 - `docs/requirements.md` must be consulted before implementing any feature
 - Contains: feature specifications, user stories, and acceptance criteria
 - Does NOT cover: implementation details, code structure, or technical design
 
 Technical Constraints
+
 - Use Deno 2.4.0 runtime and TypeScript 5.0 compiler
 - Import aliases defined in `deno.json` must be used for module resolution
 - CLI tools must use [cliffy](https://c4spar.github.io/deno-cliffy/) framework for consistent command handling
@@ -14,6 +16,7 @@ Technical Constraints
 - ❌ Do not use Deno versions <2.4.0 or TypeScript <5.0 without explicit approval
 
 Context7 Documentation Protocol
+
 1. Always use `resolve-library-id` before `get-library-docs` unless provided with explicit `/org/project` format
 2. Valid library IDs:
    - Deno runtime: `/denoland/doc`
