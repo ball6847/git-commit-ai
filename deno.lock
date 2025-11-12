@@ -22,6 +22,7 @@
     "npm:@ai-sdk/cerebras@^1.0.30": "1.0.31_zod@4.1.12",
     "npm:@ai-sdk/openai-compatible@^1.0.26": "1.0.27_zod@4.1.12",
     "npm:@ai-sdk/provider@2": "2.0.0",
+    "npm:@openrouter/ai-sdk-provider@^1.2.1": "1.2.1_ai@5.0.92__zod@4.1.12_zod@4.1.12",
     "npm:@types/node@*": "22.15.15",
     "npm:ai@^5.0.90": "5.0.92_zod@4.1.12",
     "npm:mkdirp@*": "3.0.1",
@@ -202,6 +203,13 @@
       "integrity": "sha512-4KCo8hMZXMjpTzs3HOqOGYYwAXymXIy7PEPAXNEcEOyKqkjiDlECumrWziy+JEF0Oi4ILHGxzgQ3YiMGG2t/Lg==",
       "os": ["win32"],
       "cpu": ["x64"]
+    },
+    "@openrouter/ai-sdk-provider@1.2.1_ai@5.0.92__zod@4.1.12_zod@4.1.12": {
+      "integrity": "sha512-sDc+/tlEM9VTsYlZ3YMwD9AHinSNusdLFGQhtb50eo5r68U/yBixEHRsKEevqSspiX3V6J06hU7C25t4KE9iag==",
+      "dependencies": [
+        "ai",
+        "zod"
+      ]
     },
     "@opentelemetry/api@1.9.0": {
       "integrity": "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="
@@ -450,6 +458,7 @@
       "npm:@ai-sdk/cerebras@^1.0.30",
       "npm:@ai-sdk/openai-compatible@^1.0.26",
       "npm:@ai-sdk/provider@2",
+      "npm:@openrouter/ai-sdk-provider@^1.2.1",
       "npm:ai@^5.0.90",
       "npm:typescript-result@^3.5.2"
     ]

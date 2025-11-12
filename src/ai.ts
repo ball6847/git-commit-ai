@@ -1,32 +1,35 @@
-import { blue, green, white, yellow } from '@std/fmt/colors';
-import { generateText } from 'ai';
-import { getModelKeys, getModels } from './providers/index.ts';
-import type { AIConfig, ChangeSummary, ConventionalCommitType } from './types.ts';
+import { blue, green, white, yellow } from "@std/fmt/colors";
+import { generateText } from "ai";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { getModels } from "./providers/index.ts";
+import type {
+  AIConfig,
+  ChangeSummary,
+  ConventionalCommitType,
+} from "./types.ts";
 
 /**
- * Initialize AI configuration using ai-sdk providers
+ * Get the language model for the given model name
  */
-export function initializeAI(model: string): AIConfig {
-  if (!model) {
-    throw new Error(
-      'Model is required. Please set MODEL in your .env file or use --model flag.',
-    );
+function getLanguageModel(modelName: string) {
+  // OpenRouter requires special handling because it's a dynamic model provider
+  // that doesn't need static model registration like other providers
+  if (modelName.startsWith("openrouter/")) {
+    const openrouter = createOpenRouter({
+      apiKey: Deno.env.get("OPENROUTER_API_KEY") || "",
+    });
+    const actualModelName = modelName.replace("openrouter/", "");
+    return openrouter(actualModelName);
   }
 
-  // Check if the model exists in our available models
-  const modelKeys = getModelKeys();
-  if (!modelKeys.includes(model as any)) {
-    const availableModels = modelKeys.join(', ');
+  const models = getModels();
+  if (!models[modelName]) {
+    const availableModels = Object.keys(models).join(", ");
     throw new Error(
-      `Model "${model}" not found. Available models: ${availableModels}`,
+      `Model "${modelName}" not found. Available models: ${availableModels}`,
     );
   }
-
-  return {
-    model,
-    maxTokens: 200,
-    temperature: 0.3,
-  };
+  return models[modelName];
 }
 
 /**
@@ -37,6 +40,12 @@ export async function generateCommitMessage(
   gitDiff: string,
   changeSummary: ChangeSummary,
 ): Promise<string> {
+  if (!config.model) {
+    throw new Error(
+      "Model is required. Please set MODEL in your .env file or use --model flag.",
+    );
+  }
+
   const prompt = createCommitPrompt(gitDiff, changeSummary);
 
   try {
@@ -44,9 +53,10 @@ export async function generateCommitMessage(
       blue(`🤖 Analyzing changes with AI using model: ${config.model}...`),
     );
 
-    const models = getModels();
+    const languageModel = getLanguageModel(config.model);
+
     const result = await generateText({
-      model: models[config.model],
+      model: languageModel,
       system: getSystemPrompt(),
       prompt: prompt,
       temperature: config.temperature,
@@ -55,13 +65,13 @@ export async function generateCommitMessage(
     const commitMessage = result.text.trim();
 
     // Remove quotes if present
-    const cleanMessage = commitMessage.replace(/^["']|["']$/g, '');
+    const cleanMessage = commitMessage.replace(/^["']|["']$/g, "");
 
     // Validate the commit message format
     if (!isValidConventionalCommit(cleanMessage)) {
       console.log(
         yellow(
-          '⚠️  Generated message may not follow conventional commit format perfectly.',
+          "⚠️  Generated message may not follow conventional commit format perfectly.",
         ),
       );
     }
@@ -71,7 +81,7 @@ export async function generateCommitMessage(
     if (error instanceof Error) {
       throw new Error(`Failed to generate commit message: ${error.message}`);
     }
-    throw new Error('Unknown error occurred during AI generation');
+    throw new Error("Unknown error occurred during AI generation");
   }
 }
 
@@ -84,9 +94,9 @@ function createCommitPrompt(
 ): string {
   const filesList = changeSummary.files
     .map((f) => `- ${f.filename} (${f.statusDescription})`)
-    .join('\n');
+    .join("\n");
 
-  let diffSection = '';
+  let diffSection = "";
   if (gitDiff) {
     diffSection = `<git-commit-ai-diff>
 ${gitDiff}
@@ -176,7 +186,7 @@ export function parseConventionalCommit(message: string): {
  * Display the generated commit message with formatting
  */
 export function displayCommitMessage(commitMessage: string): void {
-  console.log(green('\n✨ Generated Commit Message:'));
+  console.log(green("\n✨ Generated Commit Message:"));
   console.log(white(`"${commitMessage}"`));
   console.log();
 }

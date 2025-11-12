@@ -4,9 +4,9 @@ import { Command } from '@cliffy/command';
 import { Confirm, Input } from '@cliffy/prompt';
 import { load } from '@std/dotenv';
 import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
-import { displayCommitMessage, generateCommitMessage, initializeAI } from './ai.ts';
+import { displayCommitMessage, generateCommitMessage } from './ai.ts';
 import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from './git.ts';
-import type { CLIOptions } from './types.ts';
+import type { AIConfig, CLIOptions } from './types.ts';
 import { getModelKeys } from './providers/index.ts';
 
 // Load environment variables
@@ -14,6 +14,8 @@ await load({ export: true });
 
 const VERSION = '0.1.0';
 const DEFAULT_MODEL = 'cerebras/zai-glm-4.6';
+const DEFAULT_MAX_TOKENS = 200;
+const DEFAULT_TEMPERATURE = 0.3;
 
 /**
  * Setup signal handlers for graceful cancellation
@@ -163,18 +165,12 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       Deno.exit(1);
     }
 
-    // Initialize AI
-    let aiConfig;
-    try {
-      aiConfig = initializeAI(options.model);
-    } catch (error) {
-      console.log(
-        red(
-          `❌ AI Initialization Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        ),
-      );
-      Deno.exit(1);
-    }
+    // Initialize AI config
+    const aiConfig: AIConfig = {
+      model: options.model,
+      maxTokens: options.maxTokens || DEFAULT_MAX_TOKENS,
+      temperature: options.temperature || DEFAULT_TEMPERATURE,
+    };
 
     // Generate commit message
     let commitMessage: string;
@@ -291,6 +287,12 @@ const cli = new Command()
   .option('-m, --model <model:string>', 'AI model to use (overrides GIT_COMMIT_AI_MODEL)', {
     default: Deno.env.get('GIT_COMMIT_AI_MODEL') || DEFAULT_MODEL,
   })
+  .option('--max-tokens <maxTokens:number>', 'Maximum tokens for AI response', {
+    default: Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')) || DEFAULT_MAX_TOKENS,
+  })
+  .option('--temperature <temperature:number>', 'AI temperature (0.0-1.0)', {
+    default: Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')) || DEFAULT_TEMPERATURE,
+  })
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')
   .option('-y, --yes', 'Auto-accept generated message without prompting')
@@ -306,6 +308,12 @@ cli.command('generate', 'Generate a conventional commit message for staged chang
   .alias('g')
   .option('-m, --model <model:string>', 'AI model to use (overrides GIT_COMMIT_AI_MODEL)', {
     default: Deno.env.get('GIT_COMMIT_AI_MODEL') || DEFAULT_MODEL,
+  })
+  .option('--max-tokens <maxTokens:number>', 'Maximum tokens for AI response', {
+    default: Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')) || DEFAULT_MAX_TOKENS,
+  })
+  .option('--temperature <temperature:number>', 'AI temperature (0.0-1.0)', {
+    default: Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')) || DEFAULT_TEMPERATURE,
   })
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')

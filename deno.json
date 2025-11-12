@@ -22,6 +22,7 @@
     "@ai-sdk/provider": "npm:@ai-sdk/provider@^2.0.0",
     "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.8",
     "@cliffy/prompt": "jsr:@cliffy/prompt@^1.0.0-rc.8",
+    "@openrouter/ai-sdk-provider": "npm:@openrouter/ai-sdk-provider@^1.2.1",
     "@std/fmt/colors": "jsr:@std/fmt@^1.0.8/colors",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
     "@std/path": "jsr:@std/path@^1.1.1",
