@@ -36864,7 +36864,7 @@ function displayChangeSummary(summary) {
 await load({
   export: true
 });
-var VERSION7 = "0.0.2";
+var VERSION7 = "0.1.0";
 var DEFAULT_MODEL = "cerebras/zai-glm-4.6";
 function setupSignalHandlers() {
   let ctrlCCount = 0;

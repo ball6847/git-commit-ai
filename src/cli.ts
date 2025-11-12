@@ -12,7 +12,7 @@ import { getModelKeys } from './providers/index.ts';
 // Load environment variables
 await load({ export: true });
 
-const VERSION = '0.0.2';
+const VERSION = '0.1.0';
 const DEFAULT_MODEL = 'cerebras/zai-glm-4.6';
 
 /**
