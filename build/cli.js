@@ -44090,7 +44090,7 @@ function handleVersion() {
 await load({
   export: true
 });
-var VERSION10 = "0.1.0";
+var VERSION10 = "0.1.1";
 var cli = new Command().name("git-commit-ai").version(VERSION10).description("AI-powered git commit message generator using conventional commit guidelines");
 cli.command("generate", "Generate a conventional commit message for staged changes").alias("gen").alias("g").option("-m, --model <model:string>", "AI model to use").option("--max-tokens <maxTokens:number>", "Maximum tokens for AI response").option("--temperature <temperature:number>", "AI temperature (0.0-1.0)").option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").option("-y, --yes", "Auto-accept generated message without prompting").option("-p, --push", "Push changes to remote after commit").action(handleGenerate);
 cli.command("version", "Show version information").alias("v").action(handleVersion);
