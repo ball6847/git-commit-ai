@@ -78,6 +78,7 @@ deno task install
 ### Commands
 
 #### `generate` (or `gen`)
+
 Generate a conventional commit message for staged changes:
 
 ```bash
@@ -95,6 +96,7 @@ git-commit-ai generate --debug
 ```
 
 #### `status`
+
 Show current git status and staged changes:
 
 ```bash
@@ -186,6 +188,7 @@ The project uses `deno.json` for configuration:
 ### Permissions
 
 This app requires the following Deno permissions:
+
 - `--allow-run`: Execute git commands
 - `--allow-env`: Read environment variables
 - `--allow-read`: Read .env files
@@ -216,21 +219,25 @@ git-commit-ai/
 ## Development
 
 ### Type Checking
+
 ```bash
 deno check src/cli.ts
 ```
 
 ### Linting
+
 ```bash
 deno lint
 ```
 
 ### Formatting
+
 ```bash
 deno fmt
 ```
 
 ### Running Tests
+
 ```bash
 deno test --allow-run --allow-env --allow-read
 ```
@@ -240,24 +247,29 @@ deno test --allow-run --allow-env --allow-read
 ### Common Issues
 
 **"Not in a git repository"**
+
 - Make sure you're in a git repository directory
 - Run `git init` if needed
 
 **"No staged changes found"**
+
 - Stage your changes first: `git add <files>`
 - Check status: `git status`
 
 **"OPENROUTER_API_KEY not found"**
+
 - Copy `.env.example` to `.env`
 - Add your OpenRouter API key
 
 **"Permission denied"**
+
 - Ensure you're running with proper Deno permissions:
   ```bash
   deno run --allow-run --allow-env --allow-read src/cli.ts
   ```
 
 **"Failed to generate commit message"**
+
 - Check your internet connection
 - Verify your API key is correct
 - Try again in a few moments

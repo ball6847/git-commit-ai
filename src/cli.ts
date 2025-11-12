@@ -7,12 +7,13 @@ import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { displayCommitMessage, generateCommitMessage, initializeAI } from './ai.ts';
 import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from './git.ts';
 import type { CLIOptions } from './types.ts';
+import { getModelKeys } from './providers/index.ts';
 
 // Load environment variables
 await load({ export: true });
 
 const VERSION = '0.0.2';
-const DEFAULT_MODEL = 'mistralai/mistral-7b-instruct:free';
+const DEFAULT_MODEL = 'cerebras/zai-glm-4.6';
 
 /**
  * Setup signal handlers for graceful cancellation
@@ -129,14 +130,6 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       Deno.exit(1);
     }
 
-    // Check for API key
-    const apiKey = Deno.env.get('OPENROUTER_API_KEY');
-    if (!apiKey) {
-      console.log(red('❌ Error: OPENROUTER_API_KEY not found.'));
-      console.log(yellow('Please copy .env.example to .env and add your OpenRouter API key.'));
-      Deno.exit(1);
-    }
-
     // Get staged changes
     let diff = '';
     let changeSummary;
@@ -173,7 +166,7 @@ async function generateHandler(options: CLIOptions): Promise<void> {
     // Initialize AI
     let aiConfig;
     try {
-      aiConfig = initializeAI(apiKey, options.model);
+      aiConfig = initializeAI(options.model);
     } catch (error) {
       console.log(
         red(
@@ -238,6 +231,31 @@ async function generateHandler(options: CLIOptions): Promise<void> {
 }
 
 /**
+ * Model command handler
+ */
+function modelHandler(): void {
+  console.log(cyan(bold('\n🤖 Available AI Models\n')));
+
+  const modelKeys = getModelKeys();
+  if (modelKeys.length < 1) {
+    console.log(yellow('No models configured.'));
+    return;
+  }
+
+  console.log(green('Supported model keys:'));
+  modelKeys.forEach((key: string, index: number) => {
+    console.log(`  ${index + 1}. ${key}`);
+  });
+
+  console.log();
+  console.log(yellow('Usage:'));
+  console.log('  Set environment variable: export GIT_COMMIT_AI_MODEL=<model-key>');
+  console.log('  Or use command line option: git-commit-ai generate --model <model-key>');
+  console.log();
+  console.log(blue(`Current model: ${Deno.env.get('GIT_COMMIT_AI_MODEL') || DEFAULT_MODEL}`));
+}
+
+/**
  * Status command handler
  */
 function statusHandler(): void {
@@ -270,29 +288,43 @@ const cli = new Command()
   .name('git-commit-ai')
   .version(VERSION)
   .description('AI-powered git commit message generator using conventional commit guidelines')
-  .default('generate');
+  .option('-m, --model <model:string>', 'AI model to use (overrides GIT_COMMIT_AI_MODEL)', {
+    default: Deno.env.get('GIT_COMMIT_AI_MODEL') || DEFAULT_MODEL,
+  })
+  .option('-d, --debug', 'Enable debug output')
+  .option('--dry-run', 'Generate message without committing')
+  .option('-y, --yes', 'Auto-accept generated message without prompting')
+  .option('-p, --push', 'Push changes to remote after commit')
+  .default('generate')
+  .action(async (options: CLIOptions) => {
+    await generateHandler(options);
+  });
 
 // Generate command
 cli.command('generate', 'Generate a conventional commit message for staged changes')
   .alias('gen')
   .alias('g')
-  .option('-m, --model <model:string>', 'OpenRouter model to use (overrides OPENROUTER_MODEL)', {
-    default: Deno.env.get('OPENROUTER_MODEL') || DEFAULT_MODEL,
+  .option('-m, --model <model:string>', 'AI model to use (overrides GIT_COMMIT_AI_MODEL)', {
+    default: Deno.env.get('GIT_COMMIT_AI_MODEL') || DEFAULT_MODEL,
   })
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')
   .option('-y, --yes', 'Auto-accept generated message without prompting')
   .option('-p, --push', 'Push changes to remote after commit')
   .action(async (options: CLIOptions) => {
-    // Ensure the model option has a default value
-    if (!options.model) {
-      options.model = DEFAULT_MODEL;
-    }
     await generateHandler(options);
   });
 
+// Model command
+cli.command('model', 'List all available AI models')
+  .alias('m')
+  .action(() => {
+    modelHandler();
+  });
+
 // Status command
-cli.command('status', 'Show current git status and staged changes')
+cli
+  .command('status', 'Show current git status and staged changes')
   .alias('s')
   .action(() => {
     statusHandler();
@@ -303,7 +335,10 @@ if (import.meta.main) {
   try {
     await cli.parse(Deno.args);
   } catch (error) {
-    console.log(red('❌ CLI Error:'), error instanceof Error ? error.message : 'Unknown error');
+    console.log(
+      red('❌ CLI Error:'),
+      error instanceof Error ? error.message : 'Unknown error',
+    );
     Deno.exit(1);
   }
 }
