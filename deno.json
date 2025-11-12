@@ -18,6 +18,7 @@
   "imports": {
     "@ai-sdk/anthropic": "npm:@ai-sdk/anthropic@^2.0.43",
     "@ai-sdk/cerebras": "npm:@ai-sdk/cerebras@^1.0.30",
+    "@ai-sdk/openai": "npm:@ai-sdk/openai@^2.0.65",
     "@ai-sdk/openai-compatible": "npm:@ai-sdk/openai-compatible@^1.0.26",
     "@ai-sdk/provider": "npm:@ai-sdk/provider@^2.0.0",
     "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.8",

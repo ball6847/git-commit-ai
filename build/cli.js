@@ -35953,7 +35953,7 @@ var cerebras = createCerebras();
 
 // src/providers/cerebras.ts
 var providerId = "cerebras";
-function getCerebrasModels() {
+async function getCerebrasModels() {
   const cerebras2 = createCerebras({
     apiKey: Deno.env.get("CEREBRAS_API_KEY") || ""
   });
@@ -38970,7 +38970,7 @@ var anthropic = createAnthropic();
 
 // src/providers/kimi.ts
 var providerId2 = "kimi";
-function getKimiModels() {
+async function getKimiModels() {
   const kimi = createAnthropic({
     baseURL: "https://api.kimi.com/coding/v1",
     apiKey: Deno.env.get("KIMI_API_KEY") || ""
@@ -38982,7 +38982,7 @@ function getKimiModels() {
 
 // src/providers/ollama_cloud.ts
 var providerId3 = "ollama-cloud";
-function getOllamaCloudModels() {
+async function getOllamaCloudModels() {
   const ollamaCloud = createOpenAICompatible({
     name: providerId3,
     apiKey: Deno.env.get("OLLAMA_API_KEY") || "",
@@ -43528,7 +43528,7 @@ async function getOpenRouterModels() {
 
 // src/providers/vachin.ts
 var providerId5 = "vachin";
-function getVachinModels() {
+async function getVachinModels() {
   const endpoints = {
     "KAT-Coder-Pro": Deno.env.get("VC_KAT_CODER_PRO_ENDPOINT") || "",
     "KAT-Coder-Air": Deno.env.get("VC_KAT_CODER_AIR_ENDPOINT") || ""
@@ -43546,7 +43546,7 @@ function getVachinModels() {
 
 // src/providers/zai_coding_plan.ts
 var providerId6 = "zai-coding-plan";
-function getZaiCodingPlanModels() {
+async function getZaiCodingPlanModels() {
   const zai = createOpenAICompatible({
     name: providerId6,
     apiKey: Deno.env.get("ZAI_API_KEY") || "",
@@ -43581,7 +43581,7 @@ async function getModels() {
 }
 
 // src/ai.ts
-function getLanguageModel(modelName) {
+async function getLanguageModel(modelName) {
   if (modelName.startsWith("openrouter/")) {
     const openrouter2 = createOpenRouter({
       apiKey: Deno.env.get("OPENROUTER_API_KEY") || ""
@@ -43589,7 +43589,7 @@ function getLanguageModel(modelName) {
     const actualModelName = modelName.replace("openrouter/", "");
     return openrouter2(actualModelName);
   }
-  const models = getModels();
+  const models = await getModels();
   if (!models[modelName]) {
     const availableModels = Object.keys(models).join(", ");
     throw new Error(`Model "${modelName}" not found. Available models: ${availableModels}`);
@@ -43603,7 +43603,7 @@ async function generateCommitMessage(config2, gitDiff, changeSummary) {
   const prompt2 = createCommitPrompt(gitDiff, changeSummary);
   try {
     console.log(blue(`\u{1F916} Analyzing changes with AI using model: ${config2.model}...`));
-    const languageModel = getLanguageModel(config2.model);
+    const languageModel = await getLanguageModel(config2.model);
     const result = await generateText({
       model: languageModel,
       system: getSystemPrompt(),
