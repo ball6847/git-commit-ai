@@ -1,11 +1,7 @@
-import { blue, green, white, yellow } from "@std/fmt/colors";
-import { generateText } from "ai";
-import { models, modelKeys } from "./providers/index.ts";
-import type {
-  AIConfig,
-  ChangeSummary,
-  ConventionalCommitType,
-} from "./types.ts";
+import { blue, green, white, yellow } from '@std/fmt/colors';
+import { generateText } from 'ai';
+import { getModelKeys, getModels } from './providers/index.ts';
+import type { AIConfig, ChangeSummary, ConventionalCommitType } from './types.ts';
 
 /**
  * Initialize AI configuration using ai-sdk providers
@@ -13,13 +9,14 @@ import type {
 export function initializeAI(model: string): AIConfig {
   if (!model) {
     throw new Error(
-      "Model is required. Please set MODEL in your .env file or use --model flag.",
+      'Model is required. Please set MODEL in your .env file or use --model flag.',
     );
   }
 
   // Check if the model exists in our available models
-  if (!models[model]) {
-    const availableModels = modelKeys.join(", ");
+  const modelKeys = getModelKeys();
+  if (!modelKeys.includes(model as any)) {
+    const availableModels = modelKeys.join(', ');
     throw new Error(
       `Model "${model}" not found. Available models: ${availableModels}`,
     );
@@ -43,8 +40,11 @@ export async function generateCommitMessage(
   const prompt = createCommitPrompt(gitDiff, changeSummary);
 
   try {
-    console.log(blue("🤖 Analyzing changes with AI..."));
+    console.log(
+      blue(`🤖 Analyzing changes with AI using model: ${config.model}...`),
+    );
 
+    const models = getModels();
     const result = await generateText({
       model: models[config.model],
       system: getSystemPrompt(),
@@ -55,13 +55,13 @@ export async function generateCommitMessage(
     const commitMessage = result.text.trim();
 
     // Remove quotes if present
-    const cleanMessage = commitMessage.replace(/^["']|["']$/g, "");
+    const cleanMessage = commitMessage.replace(/^["']|["']$/g, '');
 
     // Validate the commit message format
     if (!isValidConventionalCommit(cleanMessage)) {
       console.log(
         yellow(
-          "⚠️  Generated message may not follow conventional commit format perfectly.",
+          '⚠️  Generated message may not follow conventional commit format perfectly.',
         ),
       );
     }
@@ -71,7 +71,7 @@ export async function generateCommitMessage(
     if (error instanceof Error) {
       throw new Error(`Failed to generate commit message: ${error.message}`);
     }
-    throw new Error("Unknown error occurred during AI generation");
+    throw new Error('Unknown error occurred during AI generation');
   }
 }
 
@@ -84,9 +84,9 @@ function createCommitPrompt(
 ): string {
   const filesList = changeSummary.files
     .map((f) => `- ${f.filename} (${f.statusDescription})`)
-    .join("\n");
+    .join('\n');
 
-  let diffSection = "";
+  let diffSection = '';
   if (gitDiff) {
     diffSection = `<git-commit-ai-diff>
 ${gitDiff}
@@ -176,7 +176,7 @@ export function parseConventionalCommit(message: string): {
  * Display the generated commit message with formatting
  */
 export function displayCommitMessage(commitMessage: string): void {
-  console.log(green("\n✨ Generated Commit Message:"));
+  console.log(green('\n✨ Generated Commit Message:'));
   console.log(white(`"${commitMessage}"`));
   console.log();
 }

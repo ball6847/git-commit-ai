@@ -1,17 +1,22 @@
 import type { ModelRecord } from '../types.ts';
-import { cerebrasModels } from './cerebras.ts';
-import { kimiModels } from './kimi.ts';
-import { ollamaCloudModels } from './ollama_cloud.ts';
-import { vachinModels } from './vachin.ts';
-import { zaiCodingPlanModels } from './zai_coding_plan.ts';
+import { getCerebrasModels } from './cerebras.ts';
+import { getKimiModels } from './kimi.ts';
+import { getOllamaCloudModels } from './ollama_cloud.ts';
+import { getVachinModels } from './vachin.ts';
+import { getZaiCodingPlanModels } from './zai_coding_plan.ts';
 
-export const models: ModelRecord = {
-  ...cerebrasModels,
-  ...kimiModels,
-  ...ollamaCloudModels,
-  ...vachinModels,
-  ...zaiCodingPlanModels,
-};
+// Lazy-load models only when needed
+export function getModels(): ModelRecord {
+  return {
+    ...getCerebrasModels(),
+    ...getKimiModels(),
+    ...getOllamaCloudModels(),
+    ...getVachinModels(),
+    ...getZaiCodingPlanModels(),
+  };
+}
 
-// Export just the model keys for listing without initializing providers
-export const modelKeys = Object.keys(models) as Array<keyof typeof models>;
+// Export available model keys dynamically without initializing providers
+export function getModelKeys(): string[] {
+  return Object.keys(getModels());
+}

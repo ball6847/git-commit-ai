@@ -5,18 +5,20 @@ import type { ModelRecord } from '../types.ts';
 
 const providerId = 'vachin';
 
-const endpoints = {
-  'KAT-Coder-Pro': Deno.env.get('VC_KAT_CODER_PRO_ENDPOINT') || '',
-  'KAT-Coder-Air': Deno.env.get('VC_KAT_CODER_AIR_ENDPOINT') || '',
-};
+export function getVachinModels(): ModelRecord {
+  const endpoints = {
+    'KAT-Coder-Pro': Deno.env.get('VC_KAT_CODER_PRO_ENDPOINT') || '',
+    'KAT-Coder-Air': Deno.env.get('VC_KAT_CODER_AIR_ENDPOINT') || '',
+  };
 
-const vachin = createOpenAICompatible({
-  name: providerId,
-  baseURL: 'https://vanchin.streamlake.ai/api/gateway/v1/endpoints',
-  apiKey: Deno.env.get('VC_API_KEY') || '',
-});
+  const vachin = createOpenAICompatible({
+    name: providerId,
+    baseURL: 'https://vanchin.streamlake.ai/api/gateway/v1/endpoints',
+    apiKey: Deno.env.get('VC_API_KEY') || '',
+  });
 
-export const vachinModels: ModelRecord = {
-  [`${providerId}/kat-coder-pro`]: vachin(endpoints['KAT-Coder-Pro']),
-  [`${providerId}/kat-coder-air`]: vachin(endpoints['KAT-Coder-Air']),
-};
+  return {
+    [`${providerId}/kat-coder-pro`]: vachin(endpoints['KAT-Coder-Pro']),
+    [`${providerId}/kat-coder-air`]: vachin(endpoints['KAT-Coder-Air']),
+  };
+}

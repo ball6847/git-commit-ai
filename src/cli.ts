@@ -7,13 +7,13 @@ import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { displayCommitMessage, generateCommitMessage, initializeAI } from './ai.ts';
 import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from './git.ts';
 import type { CLIOptions } from './types.ts';
-import { modelKeys } from './providers/index.ts';
+import { getModelKeys } from './providers/index.ts';
 
 // Load environment variables
 await load({ export: true });
 
 const VERSION = '0.0.2';
-const DEFAULT_MODEL = 'cerebras/llama-3.1-70b';
+const DEFAULT_MODEL = 'cerebras/zai-glm-4.6';
 
 /**
  * Setup signal handlers for graceful cancellation
@@ -236,13 +236,14 @@ async function generateHandler(options: CLIOptions): Promise<void> {
 function modelHandler(): void {
   console.log(cyan(bold('\n🤖 Available AI Models\n')));
 
+  const modelKeys = getModelKeys();
   if (modelKeys.length < 1) {
     console.log(yellow('No models configured.'));
     return;
   }
 
   console.log(green('Supported model keys:'));
-  modelKeys.forEach((key, index) => {
+  modelKeys.forEach((key: string, index: number) => {
     console.log(`  ${index + 1}. ${key}`);
   });
 
