@@ -288,7 +288,17 @@ const cli = new Command()
   .name('git-commit-ai')
   .version(VERSION)
   .description('AI-powered git commit message generator using conventional commit guidelines')
-  .default('generate');
+  .option('-m, --model <model:string>', 'AI model to use (overrides GIT_COMMIT_AI_MODEL)', {
+    default: Deno.env.get('GIT_COMMIT_AI_MODEL') || DEFAULT_MODEL,
+  })
+  .option('-d, --debug', 'Enable debug output')
+  .option('--dry-run', 'Generate message without committing')
+  .option('-y, --yes', 'Auto-accept generated message without prompting')
+  .option('-p, --push', 'Push changes to remote after commit')
+  .default('generate')
+  .action(async (options: CLIOptions) => {
+    await generateHandler(options);
+  });
 
 // Generate command
 cli.command('generate', 'Generate a conventional commit message for staged changes')
@@ -302,10 +312,6 @@ cli.command('generate', 'Generate a conventional commit message for staged chang
   .option('-y, --yes', 'Auto-accept generated message without prompting')
   .option('-p, --push', 'Push changes to remote after commit')
   .action(async (options: CLIOptions) => {
-    // Ensure the model option has a default value
-    if (!options.model) {
-      options.model = DEFAULT_MODEL;
-    }
     await generateHandler(options);
   });
 
