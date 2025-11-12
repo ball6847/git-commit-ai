@@ -8,7 +8,7 @@
     "generate": "deno run --allow-run --allow-env --allow-read --allow-net src/cli.ts generate",
     "status": "deno run --allow-run --allow-env --allow-read src/cli.ts status",
     "install": "deno task build && deno install -f --global --allow-run --allow-env --allow-read --allow-net --name git-commit-ai build/cli.js",
-    "install-remote": "deno install -f --global --allow-run --allow-env --allow-read --allow-net --name git-commit-ai https://cdn.jsdelivr.net/gh/ball6847/git-commit-ai@v0.1.1/src/cli.ts",
+    "install-remote": "deno install -f --global --allow-run --allow-env --allow-read --allow-net --name git-commit-ai https://cdn.jsdelivr.net/gh/ball6847/git-commit-ai@v0.1.1/build/cli.js",
     "test": "deno test --allow-run --allow-env --allow-read",
     "check": "deno check src/cli.ts",
     "lint": "deno lint",
