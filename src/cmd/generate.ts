@@ -71,10 +71,10 @@ export async function handleGenerate(options: GenerateOptions) {
       console.log();
     }
 
-    if (!options.model) {
+    if (!options.model && !Deno.env.get("GIT_COMMIT_AI_MODEL")) {
       console.log(
         red(
-          "❌ Error: No model specified. Please provide a model using the --model option.",
+          "❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.",
         ),
       );
       Deno.exit(1);
@@ -82,9 +82,15 @@ export async function handleGenerate(options: GenerateOptions) {
 
     // Initialize AI config
     const aiConfig: AIConfig = {
-      model: options.model,
-      maxTokens: options.maxTokens || DEFAULT_MAX_TOKENS,
-      temperature: options.temperature || DEFAULT_TEMPERATURE,
+      model: options.model || Deno.env.get("GIT_COMMIT_AI_MODEL")!,
+      maxTokens:
+        options.maxTokens ||
+        Number(Deno.env.get("GIT_COMMIT_AI_MAX_TOKENS")) ||
+        DEFAULT_MAX_TOKENS,
+      temperature:
+        options.temperature ||
+        Number(Deno.env.get("GIT_COMMIT_AI_TEMPERATURE")) ||
+        DEFAULT_TEMPERATURE,
     };
 
     // Generate commit message
@@ -262,4 +268,3 @@ function commitChanges(commitMessage: string): void {
     Deno.exit(1);
   }
 }
-

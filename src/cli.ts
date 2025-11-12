@@ -52,8 +52,8 @@ cli
   .alias("c")
   .option("-m, --model <model:string>", "AI model to use")
   .option("-p, --provider <provider:string>", "AI provider to use")
-  .option("--staged", "Only commit staged changes")
-  .option("-a, --all", "Stage all changes before committing")
+  .option("--staged", "Only commit staged changes (default: stage all)")
+  .option("-d, --debug", "Enable debug output")
   .action(handleCommit);
 
 // Add model command

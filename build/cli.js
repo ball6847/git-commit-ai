@@ -39239,14 +39239,14 @@ async function handleGenerate(options) {
       console.log(yellow(`Debug: Using model: ${options.model}`));
       console.log();
     }
-    if (!options.model) {
-      console.log(red("\u274C Error: No model specified. Please provide a model using the --model option."));
+    if (!options.model && !Deno.env.get("GIT_COMMIT_AI_MODEL")) {
+      console.log(red("\u274C Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable."));
       Deno.exit(1);
     }
     const aiConfig = {
-      model: options.model,
-      maxTokens: options.maxTokens || DEFAULT_MAX_TOKENS,
-      temperature: options.temperature || DEFAULT_TEMPERATURE
+      model: options.model || Deno.env.get("GIT_COMMIT_AI_MODEL"),
+      maxTokens: options.maxTokens || Number(Deno.env.get("GIT_COMMIT_AI_MAX_TOKENS")) || DEFAULT_MAX_TOKENS,
+      temperature: options.temperature || Number(Deno.env.get("GIT_COMMIT_AI_TEMPERATURE")) || DEFAULT_TEMPERATURE
     };
     let commitMessage;
     try {
@@ -39364,40 +39364,83 @@ function commitChanges(commitMessage) {
 }
 
 // src/cmd/commit.ts
+var DEFAULT_MAX_TOKENS2 = 200;
+var DEFAULT_TEMPERATURE2 = 0.3;
 async function handleCommit(options) {
   try {
+    console.log(cyan(bold("\n\u{1F680} Git Commit AI - Quick Commit\n")));
+    if (!isGitRepository()) {
+      console.log(red("\u274C Error: Not in a git repository."));
+      Deno.exit(1);
+    }
+    if (!options.model && !Deno.env.get("GIT_COMMIT_AI_MODEL")) {
+      console.log(red("\u274C Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable."));
+      Deno.exit(1);
+    }
     const config2 = {
-      model: options.model || Deno.env.get("GIT_COMMIT_AI_MODEL") || "gpt-4",
-      maxTokens: 1e3,
-      temperature: 0.7
+      model: options.model || Deno.env.get("GIT_COMMIT_AI_MODEL"),
+      maxTokens: options.maxTokens || Number(Deno.env.get("GIT_COMMIT_AI_MAX_TOKENS")) || DEFAULT_MAX_TOKENS2,
+      temperature: options.temperature || Number(Deno.env.get("GIT_COMMIT_AI_TEMPERATURE")) || DEFAULT_TEMPERATURE2
     };
-    if (options.all) {
-      await new Deno.Command("git", {
+    if (!options.staged) {
+      console.log(cyan("\u{1F4DD} Staging all changes..."));
+      const { success: success3 } = await new Deno.Command("git", {
         args: [
           "add",
           "."
-        ]
+        ],
+        stdout: "inherit",
+        stderr: "inherit"
       }).output();
+      if (!success3) {
+        console.log(red("\u274C Failed to stage changes"));
+        Deno.exit(1);
+      }
     }
-    const diff = getStagedDiff();
-    const changeSummary = getChangeSummary();
+    let diff = "";
+    let changeSummary;
+    try {
+      changeSummary = getChangeSummary();
+      if (!changeSummary.allDeletions) {
+        diff = getStagedDiff();
+      }
+    } catch (error46) {
+      console.log(red(`\u274C ${error46 instanceof Error ? error46.message : "Unknown error"}`));
+      if (error46 instanceof Error && error46.message.includes("No staged changes")) {
+        console.log(cyan('\u{1F4A1} Tip: Use "git add <files>" to stage your changes first.'));
+      }
+      Deno.exit(1);
+    }
     if (!diff.trim()) {
-      console.log("No changes to commit.");
+      console.log(cyan("No changes to commit."));
       return;
     }
-    console.log("Generating commit message...");
+    if (options.debug) {
+      console.log(cyan("Debug: Git diff preview:"));
+      console.log(cyan(diff.substring(0, 500) + "..."));
+      console.log(cyan(`Debug: Using model: ${options.model}`));
+      console.log();
+    }
+    console.log(cyan("Generating commit message..."));
     const commitMessage = await generateCommitMessage(config2, diff, changeSummary);
     console.log(`
 ${commitMessage}
 `);
-    await new Deno.Command("git", {
+    const { success: success2 } = await new Deno.Command("git", {
       args: [
         "commit",
         "-m",
         commitMessage
-      ]
+      ],
+      stdout: "inherit",
+      stderr: "inherit"
     }).output();
-    console.log("Changes committed successfully!");
+    if (success2) {
+      console.log(cyan("\u2705 Changes committed successfully!"));
+    } else {
+      console.log(red("\u274C Commit failed"));
+      Deno.exit(1);
+    }
   } catch (error46) {
     console.error("Error:", error46 instanceof Error ? error46.message : "Unknown error");
     Deno.exit(1);
@@ -39461,7 +39504,7 @@ var VERSION9 = "0.1.0";
 var cli = new Command().name("git-commit-ai").version(VERSION9).description("AI-powered git commit message generator using conventional commit guidelines");
 cli.command("generate", "Generate a conventional commit message for staged changes").alias("gen").alias("g").option("-m, --model <model:string>", "AI model to use").option("--max-tokens <maxTokens:number>", "Maximum tokens for AI response").option("--temperature <temperature:number>", "AI temperature (0.0-1.0)").option("-d, --debug", "Enable debug output").option("--dry-run", "Generate message without committing").option("-y, --yes", "Auto-accept generated message without prompting").option("-p, --push", "Push changes to remote after commit").action(handleGenerate);
 cli.command("version", "Show version information").alias("v").action(handleVersion);
-cli.command("commit", "Generate and commit changes with AI").alias("c").option("-m, --model <model:string>", "AI model to use").option("-p, --provider <provider:string>", "AI provider to use").option("--staged", "Only commit staged changes").option("-a, --all", "Stage all changes before committing").action(handleCommit);
+cli.command("commit", "Generate and commit changes with AI").alias("c").option("-m, --model <model:string>", "AI model to use").option("-p, --provider <provider:string>", "AI provider to use").option("--staged", "Only commit staged changes (default: stage all)").option("-d, --debug", "Enable debug output").action(handleCommit);
 cli.command("model", "List all available AI models").alias("m").action(handleModel);
 cli.command("status", "Show current git status and staged changes").alias("s").action(handleStatus);
 if (import.meta.main) {
