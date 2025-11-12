@@ -18,7 +18,7 @@ Choose appropriate version bump based on changes:
 
 ### 2. Update Version in Source Files
 
-**Update the version constant in `src/cli.ts`:**
+**Update the version constant in `src/cmd/version.ts`:**
 
 - Locate the `VERSION` constant definition
 - Update it to the new version number
@@ -50,7 +50,7 @@ This will:
 
 ```bash
 # Check that version was updated in the source file
-grep 'const VERSION' src/cli.ts
+grep 'const VERSION' src/cmd/version.ts
 
 # Check that documentation references are updated
 grep 'workspace-manager@v' README.md
@@ -72,7 +72,7 @@ deno run --allow-all build/cli.js --version
 
 ```bash
 # Stage the changed files
-git add src/cli.ts README.md build/cli.js
+git add src/cmd/version.ts README.md build/cli.js
 
 # Create a descriptive commit message
 git commit -m "chore: bump version to [NEW_VERSION]"
