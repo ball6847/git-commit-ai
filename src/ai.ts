@@ -1,39 +1,39 @@
-import { blue, green, white, yellow } from '@std/fmt/colors';
+import { blue, green, white, yellow } from "@std/fmt/colors";
+import { generateText } from "ai";
+import { models, modelKeys } from "./providers/index.ts";
 import type {
   AIConfig,
   ChangeSummary,
   ConventionalCommitType,
-  OpenRouterRequest,
-  OpenRouterResponse,
-} from './types.ts';
+} from "./types.ts";
 
 /**
- * Initialize AI configuration for OpenRouter
+ * Initialize AI configuration using ai-sdk providers
  */
-export function initializeAI(apiKey: string, model: string): AIConfig {
-  if (!apiKey) {
+export function initializeAI(model: string): AIConfig {
+  if (!model) {
     throw new Error(
-      'OpenRouter API key is required. Please set OPENROUTER_API_KEY in your .env file.',
+      "Model is required. Please set MODEL in your .env file or use --model flag.",
     );
   }
 
-  if (!model) {
+  // Check if the model exists in our available models
+  if (!models[model]) {
+    const availableModels = modelKeys.join(", ");
     throw new Error(
-      'Model is required. Please set OPENROUTER_MODEL in your .env file or use --model flag.',
+      `Model "${model}" not found. Available models: ${availableModels}`,
     );
   }
 
   return {
-    apiKey,
     model,
-    baseURL: 'https://openrouter.ai/api/v1',
     maxTokens: 200,
     temperature: 0.3,
   };
 }
 
 /**
- * Generate a conventional commit message from git diff using OpenRouter API
+ * Generate a conventional commit message from git diff using ai-sdk
  */
 export async function generateCommitMessage(
   config: AIConfig,
@@ -43,55 +43,26 @@ export async function generateCommitMessage(
   const prompt = createCommitPrompt(gitDiff, changeSummary);
 
   try {
-    console.log(blue('🤖 Analyzing changes with AI...'));
+    console.log(blue("🤖 Analyzing changes with AI..."));
 
-    const requestBody: OpenRouterRequest = {
-      model: config.model,
-      messages: [
-        {
-          role: 'system',
-          content: getSystemPrompt(),
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      max_tokens: config.maxTokens,
+    const result = await generateText({
+      model: models[config.model],
+      system: getSystemPrompt(),
+      prompt: prompt,
       temperature: config.temperature,
-    };
-
-    const response = await fetch(`${config.baseURL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${config.apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://github.com/ball6/git-commit-ai',
-        'X-Title': 'Git Commit AI',
-      },
-      body: JSON.stringify(requestBody),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`OpenRouter API error (${response.status}): ${errorText}`);
-    }
-
-    const data: OpenRouterResponse = await response.json();
-
-    if (!data.choices || data.choices.length === 0) {
-      throw new Error('No response generated from AI model');
-    }
-
-    const commitMessage = data.choices[0].message.content.trim();
+    const commitMessage = result.text.trim();
 
     // Remove quotes if present
-    const cleanMessage = commitMessage.replace(/^["']|["']$/g, '');
+    const cleanMessage = commitMessage.replace(/^["']|["']$/g, "");
 
     // Validate the commit message format
     if (!isValidConventionalCommit(cleanMessage)) {
       console.log(
-        yellow('⚠️  Generated message may not follow conventional commit format perfectly.'),
+        yellow(
+          "⚠️  Generated message may not follow conventional commit format perfectly.",
+        ),
       );
     }
 
@@ -100,19 +71,22 @@ export async function generateCommitMessage(
     if (error instanceof Error) {
       throw new Error(`Failed to generate commit message: ${error.message}`);
     }
-    throw new Error('Unknown error occurred during AI generation');
+    throw new Error("Unknown error occurred during AI generation");
   }
 }
 
 /**
  * Create the prompt for commit message generation
  */
-function createCommitPrompt(gitDiff: string, changeSummary: ChangeSummary): string {
-  const filesList = changeSummary.files.map((f) => `- ${f.filename} (${f.statusDescription})`).join(
-    '\n',
-  );
+function createCommitPrompt(
+  gitDiff: string,
+  changeSummary: ChangeSummary,
+): string {
+  const filesList = changeSummary.files
+    .map((f) => `- ${f.filename} (${f.statusDescription})`)
+    .join("\n");
 
-  let diffSection = '';
+  let diffSection = "";
   if (gitDiff) {
     diffSection = `<git-commit-ai-diff>
 ${gitDiff}
@@ -202,7 +176,7 @@ export function parseConventionalCommit(message: string): {
  * Display the generated commit message with formatting
  */
 export function displayCommitMessage(commitMessage: string): void {
-  console.log(green('\n✨ Generated Commit Message:'));
+  console.log(green("\n✨ Generated Commit Message:"));
   console.log(white(`"${commitMessage}"`));
   console.log();
 }

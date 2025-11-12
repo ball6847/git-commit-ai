@@ -25,10 +25,10 @@ Deno.test('Git operations', async (t) => {
 
 Deno.test('AI operations', async (t) => {
   await t.step('should initialize AI config', () => {
-    const config = initializeAI('test-key', 'test-model');
-    assertEquals(config.apiKey, 'test-key');
-    assertEquals(config.model, 'test-model');
-    assertEquals(config.baseURL, 'https://openrouter.ai/api/v1');
+    const config = initializeAI('cerebras/zai-glm-4.6');
+    assertEquals(config.model, 'cerebras/zai-glm-4.6');
+    assertEquals(config.maxTokens, 200);
+    assertEquals(config.temperature, 0.3);
   });
 
   await t.step('should parse conventional commit messages', () => {

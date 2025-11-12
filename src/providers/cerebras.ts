@@ -1,12 +1,14 @@
-import { createCerebras } from "@ai-sdk/cerebras";
-import type { ModelRecord } from "../domain/types.ts";
+import { createCerebras } from '@ai-sdk/cerebras';
+import type { ModelRecord } from '../types.ts';
 
-const providerId = "cerebras";
+const providerId = 'cerebras';
 
-const cerebras = createCerebras({
-  apiKey: Deno.env.get("CEREBRAS_API_KEY") || "",
-});
+function getCerebrasProvider() {
+  return createCerebras({
+    apiKey: Deno.env.get('CEREBRAS_API_KEY') || '',
+  });
+}
 
 export const cerebrasModels: ModelRecord = {
-  [`${providerId}/zai-glm-4.6`]: cerebras("zai-glm-4.6"),
+  [`${providerId}/zai-glm-4.6`]: getCerebrasProvider()('zai-glm-4.6'),
 };

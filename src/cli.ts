@@ -7,12 +7,13 @@ import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { displayCommitMessage, generateCommitMessage, initializeAI } from './ai.ts';
 import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from './git.ts';
 import type { CLIOptions } from './types.ts';
+import { modelKeys } from './providers/index.ts';
 
 // Load environment variables
 await load({ export: true });
 
 const VERSION = '0.0.2';
-const DEFAULT_MODEL = 'mistralai/mistral-7b-instruct:free';
+const DEFAULT_MODEL = 'cerebras/llama-3.1-70b';
 
 /**
  * Setup signal handlers for graceful cancellation
@@ -129,14 +130,6 @@ async function generateHandler(options: CLIOptions): Promise<void> {
       Deno.exit(1);
     }
 
-    // Check for API key
-    const apiKey = Deno.env.get('OPENROUTER_API_KEY');
-    if (!apiKey) {
-      console.log(red('❌ Error: OPENROUTER_API_KEY not found.'));
-      console.log(yellow('Please copy .env.example to .env and add your OpenRouter API key.'));
-      Deno.exit(1);
-    }
-
     // Get staged changes
     let diff = '';
     let changeSummary;
@@ -173,7 +166,7 @@ async function generateHandler(options: CLIOptions): Promise<void> {
     // Initialize AI
     let aiConfig;
     try {
-      aiConfig = initializeAI(apiKey, options.model);
+      aiConfig = initializeAI(options.model);
     } catch (error) {
       console.log(
         red(
@@ -238,6 +231,30 @@ async function generateHandler(options: CLIOptions): Promise<void> {
 }
 
 /**
+ * Model command handler
+ */
+function modelHandler(): void {
+  console.log(cyan(bold('\n🤖 Available AI Models\n')));
+
+  if (modelKeys.length < 1) {
+    console.log(yellow('No models configured.'));
+    return;
+  }
+
+  console.log(green('Supported model keys:'));
+  modelKeys.forEach((key, index) => {
+    console.log(`  ${index + 1}. ${key}`);
+  });
+
+  console.log();
+  console.log(yellow('Usage:'));
+  console.log('  Set environment variable: export GIT_COMMIT_AI_MODEL=<model-key>');
+  console.log('  Or use command line option: git-commit-ai generate --model <model-key>');
+  console.log();
+  console.log(blue(`Current model: ${Deno.env.get('GIT_COMMIT_AI_MODEL') || DEFAULT_MODEL}`));
+}
+
+/**
  * Status command handler
  */
 function statusHandler(): void {
@@ -276,8 +293,8 @@ const cli = new Command()
 cli.command('generate', 'Generate a conventional commit message for staged changes')
   .alias('gen')
   .alias('g')
-  .option('-m, --model <model:string>', 'OpenRouter model to use (overrides OPENROUTER_MODEL)', {
-    default: Deno.env.get('OPENROUTER_MODEL') || DEFAULT_MODEL,
+  .option('-m, --model <model:string>', 'AI model to use (overrides GIT_COMMIT_AI_MODEL)', {
+    default: Deno.env.get('GIT_COMMIT_AI_MODEL') || DEFAULT_MODEL,
   })
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')
@@ -291,8 +308,16 @@ cli.command('generate', 'Generate a conventional commit message for staged chang
     await generateHandler(options);
   });
 
+// Model command
+cli.command('model', 'List all available AI models')
+  .alias('m')
+  .action(() => {
+    modelHandler();
+  });
+
 // Status command
-cli.command('status', 'Show current git status and staged changes')
+cli
+  .command('status', 'Show current git status and staged changes')
   .alias('s')
   .action(() => {
     statusHandler();
@@ -303,7 +328,10 @@ if (import.meta.main) {
   try {
     await cli.parse(Deno.args);
   } catch (error) {
-    console.log(red('❌ CLI Error:'), error instanceof Error ? error.message : 'Unknown error');
+    console.log(
+      red('❌ CLI Error:'),
+      error instanceof Error ? error.message : 'Unknown error',
+    );
     Deno.exit(1);
   }
 }
