@@ -5,7 +5,7 @@ import type { ModelRecord } from '../types.ts';
 
 const providerId = 'vachin';
 
-export function getVachinModels(): ModelRecord {
+export async function getVachinModels(): Promise<ModelRecord> {
   const endpoints = {
     'KAT-Coder-Pro': Deno.env.get('VC_KAT_CODER_PRO_ENDPOINT') || '',
     'KAT-Coder-Air': Deno.env.get('VC_KAT_CODER_AIR_ENDPOINT') || '',

@@ -65,6 +65,8 @@ export interface AIConfig {
 
 export interface CLIOptions {
   model?: string;
+  maxTokens?: number;
+  temperature?: number;
   debug?: boolean;
   dryRun?: boolean;
   yes?: boolean;

@@ -3,7 +3,7 @@ import type { ModelRecord } from '../types.ts';
 
 const providerId = 'kimi';
 
-export function getKimiModels(): ModelRecord {
+export async function getKimiModels(): Promise<ModelRecord> {
   const kimi = createAnthropic({
     baseURL: 'https://api.kimi.com/coding/v1',
     apiKey: Deno.env.get('KIMI_API_KEY') || '',

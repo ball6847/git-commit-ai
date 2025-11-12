@@ -22,16 +22,19 @@ An AI-powered git commit message generator that follows conventional commit guid
 ## Installation
 
 1. **Clone and setup the project:**
+
    ```bash
    cd path/to/your/project
    ```
 
 2. **Configure environment variables:**
+
    ```bash
    copy .env.example .env
    ```
 
 3. **Add your OpenRouter API key to `.env`:**
+
    ```env
    OPENROUTER_API_KEY=your_openrouter_api_key_here
    ```
@@ -314,5 +317,7 @@ Feel free to contribute! Some ideas:
 MIT License - feel free to use this project however you'd like!
 
 ---
+
+Author: Porawit Poboonma
 
 Made with ❤️ using Deno and TypeScript

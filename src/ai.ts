@@ -1,32 +1,31 @@
 import { blue, green, white, yellow } from '@std/fmt/colors';
 import { generateText } from 'ai';
-import { getModelKeys, getModels } from './providers/index.ts';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { getModels } from './providers/index.ts';
 import type { AIConfig, ChangeSummary, ConventionalCommitType } from './types.ts';
 
 /**
- * Initialize AI configuration using ai-sdk providers
+ * Get the language model for the given model name
  */
-export function initializeAI(model: string): AIConfig {
-  if (!model) {
-    throw new Error(
-      'Model is required. Please set MODEL in your .env file or use --model flag.',
-    );
+async function getLanguageModel(modelName: string) {
+  // OpenRouter requires special handling because it's a dynamic model provider
+  // that doesn't need static model registration like other providers
+  if (modelName.startsWith('openrouter/')) {
+    const openrouter = createOpenRouter({
+      apiKey: Deno.env.get('OPENROUTER_API_KEY') || '',
+    });
+    const actualModelName = modelName.replace('openrouter/', '');
+    return openrouter(actualModelName);
   }
 
-  // Check if the model exists in our available models
-  const modelKeys = getModelKeys();
-  if (!modelKeys.includes(model as any)) {
-    const availableModels = modelKeys.join(', ');
+  const models = await getModels();
+  if (!models[modelName]) {
+    const availableModels = Object.keys(models).join(', ');
     throw new Error(
-      `Model "${model}" not found. Available models: ${availableModels}`,
+      `Model "${modelName}" not found. Available models: ${availableModels}`,
     );
   }
-
-  return {
-    model,
-    maxTokens: 200,
-    temperature: 0.3,
-  };
+  return models[modelName];
 }
 
 /**
@@ -37,6 +36,12 @@ export async function generateCommitMessage(
   gitDiff: string,
   changeSummary: ChangeSummary,
 ): Promise<string> {
+  if (!config.model) {
+    throw new Error(
+      'Model is required. Please set MODEL in your .env file or use --model flag.',
+    );
+  }
+
   const prompt = createCommitPrompt(gitDiff, changeSummary);
 
   try {
@@ -44,9 +49,10 @@ export async function generateCommitMessage(
       blue(`🤖 Analyzing changes with AI using model: ${config.model}...`),
     );
 
-    const models = getModels();
+    const languageModel = await getLanguageModel(config.model);
+
     const result = await generateText({
-      model: models[config.model],
+      model: languageModel,
       system: getSystemPrompt(),
       prompt: prompt,
       temperature: config.temperature,
@@ -169,6 +175,17 @@ export function parseConventionalCommit(message: string): {
     scope: match[3] || null,
     description: match[4],
     isValid: true,
+  };
+}
+
+/**
+ * Initialize AI configuration with defaults
+ */
+export function initializeAI(model: string): AIConfig {
+  return {
+    model,
+    maxTokens: 200,
+    temperature: 0.3,
   };
 }
 

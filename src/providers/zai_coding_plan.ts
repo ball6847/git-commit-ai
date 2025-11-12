@@ -3,7 +3,7 @@ import type { ModelRecord } from '../types.ts';
 
 const providerId = 'zai-coding-plan';
 
-export function getZaiCodingPlanModels(): ModelRecord {
+export async function getZaiCodingPlanModels(): Promise<ModelRecord> {
   const zai = createOpenAICompatible({
     name: providerId,
     apiKey: Deno.env.get('ZAI_API_KEY') || '',
