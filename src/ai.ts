@@ -7,7 +7,7 @@ import type { AIConfig, ChangeSummary, ConventionalCommitType } from './types.ts
 /**
  * Get the language model for the given model name
  */
-function getLanguageModel(modelName: string) {
+async function getLanguageModel(modelName: string) {
   // OpenRouter requires special handling because it's a dynamic model provider
   // that doesn't need static model registration like other providers
   if (modelName.startsWith('openrouter/')) {
@@ -18,7 +18,7 @@ function getLanguageModel(modelName: string) {
     return openrouter(actualModelName);
   }
 
-  const models = getModels();
+  const models = await getModels();
   if (!models[modelName]) {
     const availableModels = Object.keys(models).join(', ');
     throw new Error(
@@ -49,7 +49,7 @@ export async function generateCommitMessage(
       blue(`🤖 Analyzing changes with AI using model: ${config.model}...`),
     );
 
-    const languageModel = getLanguageModel(config.model);
+    const languageModel = await getLanguageModel(config.model);
 
     const result = await generateText({
       model: languageModel,

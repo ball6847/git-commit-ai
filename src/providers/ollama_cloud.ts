@@ -3,7 +3,7 @@ import type { ModelRecord } from '../types.ts';
 
 const providerId = 'ollama-cloud';
 
-export function getOllamaCloudModels(): ModelRecord {
+export async function getOllamaCloudModels(): Promise<ModelRecord> {
   const ollamaCloud = createOpenAICompatible({
     name: providerId,
     apiKey: Deno.env.get('OLLAMA_API_KEY') || '',
