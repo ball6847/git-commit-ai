@@ -1,6 +1,6 @@
 {
   "name": "@ball6847/git-commit-ai",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "exports": "./src/cli.ts",
   "tasks": {
     "start": "deno run --allow-run --allow-env --allow-read src/cli.ts",
