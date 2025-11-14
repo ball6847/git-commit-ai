@@ -15,6 +15,7 @@ export interface GenerateOptions {
   dryRun?: boolean;
   yes?: boolean;
   push?: boolean;
+  message?: string;
 }
 
 export async function handleGenerate(options: GenerateOptions) {
@@ -93,6 +94,7 @@ export async function handleGenerate(options: GenerateOptions) {
         aiConfig,
         diff,
         changeSummary,
+        options.message,
       );
     } catch (error) {
       console.log(
