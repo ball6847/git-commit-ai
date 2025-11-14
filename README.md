@@ -21,20 +21,25 @@ An AI-powered git commit message generator that follows conventional commit guid
 
 ## Installation
 
-1. **Clone and setup the project:**
+### Quick Install via JSR (Recommended)
+```bash
+deno install -f --global --allow-run --allow-env --allow-read --allow-write --allow-net jsr:@ball6847/git-commit-ai
+```
 
+### Manual Installation from Source
+
+1. **Clone the repository:**
    ```bash
-   cd path/to/your/project
+   git clone https://github.com/ball6847/git-commit-ai.git
+   cd git-commit-ai
    ```
 
 2. **Configure environment variables:**
-
    ```bash
-   copy .env.example .env
+   cp .env.example .env
    ```
 
 3. **Add your OpenRouter API key to `.env`:**
-
    ```env
    OPENROUTER_API_KEY=your_openrouter_api_key_here
    ```
@@ -52,10 +57,13 @@ An AI-powered git commit message generator that follows conventional commit guid
 # Stage your changes
 git add .
 
-# Generate and commit (basic usage)
+# Generate and commit with JSR installation (recommended)
+git-commit-ai generate
+
+# Or with manual installation
 deno task generate
 
-# Or run directly
+# Or run directly from source
 deno run --allow-run --allow-env --allow-read src/cli.ts generate
 ```
 
