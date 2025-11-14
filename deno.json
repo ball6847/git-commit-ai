@@ -1,6 +1,6 @@
 {
   "name": "@ball6847/git-commit-ai",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "exports": "./src/cli.ts",
   "tasks": {
     "start": "deno run --allow-run --allow-env --allow-read src/cli.ts",
@@ -32,7 +32,11 @@
   },
   "nodeModulesDir": "auto",
   "compilerOptions": {
-    "lib": ["deno.ns", "dom", "es2022"],
+    "lib": [
+      "deno.ns",
+      "dom",
+      "es2022"
+    ],
     "strict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -49,7 +53,9 @@
   },
   "lint": {
     "rules": {
-      "tags": ["recommended"]
+      "tags": [
+        "recommended"
+      ]
     }
   }
 }

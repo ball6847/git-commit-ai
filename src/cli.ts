@@ -13,7 +13,7 @@ import { handleVersion } from './cmd/version.ts';
 // Load environment variables
 await load({ export: true });
 
-const VERSION = '0.1.1';
+const VERSION = '1.0.0';
 
 // Create CLI application
 const cli = new Command()
