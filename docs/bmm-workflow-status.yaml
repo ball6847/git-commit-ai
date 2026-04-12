@@ -78,6 +78,12 @@ workflow_status:
     description: 'Create individual user story with acceptance criteria'
     command: '/create-story'
 
+  - name: create-story-007
+    phase: 4
+    status: 'docs/stories/STORY-007-credit-models-dev-ai-sdk.md'
+    description: 'Add attribution/credits for models.dev and AI SDK to README'
+    command: '/create-story'
+
   - name: dev-story
     phase: 4
     status: 'conditional'
