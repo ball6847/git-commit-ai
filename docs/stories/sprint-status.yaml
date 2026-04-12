@@ -1,0 +1,40 @@
+# Sprint Plan: git-commit-ai
+
+**Created:** 2026-04-12
+**Project:** git-commit-ai
+**Level:** 0
+
+---
+
+## Goal
+
+Replace hardcoded provider list with models.dev-driven dynamic provider resolution, so the CLI automatically supports all providers as models.dev grows — without code changes when new providers are added.
+
+## Approach (smaller scale than OpenCode)
+
+1. **Fetch** models.dev catalog at startup (with local cache fallback)
+2. **Auto-discover** available providers by checking env vars against `provider.env` fields
+3. **Resolve** model requests using the `npm` field from models.dev
+4. **Bundled providers** for common packages; `@ai-sdk/openai-compatible` fallback for others with `api` field
+5. **CLI flag** `--model provider/model-name` (e.g. `--model anthropic/claude-sonnet-4-5`)
+
+## Stories
+
+### Story 1: models.dev provider integration
+
+**Status:** pending
+
+Replace the current static `src/providers/*.ts` system with a single `src/provider/` module that:
+
+- Fetches and caches `https://models.dev/api.json`
+- Filters providers by available API keys in env
+- Resolves `provider/model` strings to `LanguageModelV2` instances via Vercel AI SDK
+- Supports bundled SDK packages (anthropic, openai, google, etc.) + openai-compatible fallback
+
+**Acceptance Criteria:**
+- [ ] `git-commit-ai generate --model anthropic/claude-sonnet-4-5` works when `ANTHROPIC_API_KEY` is set
+- [ ] `git-commit-ai generate --model openrouter/meta-llama/llama-3.1-8b` works when `OPENROUTER_API_KEY` is set
+- [ ] `git-commit-ai model` lists all providers with available API keys and their models
+- [ ] models.dev response is cached to `~/.git-commit-ai/models-cache.json`
+- [ ] Falls back to bundled snapshot if fetch fails and no cache exists
+- [ ] Old `src/providers/` directory is removed

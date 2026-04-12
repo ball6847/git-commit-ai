@@ -1,0 +1,91 @@
+# BMAD Method Workflow Status
+# Generated: 2026-04-12
+# Project: git-commit-ai
+
+# Project Information
+project_name: "git-commit-ai"
+project_type: "cli"
+project_level: 0
+communication_language: "English"
+output_language: "English"
+last_updated: "2026-04-12"
+
+# Workflow Status Tracking
+workflow_status:
+  # Phase 1: Analysis
+  - name: product-brief
+    phase: 1
+    status: "optional"
+    description: "Create comprehensive product brief with vision and high-level requirements"
+    command: "/product-brief"
+
+  - name: brainstorm-project
+    phase: 1
+    status: "optional"
+    description: "Structured brainstorming session for features and solutions"
+    command: "/brainstorm"
+
+  - name: research
+    phase: 1
+    status: "optional"
+    description: "Market analysis, competitive research, and technical investigation"
+    command: "/research"
+
+  # Phase 2: Planning
+  - name: prd
+    phase: 2
+    status: "optional"
+    description: "Product Requirements Document - comprehensive requirements for multi-feature projects"
+    command: "/prd"
+    notes: "Use for Level 2+ projects or when stakeholder alignment needed"
+
+  - name: tech-spec
+    phase: 2
+    status: "docs/tech-spec-git-commit-ai-2026-04-12.md"
+    description: "Technical Specification - detailed technical design for implementation"
+    command: "/tech-spec"
+    notes: "Use for Level 0-1 projects or as supplement to PRD"
+
+  - name: create-ux-design
+    phase: 2
+    status: "optional"
+    description: "UX/UI design workflow with wireframes and user flows"
+    command: "/create-ux-design"
+
+  # Phase 3: Solutioning
+  - name: architecture
+    phase: 3
+    status: "optional"
+    description: "System architecture design with components and integrations"
+    command: "/architecture"
+
+  - name: solutioning-gate-check
+    phase: 3
+    status: "optional"
+    description: "Validate architecture against requirements before implementation"
+    command: "/solutioning-gate-check"
+
+  # Phase 4: Implementation
+  - name: sprint-planning
+    phase: 4
+    status: "required"
+    description: "Break down requirements into epics and stories, create sprint plan"
+    command: "/sprint-planning"
+
+  - name: create-story
+    phase: 4
+    status: "conditional"
+    description: "Create individual user story with acceptance criteria"
+    command: "/create-story"
+
+  - name: dev-story
+    phase: 4
+    status: "conditional"
+    description: "Implement specific user story with code generation"
+    command: "/dev-story"
+
+  - name: code-review
+    phase: 4
+    status: "optional"
+    description: "Review implemented code for quality and standards"
+    command: "/code-review"

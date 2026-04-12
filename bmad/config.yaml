@@ -1,0 +1,19 @@
+# BMAD Method v6 - Project Configuration
+# Generated: 2026-04-12
+# Project: git-commit-ai
+
+# BMAD Version
+bmad_version: "6.0.0"
+
+# Project Information
+project_name: "git-commit-ai"
+project_type: "cli"
+project_level: 0
+
+# Output Configuration
+output_folder: "docs"
+stories_folder: "docs/stories"
+
+# Language Settings
+communication_language: "English"
+document_output_language: "English"
