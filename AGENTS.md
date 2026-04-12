@@ -44,10 +44,10 @@ deno task dev
 deno task start
 
 # Generate commit message for staged changes
-deno task generate
+deno task start generate
 
 # Check git status
-deno task status
+deno task start status
 
 # Install globally
 deno task install

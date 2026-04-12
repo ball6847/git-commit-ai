@@ -62,7 +62,7 @@ git add .
 git-commit-ai generate
 
 # Or with manual installation
-deno task generate
+deno task start generate
 
 # Or run directly from source
 deno run --allow-run --allow-env --allow-read src/cli.ts generate
@@ -73,12 +73,6 @@ deno run --allow-run --allow-env --allow-read src/cli.ts generate
 ```bash
 # Start the CLI
 deno task start
-
-# Generate commit message
-deno task generate
-
-# Check git status
-deno task status
 
 # Development with file watching
 deno task dev
@@ -95,7 +89,7 @@ Generate a conventional commit message for staged changes:
 
 ```bash
 # Basic usage
-deno task generate
+deno task start generate
 
 # Use different model
 git-commit-ai generate --model meta-llama/llama-3.2-1b-instruct
@@ -112,7 +106,7 @@ git-commit-ai generate --debug
 Show current git status and staged changes:
 
 ```bash
-deno task status
+deno task start status
 # or
 git-commit-ai status
 ```
@@ -140,10 +134,10 @@ echo "console.log('Hello World');" > hello.ts
 git add hello.ts
 
 # 3. Check status
-deno task status
+deno task start status
 
 # 4. Generate commit message
-deno task generate
+deno task start generate
 
 # Output:
 # 📁 Files to be committed (1):
@@ -291,7 +285,7 @@ deno test --allow-run --allow-env --allow-read
 Use the `--debug` flag to see detailed output:
 
 ```bash
-deno task generate --debug
+deno task start generate --debug
 ```
 
 ## Why Deno?
