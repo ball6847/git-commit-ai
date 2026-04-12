@@ -8,7 +8,7 @@
   "tasks": {
     "start": "deno run --allow-run --allow-env --allow-read src/cli.ts",
     "dev": "deno run --allow-run --allow-env --allow-read --watch src/cli.ts",
-    "install:local": "deno install --global --allow-run --allow-env --allow-read --allow-net -n git-commit-ai --config deno.json --force ./src/cli.ts",
+    "install:local": "deno install --global --allow-run --allow-env --allow-read --allow-net -n git-commit-ai-local --config deno.json --force ./src/cli.ts",
     "test": "deno test --allow-run --allow-env --allow-read",
     "check": "deno check src/cli.ts",
     "lint": "deno lint",
