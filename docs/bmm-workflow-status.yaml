@@ -72,10 +72,40 @@ workflow_status:
     description: 'Break down requirements into epics and stories, create sprint plan'
     command: '/sprint-planning'
 
-  - name: create-story
+  - name: create-story-001
     phase: 4
     status: 'docs/stories/STORY-001-fetch-cache-models-dev.md'
-    description: 'Create individual user story with acceptance criteria'
+    description: 'Fetch and Cache models.dev Database'
+    command: '/create-story'
+
+  - name: create-story-002
+    phase: 4
+    status: 'docs/stories/STORY-002-dynamic-provider-resolution.md'
+    description: 'Dynamic Provider Resolution'
+    command: '/create-story'
+
+  - name: create-story-003
+    phase: 4
+    status: 'docs/stories/STORY-003-vercel-ai-sdk-provider-loading.md'
+    description: 'Vercel AI SDK Provider Loading'
+    command: '/create-story'
+
+  - name: create-story-004
+    phase: 4
+    status: 'docs/stories/STORY-004-update-model-listing-command.md'
+    description: 'Update Model Listing Command'
+    command: '/create-story'
+
+  - name: create-story-005
+    phase: 4
+    status: 'docs/stories/STORY-005-update-generate-commit-use-models-dev.md'
+    description: 'Update Generate/Commit to Use models.dev'
+    command: '/create-story'
+
+  - name: create-story-006
+    phase: 4
+    status: 'docs/stories/STORY-006-tests-models-dev-integration.md'
+    description: 'Update Tests for models.dev Integration'
     command: '/create-story'
 
   - name: create-story-007
