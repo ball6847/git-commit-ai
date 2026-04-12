@@ -52,6 +52,7 @@ Integrate **models.dev** as an external model database to enable dynamic provide
 As a user of git-commit-ai, I want the tool to fetch model metadata from models.dev so that new providers and models are available automatically without code updates.
 
 **Acceptance Criteria:**
+
 - [ ] Fetch `https://models.dev/api.json` on first run
 - [ ] Cache response to `~/.git-commit-ai/models-cache.json`
 - [ ] Cache expires after 24 hours (configurable)
@@ -59,14 +60,17 @@ As a user of git-commit-ai, I want the tool to fetch model metadata from models.
 - [ ] Graceful degradation if models.dev is unreachable
 
 **Technical Notes:**
+
 - Create `src/models-dev.ts` module
 - Use existing cache pattern from `src/providers/openrouter.ts` (CACHE_DIR, CACHE_FILE)
 - Response structure: `{ [providerId]: { env: string[], npm: string, api?: string, models: {...} } }`
 
 **Files to Create:**
+
 - `src/models-dev.ts`
 
 **Files to Modify:**
+
 - None (new module)
 
 ---
@@ -81,20 +85,24 @@ As a user of git-commit-ai, I want the tool to fetch model metadata from models.
 As a user of git-commit-ai, I want the tool to automatically detect which providers are available based on my environment variables so that I only see models I can actually use.
 
 **Acceptance Criteria:**
+
 - [ ] Read provider `env` field from models.dev data
 - [ ] Check if corresponding env var is set (e.g., `ANTHROPIC_API_KEY` → Anthropic available)
 - [ ] Only list models from providers with valid credentials
 - [ ] Support existing hardcoded providers as fallback
 
 **Technical Notes:**
+
 - For each provider in models.dev data, check `provider.env` array against `Deno.env`
 - Build available models list from providers with credentials
 - Keep existing provider modules as fallback/bundled option
 
 **Files to Create:**
+
 - None
 
 **Files to Modify:**
+
 - `src/models-dev.ts` (extend from Story 1.1)
 
 ---
@@ -109,6 +117,7 @@ As a user of git-commit-ai, I want the tool to automatically detect which provid
 As a user of git-commit-ai, I want models.dev providers to work with the Vercel AI SDK so that I can use any provider through a unified interface.
 
 **Acceptance Criteria:**
+
 - [ ] Map models.dev `npm` field to Vercel AI SDK provider constructors
 - [ ] Support bundled providers: `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/cerebras`, etc.
 - [ ] Support `@ai-sdk/openai-compatible` for providers with `api` field
@@ -116,15 +125,18 @@ As a user of git-commit-ai, I want models.dev providers to work with the Vercel 
 - [ ] Return `LanguageModelV2` compatible instance
 
 **Technical Notes:**
+
 - Create provider constructor map: `{ "@ai-sdk/anthropic": createAnthropic, ... }`
 - For providers with `api` field, use `createOpenAICompatible({ baseURL: provider.api, apiKey })`
 - For OpenRouter, use existing `@openrouter/ai-sdk-provider`
 - Import needed SDK packages in `deno.json`
 
 **Files to Create:**
+
 - None
 
 **Files to Modify:**
+
 - `src/models-dev.ts` (extend)
 - `deno.json` (add missing AI SDK imports)
 
@@ -140,20 +152,24 @@ As a user of git-commit-ai, I want models.dev providers to work with the Vercel 
 As a user of git-commit-ai, I want to see all available models from models.dev in the `model` command so that I can discover and select from the full catalog.
 
 **Acceptance Criteria:**
+
 - [ ] `model` command shows models from models.dev (grouped by provider)
 - [ ] Mark which providers are available (have API key) vs unavailable
 - [ ] Keep existing hardcoded models as fallback if models.dev fetch fails
 - [ ] Support model selection via `--model provider/model-id` format
 
 **Technical Notes:**
+
 - Modify `src/cmd/model.ts` to integrate models.dev data
 - Display format: `provider/model-id` (e.g., `anthropic/claude-sonnet-4-5`)
 - Indicate availability status (✓ available, ✗ no API key)
 
 **Files to Create:**
+
 - None
 
 **Files to Modify:**
+
 - `src/cmd/model.ts`
 - `src/models-dev.ts` (add listing helpers)
 
@@ -169,21 +185,25 @@ As a user of git-commit-ai, I want to see all available models from models.dev i
 As a user of git-commit-ai, I want to use any model from models.dev with the `generate` and `commit` commands so that I can leverage the full ecosystem of AI providers.
 
 **Acceptance Criteria:**
+
 - [ ] `--model provider/model-id` resolves via models.dev data
 - [ ] Falls back to existing provider logic if models.dev lookup fails
 - [ ] Clear error message if provider not found or no API key
 - [ ] Existing `--model cerebras/zai-glm-4.6` format still works
 
 **Technical Notes:**
+
 - Modify `src/ai.ts` `getLanguageModel()` to check models.dev first
 - Parse `provider/model-id` format, look up in models.dev data
 - Use loaded provider SDK instance for `generateText()` call
 - Keep existing provider modules as fallback
 
 **Files to Create:**
+
 - None
 
 **Files to Modify:**
+
 - `src/ai.ts`
 - `src/models-dev.ts` (add model resolution)
 
@@ -199,32 +219,36 @@ As a user of git-commit-ai, I want to use any model from models.dev with the `ge
 As a developer, I want test coverage for the models.dev integration so that I can ensure reliability and catch regressions.
 
 **Acceptance Criteria:**
+
 - [ ] Test models.dev API fetching and caching
 - [ ] Test provider discovery from env vars
 - [ ] Test model resolution with mock data
 - [ ] Test fallback behavior when models.dev unavailable
 
 **Technical Notes:**
+
 - Add tests to `tests/main_test.ts`
 - Mock fetch responses for models.dev API
 - Mock environment variables for provider discovery
 
 **Files to Create:**
+
 - None
 
 **Files to Modify:**
+
 - `tests/main_test.ts`
 
 ---
 
 ## Sprint Metrics
 
-| Metric | Value |
-|--------|-------|
-| Total Stories | 6 |
-| Story Points | 13 (3+2+3+2+2+1) |
-| Sprint Duration | 1-2 weeks |
-| Target Completion | 2026-04-26 |
+| Metric            | Value            |
+| ----------------- | ---------------- |
+| Total Stories     | 6                |
+| Story Points      | 13 (3+2+3+2+2+1) |
+| Sprint Duration   | 1-2 weeks        |
+| Target Completion | 2026-04-26       |
 
 ---
 
@@ -237,12 +261,12 @@ As a developer, I want test coverage for the models.dev integration so that I ca
 
 ## Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| models.dev API downtime | Medium | Cache aggressively, fallback to hardcoded providers |
-| Provider SDK incompatibility | Low | Use `@ai-sdk/openai-compatible` as universal fallback |
-| Breaking existing model selection | High | Keep existing provider modules, add models.dev as layer on top |
-| Rate limiting on models.dev | Low | 24-hour cache, only fetch on cache miss |
+| Risk                              | Impact | Mitigation                                                     |
+| --------------------------------- | ------ | -------------------------------------------------------------- |
+| models.dev API downtime           | Medium | Cache aggressively, fallback to hardcoded providers            |
+| Provider SDK incompatibility      | Low    | Use `@ai-sdk/openai-compatible` as universal fallback          |
+| Breaking existing model selection | High   | Keep existing provider modules, add models.dev as layer on top |
+| Rate limiting on models.dev       | Low    | 24-hour cache, only fetch on cache miss                        |
 
 ---
 

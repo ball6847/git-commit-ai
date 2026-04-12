@@ -119,20 +119,20 @@ Deno.test('models.dev SDK loading', async (t) => {
 
 ### Test Strategy
 
-| Area | Approach |
-|------|----------|
-| API Fetching | Mock `fetch()` or use test fixtures |
-| Caching | Mock file system operations |
-| Provider Discovery | Set/unset env vars in test |
-| SDK Loading | Test with real bundled providers |
-| Fallback | Mock fetch failure, verify graceful degradation |
+| Area               | Approach                                        |
+| ------------------ | ----------------------------------------------- |
+| API Fetching       | Mock `fetch()` or use test fixtures             |
+| Caching            | Mock file system operations                     |
+| Provider Discovery | Set/unset env vars in test                      |
+| SDK Loading        | Test with real bundled providers                |
+| Fallback           | Mock fetch failure, verify graceful degradation |
 
 ---
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
+| File                 | Change                           |
+| -------------------- | -------------------------------- |
 | `tests/main_test.ts` | Add models.dev integration tests |
 
 ---
@@ -140,6 +140,7 @@ Deno.test('models.dev SDK loading', async (t) => {
 ## Gherkin Scenarios
 
 ### Scenario 1: Tests run successfully
+
 ```gherkin
 Given all test cases are implemented
 When I run "deno test --allow-run --allow-env --allow-read"

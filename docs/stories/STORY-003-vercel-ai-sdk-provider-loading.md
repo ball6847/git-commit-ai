@@ -40,10 +40,13 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createCerebras } from '@ai-sdk/cerebras';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import type { ProviderV2, LanguageModelV2 } from '@ai-sdk/provider';
+import type { LanguageModelV2, ProviderV2 } from '@ai-sdk/provider';
 
 // Map of npm package name → SDK factory function
-const BUNDLED_SDK_FACTORIES: Record<string, (opts: { apiKey: string; baseURL?: string }) => ProviderV2> = {
+const BUNDLED_SDK_FACTORIES: Record<
+  string,
+  (opts: { apiKey: string; baseURL?: string }) => ProviderV2
+> = {
   '@ai-sdk/anthropic': (opts) => createAnthropic(opts),
   '@ai-sdk/openai': (opts) => createOpenAI(opts),
   '@ai-sdk/cerebras': (opts) => createCerebras(opts),
@@ -56,7 +59,7 @@ const sdkCache = new Map<string, ProviderV2>();
 
 export function getProviderSDK(provider: AvailableProvider): ProviderV2 {
   const cacheKey = `${provider.npm}:${provider.apiKey}`;
-  
+
   if (sdkCache.has(cacheKey)) {
     return sdkCache.get(cacheKey)!;
   }
@@ -74,7 +77,7 @@ export function getProviderSDK(provider: AvailableProvider): ProviderV2 {
     }
     throw new Error(
       `Provider "${provider.id}" uses npm package "${provider.npm}" which is not bundled. ` +
-      `Supported: ${Object.keys(BUNDLED_SDK_FACTORIES).join(', ')}`
+        `Supported: ${Object.keys(BUNDLED_SDK_FACTORIES).join(', ')}`,
     );
   }
 
@@ -90,7 +93,7 @@ export function getProviderSDK(provider: AvailableProvider): ProviderV2 {
 
 export function getModelFromProvider(
   provider: AvailableProvider,
-  modelId: string
+  modelId: string,
 ): LanguageModelV2 {
   const sdk = getProviderSDK(provider);
   return sdk.languageModel(modelId);
@@ -99,29 +102,30 @@ export function getModelFromProvider(
 
 ### Provider → SDK Mapping
 
-| models.dev `npm` | SDK Package | Factory Function |
-|-------------------|-------------|------------------|
-| `@ai-sdk/anthropic` | `@ai-sdk/anthropic` | `createAnthropic` |
-| `@ai-sdk/openai` | `@ai-sdk/openai` | `createOpenAI` |
-| `@ai-sdk/cerebras` | `@ai-sdk/cerebras` | `createCerebras` |
-| `@ai-sdk/openai-compatible` | `@ai-sdk/openai-compatible` | `createOpenAICompatible` |
-| `@openrouter/ai-sdk-provider` | `@openrouter/ai-sdk-provider` | `createOpenRouter` |
-| *(any with `api` field)* | `@ai-sdk/openai-compatible` | `createOpenAICompatible` (fallback) |
+| models.dev `npm`              | SDK Package                   | Factory Function                    |
+| ----------------------------- | ----------------------------- | ----------------------------------- |
+| `@ai-sdk/anthropic`           | `@ai-sdk/anthropic`           | `createAnthropic`                   |
+| `@ai-sdk/openai`              | `@ai-sdk/openai`              | `createOpenAI`                      |
+| `@ai-sdk/cerebras`            | `@ai-sdk/cerebras`            | `createCerebras`                    |
+| `@ai-sdk/openai-compatible`   | `@ai-sdk/openai-compatible`   | `createOpenAICompatible`            |
+| `@openrouter/ai-sdk-provider` | `@openrouter/ai-sdk-provider` | `createOpenRouter`                  |
+| _(any with `api` field)_      | `@ai-sdk/openai-compatible`   | `createOpenAICompatible` (fallback) |
 
 ---
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
-| `src/models-dev.ts` | Add `BUNDLED_SDK_FACTORIES`, `getProviderSDK()`, `getModelFromProvider()` |
-| `deno.json` | Add `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/openai-compatible` if missing |
+| File                | Change                                                                            |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `src/models-dev.ts` | Add `BUNDLED_SDK_FACTORIES`, `getProviderSDK()`, `getModelFromProvider()`         |
+| `deno.json`         | Add `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/openai-compatible` if missing |
 
 ---
 
 ## Gherkin Scenarios
 
 ### Scenario 1: Bundled provider loads correctly
+
 ```gherkin
 Given provider "anthropic" with npm "@ai-sdk/anthropic" and apiKey "sk-ant-xxx"
 When I call getProviderSDK(anthropic)
@@ -130,6 +134,7 @@ And sdk.languageModel("claude-sonnet-4-5") returns a LanguageModelV2
 ```
 
 ### Scenario 2: OpenAI-compatible provider uses api field
+
 ```gherkin
 Given provider "groq" with npm "@ai-sdk/openai-compatible" and api "https://api.groq.com/openai/v1"
 And apiKey "gsk_xxx"
@@ -138,6 +143,7 @@ Then it returns SDK configured with baseURL "https://api.groq.com/openai/v1"
 ```
 
 ### Scenario 3: Unknown provider with api field falls back
+
 ```gherkin
 Given provider "custom" with npm "@ai-sdk/unknown" and api "https://custom.api/v1"
 And apiKey "key-xxx"
@@ -146,6 +152,7 @@ Then it falls back to createOpenAICompatible with baseURL "https://custom.api/v1
 ```
 
 ### Scenario 4: SDK instance is cached
+
 ```gherkin
 Given I called getProviderSDK(anthropic) once
 When I call getProviderSDK(anthropic) again with same apiKey
@@ -153,6 +160,7 @@ Then it returns the same SDK instance (cached)
 ```
 
 ### Scenario 5: Unknown provider without api field throws error
+
 ```gherkin
 Given provider "unknown" with npm "@ai-sdk/unknown" and no api field
 When I call getProviderSDK(unknown)

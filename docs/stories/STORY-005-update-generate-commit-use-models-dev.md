@@ -33,53 +33,53 @@ As a user of git-commit-ai, I want to use any model from models.dev with the `ge
 Modify `src/ai.ts` — update `getLanguageModel()`:
 
 ```typescript
-import { 
-  getModelsDevData, 
-  getAvailableProviders, 
+import {
+  getAvailableProviders,
   getModelFromProvider,
-  isProviderAvailable 
+  getModelsDevData,
+  isProviderAvailable,
 } from './models-dev.ts';
 
 export async function getLanguageModel(modelName: string): Promise<LanguageModelV2> {
   // Check if model name contains "/" (provider/model-id format)
   const slashIndex = modelName.indexOf('/');
-  
+
   if (slashIndex > 0) {
     const providerId = modelName.substring(0, slashIndex);
     const modelId = modelName.substring(slashIndex + 1);
-    
+
     // Try models.dev first
     const data = await getModelsDevData();
     if (Object.keys(data).length > 0) {
       const providers = getAvailableProviders(data);
-      const provider = providers.find(p => p.id === providerId);
-      
+      const provider = providers.find((p) => p.id === providerId);
+
       if (provider) {
         return getModelFromProvider(provider, modelId);
       }
-      
+
       // Provider exists in models.dev but no API key
       if (data[providerId]) {
         throw new Error(
           `Provider "${providerId}" requires API key. ` +
-          `Set one of: ${data[providerId].env.join(', ')}`
+            `Set one of: ${data[providerId].env.join(', ')}`,
         );
       }
     }
   }
-  
+
   // Fallback to existing provider logic
   const config = initializeAI(modelName);
   const models = await getAllModels();
   const model = models[modelName];
-  
+
   if (!model) {
     throw new Error(
       `Model "${modelName}" not found. ` +
-      `Run "git-commit-ai model" to see available models.`
+        `Run "git-commit-ai model" to see available models.`,
     );
   }
-  
+
   return model;
 }
 ```
@@ -120,8 +120,8 @@ git-commit-ai generate --model anthropic/claude-sonnet-4-5
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
+| File        | Change                                                |
+| ----------- | ----------------------------------------------------- |
 | `src/ai.ts` | Update `getLanguageModel()` to resolve via models.dev |
 
 ---
@@ -129,6 +129,7 @@ git-commit-ai generate --model anthropic/claude-sonnet-4-5
 ## Gherkin Scenarios
 
 ### Scenario 1: models.dev model resolves correctly
+
 ```gherkin
 Given models.dev has provider "anthropic" with model "claude-sonnet-4-5"
 And ANTHROPIC_API_KEY is set
@@ -137,6 +138,7 @@ Then it returns a valid LanguageModelV2 instance
 ```
 
 ### Scenario 2: Existing model format still works
+
 ```gherkin
 Given built-in provider has model "cerebras/zai-glm-4.6"
 When I call getLanguageModel("cerebras/zai-glm-4.6")
@@ -144,6 +146,7 @@ Then it returns a valid LanguageModelV2 instance via existing logic
 ```
 
 ### Scenario 3: Provider exists but no API key
+
 ```gherkin
 Given models.dev has provider "openai"
 And OPENAI_API_KEY is not set
@@ -152,6 +155,7 @@ Then it throws error: "Provider "openai" requires API key. Set one of: OPENAI_AP
 ```
 
 ### Scenario 4: Fallback when models.dev unavailable
+
 ```gherkin
 Given models.dev fetch fails
 When I call getLanguageModel("anthropic/claude-sonnet-4-5")

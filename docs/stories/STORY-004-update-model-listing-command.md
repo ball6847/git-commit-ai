@@ -34,12 +34,12 @@ As a user of git-commit-ai, I want to see all available models from models.dev i
 Modify `src/cmd/model.ts`:
 
 ```typescript
-import { getModelsDevData, getAvailableProviders } from '../models-dev.ts';
-import { bold, green, red, dim } from '@std/fmt/colors';
+import { getAvailableProviders, getModelsDevData } from '../models-dev.ts';
+import { bold, dim, green, red } from '@std/fmt/colors';
 
 export async function handleModelCommand(): Promise<void> {
   const data = await getModelsDevData();
-  
+
   if (Object.keys(data).length === 0) {
     // Fallback to existing behavior
     console.log(dim('Could not fetch models.dev, showing built-in models...'));
@@ -48,7 +48,7 @@ export async function handleModelCommand(): Promise<void> {
   }
 
   const available = getAvailableProviders(data);
-  const availableIds = new Set(available.map(p => p.id));
+  const availableIds = new Set(available.map((p) => p.id));
 
   console.log(bold('\nAvailable Models (from models.dev)\n'));
 
@@ -58,14 +58,14 @@ export async function handleModelCommand(): Promise<void> {
     const models = Object.values(provider.models);
 
     console.log(`${status} ${bold(provider.name)} (${providerId})`);
-    
+
     for (const model of models) {
       const modelRef = `${providerId}/${model.id}`;
       const features = [];
       if (model.reasoning) features.push('reasoning');
       if (model.tool_call) features.push('tools');
       if (model.attachment) features.push('attachments');
-      
+
       const featureStr = features.length > 0 ? dim(` [${features.join(', ')}]`) : '';
       console.log(`  ${modelRef}${featureStr}`);
     }
@@ -101,8 +101,8 @@ Use: git-commit-ai generate --model provider/model-id
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
+| File               | Change                                           |
+| ------------------ | ------------------------------------------------ |
 | `src/cmd/model.ts` | Integrate models.dev data, update display format |
 
 ---
@@ -110,6 +110,7 @@ Use: git-commit-ai generate --model provider/model-id
 ## Gherkin Scenarios
 
 ### Scenario 1: Display models.dev catalog
+
 ```gherkin
 Given models.dev data is available
 And ANTHROPIC_API_KEY is set
@@ -120,6 +121,7 @@ And models are shown in provider/model-id format
 ```
 
 ### Scenario 2: Fallback on fetch failure
+
 ```gherkin
 Given models.dev fetch fails
 When I run "git-commit-ai model"

@@ -35,17 +35,17 @@ Extend `src/models-dev.ts` (from STORY-001):
 
 ```typescript
 interface AvailableProvider {
-  id: string;           // e.g., "anthropic"
-  name: string;         // e.g., "Anthropic"
-  apiKey: string;       // resolved env var value
-  npm: string;          // e.g., "@ai-sdk/anthropic"
-  api?: string;         // base URL if applicable
+  id: string; // e.g., "anthropic"
+  name: string; // e.g., "Anthropic"
+  apiKey: string; // resolved env var value
+  npm: string; // e.g., "@ai-sdk/anthropic"
+  api?: string; // base URL if applicable
   models: ModelsDevModel[];
 }
 
-export function getAvailableProviders(data: ModelsDevResponse): AvailableProvider[]
-export function isProviderAvailable(data: ModelsDevResponse, providerId: string): boolean
-export function getProviderApiKey(provider: ModelsDevProvider): string | null
+export function getAvailableProviders(data: ModelsDevResponse): AvailableProvider[];
+export function isProviderAvailable(data: ModelsDevResponse, providerId: string): boolean;
+export function getProviderApiKey(provider: ModelsDevProvider): string | null;
 ```
 
 ### Provider Resolution Logic
@@ -61,7 +61,7 @@ export function getProviderApiKey(provider: ModelsDevProvider): string | null {
 
 export function getAvailableProviders(data: ModelsDevResponse): AvailableProvider[] {
   return Object.values(data)
-    .map(provider => {
+    .map((provider) => {
       const apiKey = getProviderApiKey(provider);
       if (!apiKey) return null;
       return {
@@ -99,8 +99,8 @@ Result from getAvailableProviders():
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
+| File                | Change                                                                        |
+| ------------------- | ----------------------------------------------------------------------------- |
 | `src/models-dev.ts` | Add `getAvailableProviders()`, `isProviderAvailable()`, `getProviderApiKey()` |
 
 ---
@@ -108,6 +108,7 @@ Result from getAvailableProviders():
 ## Gherkin Scenarios
 
 ### Scenario 1: Provider with matching env var is available
+
 ```gherkin
 Given models.dev has provider "anthropic" with env ["ANTHROPIC_API_KEY"]
 And environment variable ANTHROPIC_API_KEY is set to "sk-ant-xxx"
@@ -116,6 +117,7 @@ Then the result includes anthropic with apiKey "sk-ant-xxx"
 ```
 
 ### Scenario 2: Provider without env var is excluded
+
 ```gherkin
 Given models.dev has provider "google" with env ["GOOGLE_API_KEY"]
 And environment variable GOOGLE_API_KEY is not set
@@ -124,6 +126,7 @@ Then the result does not include google
 ```
 
 ### Scenario 3: Provider with multiple env vars uses first match
+
 ```gherkin
 Given models.dev has provider "openrouter" with env ["OPENROUTER_API_KEY", "OR_API_KEY"]
 And environment variable OR_API_KEY is set to "or-key-xxx"

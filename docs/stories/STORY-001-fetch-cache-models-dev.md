@@ -48,12 +48,12 @@ Create `src/models-dev.ts` with:
    interface ModelsDevProvider {
      id: string;
      name: string;
-     env: string[];        // e.g., ["ANTHROPIC_API_KEY"]
-     npm: string;          // e.g., "@ai-sdk/anthropic"
-     api?: string;         // e.g., "https://api.anthropic.com"
+     env: string[]; // e.g., ["ANTHROPIC_API_KEY"]
+     npm: string; // e.g., "@ai-sdk/anthropic"
+     api?: string; // e.g., "https://api.anthropic.com"
      models: Record<string, ModelsDevModel>;
    }
-   
+
    interface ModelsDevModel {
      id: string;
      name: string;
@@ -64,7 +64,7 @@ Create `src/models-dev.ts` with:
      cost?: { input: number; output: number; cache_read?: number; cache_write?: number };
      limit?: { context: number; output: number };
    }
-   
+
    type ModelsDevResponse = Record<string, ModelsDevProvider>;
    ```
 
@@ -95,7 +95,7 @@ Create `src/models-dev.ts` with:
     "name": "OpenAI",
     "env": ["OPENAI_API_KEY"],
     "npm": "@ai-sdk/openai",
-    "models": { /* ... */ }
+    "models": {/* ... */}
   }
   // ... more providers
 }
@@ -105,14 +105,14 @@ Create `src/models-dev.ts` with:
 
 ## Files to Create
 
-| File | Purpose |
-|------|---------|
+| File                | Purpose                                                           |
+| ------------------- | ----------------------------------------------------------------- |
 | `src/models-dev.ts` | New module for models.dev fetching, caching, and type definitions |
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
+| File        | Change                                                          |
+| ----------- | --------------------------------------------------------------- |
 | `deno.json` | Add `@std/async` import for `delay()` if needed for retry logic |
 
 ---
@@ -120,6 +120,7 @@ Create `src/models-dev.ts` with:
 ## Gherkin Scenarios
 
 ### Scenario 1: First run fetches from API
+
 ```gherkin
 Given no cache file exists
 When I call getModelsDevData()
@@ -129,6 +130,7 @@ And returns the fetched data
 ```
 
 ### Scenario 2: Cached data used within TTL
+
 ```gherkin
 Given cache file exists with timestamp less than 24 hours ago
 When I call getModelsDevData()
@@ -136,6 +138,7 @@ Then it returns cached data without fetching
 ```
 
 ### Scenario 3: Cache expired triggers refresh
+
 ```gherkin
 Given cache file exists with timestamp more than 24 hours ago
 When I call getModelsDevData()
@@ -145,6 +148,7 @@ And returns the fresh data
 ```
 
 ### Scenario 4: Fetch failure falls back to cache
+
 ```gherkin
 Given cache file exists (even if expired)
 And network fetch fails
@@ -154,6 +158,7 @@ And logs a warning about fetch failure
 ```
 
 ### Scenario 5: No cache and fetch failure
+
 ```gherkin
 Given no cache file exists
 And network fetch fails
