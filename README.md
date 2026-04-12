@@ -45,9 +45,9 @@ deno install -f --global --allow-run --allow-env --allow-read --allow-write --al
    OPENROUTER_API_KEY=your_openrouter_api_key_here
    ```
 
-4. **Install globally (optional):**
+4. **Install locally for testing (optional):**
    ```bash
-   deno task install
+   deno task install:local
    ```
 
 ## Usage
@@ -77,8 +77,8 @@ deno task start
 # Development with file watching
 deno task dev
 
-# Install globally
-deno task install
+# Install locally for testing
+deno task install:local
 ```
 
 ### Commands

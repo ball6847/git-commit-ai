@@ -49,14 +49,14 @@ deno task start generate
 # Check git status
 deno task start status
 
-# Install globally
-deno task install
+# Install locally for testing
+deno task install:local
 
 # Code quality checks
 deno task fmt      # Format code
 deno task lint     # Lint code
 deno task test     # Run tests
-deno task build    # Build for production
+deno task publish:dry  # Dry run publish check
 ```
 
 **Required Deno Permissions:**
@@ -65,7 +65,6 @@ deno task build    # Build for production
 - `--allow-env` (read environment variables)
 - `--allow-read` (read files)
 - `--allow-net` (make network requests to OpenRouter)
-- `--allow-write` (for build tasks)
 
 ## Testing Instructions
 
@@ -126,9 +125,10 @@ deno fmt
 
 ```
 src/
-├── ai.ts           # OpenRouter AI integration
+├── ai.ts           # AI integration (models.dev provider resolution)
 ├── cli.ts          # CLI entry point
 ├── git.ts          # Git operations and utilities
+├── models-dev.ts   # Models.dev fetching, caching, provider resolution, SDK loading
 ├── types.ts        # TypeScript type definitions
 ├── cmd/
 │   ├── commit.ts   # Commit command implementation
@@ -136,14 +136,6 @@ src/
 │   ├── model.ts    # Model management command
 │   ├── status.ts   # Status check command
 │   └── version.ts  # Version command
-├── providers/
-│   ├── cerebras.ts     # Cerebras AI provider
-│   ├── index.ts        # Provider index/exports
-│   ├── kimi.ts         # Kimi AI provider
-│   ├── ollama_cloud.ts # Ollama Cloud AI provider
-│   ├── openrouter.ts   # OpenRouter AI provider
-│   ├── vachin.ts       # Vachin AI provider
-│   └── zai_coding_plan.ts # ZAI Coding Plan provider
 tests/
 └── main_test.ts    # Main test file
 ```
@@ -151,8 +143,8 @@ tests/
 ## Build and Deployment
 
 ```bash
-# Build for production
-deno task build
+# Install locally for testing
+deno task install:local
 
 # Publish to JSR (triggered by version tags)
 git tag v1.0.0
@@ -161,26 +153,6 @@ git push origin v1.0.0
 # Install from JSR (recommended)
 deno install -f --global --allow-run --allow-env --allow-read --allow-net jsr:@ball6847/git-commit-ai
 ```
-
-**Build Outputs:**
-
-- Bundled JavaScript: `build/cli.js`
-- Global installation: `git-commit-ai` command
-
-**Deployment Process:**
-
-1. Create semantic version tag (v1.0.0 format)
-2. Push tag to trigger GitHub Actions workflow
-3. JSR publish workflow runs automatically with these checks:
-   - Checkout code
-   - Setup Deno
-   - Verify formatting with `deno fmt --check`
-   - Run linter with `deno lint`
-   - Perform type check with `deno check`
-   - Run test suite
-   - Dry run publish
-   - Publish to JSR
-4. Package becomes available on jsr.io
 
 ## Pull Request Guidelines
 
