@@ -8,7 +8,7 @@ project_type: "cli"
 project_level: 0
 communication_language: "English"
 output_language: "English"
-last_updated: "2026-04-12"
+last_updated: "2026-04-12T12:30:00Z"
 
 # Workflow Status Tracking
 workflow_status:
@@ -68,13 +68,13 @@ workflow_status:
   # Phase 4: Implementation
   - name: sprint-planning
     phase: 4
-    status: "required"
+    status: "docs/stories/sprint-1-plan.md"
     description: "Break down requirements into epics and stories, create sprint plan"
     command: "/sprint-planning"
 
   - name: create-story
     phase: 4
-    status: "conditional"
+    status: "docs/stories/STORY-001-fetch-cache-models-dev.md"
     description: "Create individual user story with acceptance criteria"
     command: "/create-story"
 

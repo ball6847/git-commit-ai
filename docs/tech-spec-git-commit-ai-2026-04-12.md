@@ -137,9 +137,24 @@ User runs: git-commit-ai generate --model openrouter/meta-llama/llama-3.1-8b-ins
 4. **No persistent config file** — Config via env vars and CLI flags only
 5. **Prompt injection defense** — XML tags wrap user-controlled content with system rules to ignore instructions within them
 
-## Potential Improvements (from TODO)
+## Potential Improvements
 
-- [ ] Allow OpenRouter provider to be provided via env var or CLI arg (currently hardcoded path)
+### Primary: models.dev Integration
+
+Integrate [models.dev](https://models.dev) as an external model database to enable dynamic provider support:
+
+1. **Fetch & Cache** — Fetch `https://models.dev/api.json`, cache to `~/.git-commit-ai/models-cache.json` (24h TTL)
+2. **Auto-Discovery** — Check provider `env` fields against environment variables to find available providers
+3. **SDK Loading** — Map models.dev `npm` field to Vercel AI SDK provider constructors
+4. **Unified Model Selection** — `--model provider/model-id` format works across all models.dev providers
+
+**Key Design Decisions:**
+- **Additive approach** — models.dev adds on top of existing providers (backward compatible)
+- **Cache-first** — Aggressive caching minimizes API calls
+- **`@ai-sdk/openai-compatible` fallback** — Universal adapter for any provider with `api` base URL
+- **No dynamic npm install** — Only use pre-bundled AI SDK packages (simpler, Deno-compatible)
+
+See `docs/stories/sprint-1-plan.md` for full implementation plan.
 
 ## Testing
 
