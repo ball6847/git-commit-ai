@@ -9,7 +9,7 @@ export async function handleModel() {
   try {
     const models = await getModels();
     const modelKeys = Object.keys(models);
-    
+
     if (modelKeys.length < 1) {
       console.log(yellow('No models configured.'));
       return;

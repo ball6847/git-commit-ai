@@ -1,0 +1,12 @@
+pre-commit:
+  parallel: false
+  commands:
+    format:
+      run: |
+        deno task fmt | grep "^/" | xargs -r git add
+      glob: '*.{ts,tsx,js,jsx,json,md}'
+    lint:
+      run: deno task lint
+      glob: '*.{ts,tsx,js,jsx}'
+    test:
+      run: deno task test

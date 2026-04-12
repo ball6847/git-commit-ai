@@ -30,7 +30,7 @@ async function loadCachedModels(): Promise<OpenRouterModel[] | null> {
   try {
     const cacheData = await Deno.readTextFile(CACHE_FILE);
     const cached: CachedModels = JSON.parse(cacheData);
-    
+
     if (Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.models;
     }
@@ -45,7 +45,7 @@ async function saveCachedModels(models: OpenRouterModel[]): Promise<void> {
     models,
     timestamp: Date.now(),
   };
-  
+
   try {
     await Deno.mkdir(CACHE_DIR, { recursive: true });
     await Deno.writeTextFile(CACHE_FILE, JSON.stringify(cached));
@@ -95,10 +95,11 @@ export async function getOpenRouterModels(): Promise<ModelRecord> {
   });
 
   const modelRecord: ModelRecord = {};
-  
+
   for (const model of models) {
-    const isFree = model.pricing.prompt === '0' && model.pricing.completion === '0' && model.pricing.request === '0';
-    
+    const isFree = model.pricing.prompt === '0' && model.pricing.completion === '0' &&
+      model.pricing.request === '0';
+
     if (isFree) {
       modelRecord[`${providerId}/${model.id}`] = openrouter(model.id);
     }

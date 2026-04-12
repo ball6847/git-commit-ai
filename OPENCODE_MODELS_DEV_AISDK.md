@@ -39,8 +39,8 @@ This document explains how OpenCode uses **models.dev** as an external model dat
 
 [models.dev](https://models.dev) is an open-source (MIT-licensed) database of AI model specifications, pricing, and capabilities, maintained by the same team behind OpenCode (anomalyco/SST). It stores provider and model metadata as TOML files in a GitHub repo and exposes them via a public JSON API.
 
-**Repository:** https://github.com/anomalyco/models.dev  
-**License:** MIT  
+**Repository:** https://github.com/anomalyco/models.dev\
+**License:** MIT\
 **API endpoint:** `https://models.dev/api.json`
 
 ### Data Structure
@@ -69,13 +69,13 @@ Each provider entry in the API contains:
           "input": 3,
           "output": 15,
           "cache_read": 0.3,
-          "cache_write": 3.75,
+          "cache_write": 3.75
         },
-        "limit": { "context": 200000, "output": 64000 },
+        "limit": { "context": 200000, "output": 64000 }
         // ... more fields
-      },
-    },
-  },
+      }
+    }
+  }
 }
 ```
 
@@ -104,7 +104,7 @@ export const Data = lazy(async () => {
   if (result) return result;
 
   // 2. Try bundled snapshot (generated at build time)
-  const snapshot = await import("./models-snapshot")
+  const snapshot = await import('./models-snapshot')
     .then((m) => m.snapshot)
     .catch(() => undefined);
   if (snapshot) return snapshot;
@@ -175,11 +175,11 @@ Users can override or extend the database in their config file:
           "reasoning": false,
           "tool_call": true,
           "cost": { "input": 0, "output": 0 },
-          "limit": { "context": 128000, "output": 8192 },
-        },
-      },
-    },
-  },
+          "limit": { "context": 128000, "output": 8192 }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -193,7 +193,7 @@ const env = Env.all();
 for (const [providerID, provider] of Object.entries(database)) {
   const apiKey = provider.env.map((item) => env[item]).find(Boolean);
   if (!apiKey) continue;
-  mergeProvider(providerID, { source: "env", key: apiKey });
+  mergeProvider(providerID, { source: 'env', key: apiKey });
 }
 ```
 
@@ -205,8 +205,8 @@ OpenCode also supports stored auth credentials (from `opencode auth <provider>`)
 
 ```typescript
 for (const [providerID, provider] of Object.entries(await Auth.all())) {
-  if (provider.type === "api") {
-    mergeProvider(providerID, { source: "api", key: provider.key });
+  if (provider.type === 'api') {
+    mergeProvider(providerID, { source: 'api', key: provider.key });
   }
 }
 ```
@@ -222,24 +222,21 @@ const CUSTOM_LOADERS: Record<string, CustomLoader> = {
       autoload: false,
       options: {
         headers: {
-          "anthropic-beta":
-            "claude-code-20250219,interleaved-thinking-2025-05-14,...",
+          'anthropic-beta': 'claude-code-20250219,interleaved-thinking-2025-05-14,...',
         },
       },
     };
   },
-  async "amazon-bedrock"(input) {
+  async 'amazon-bedrock'(input) {
     // Complex AWS credential chain resolution
     return { autoload: true, options: { region, credentialProvider } };
   },
-  async "github-copilot"(input) {
+  async 'github-copilot'(input) {
     return {
       autoload: false,
       async getModel(sdk, modelID, options) {
         // Special: use responses API for GPT-5+, chat API otherwise
-        return shouldUseCopilotResponsesApi(modelID)
-          ? sdk.responses(modelID)
-          : sdk.chat(modelID);
+        return shouldUseCopilotResponsesApi(modelID) ? sdk.responses(modelID) : sdk.chat(modelID);
       },
     };
   },
@@ -275,26 +272,26 @@ The most popular providers are bundled directly into OpenCode's binary:
 
 ```typescript
 const BUNDLED_PROVIDERS: Record<string, (options: any) => SDK> = {
-  "@ai-sdk/amazon-bedrock": createAmazonBedrock,
-  "@ai-sdk/anthropic": createAnthropic,
-  "@ai-sdk/azure": createAzure,
-  "@ai-sdk/google": createGoogleGenerativeAI,
-  "@ai-sdk/google-vertex": createVertex,
-  "@ai-sdk/openai": createOpenAI,
-  "@ai-sdk/openai-compatible": createOpenAICompatible,
-  "@openrouter/ai-sdk-provider": createOpenRouter,
-  "@ai-sdk/xai": createXai,
-  "@ai-sdk/mistral": createMistral,
-  "@ai-sdk/groq": createGroq,
-  "@ai-sdk/deepinfra": createDeepInfra,
-  "@ai-sdk/cerebras": createCerebras,
-  "@ai-sdk/cohere": createCohere,
-  "@ai-sdk/gateway": createGateway,
-  "@ai-sdk/togetherai": createTogetherAI,
-  "@ai-sdk/perplexity": createPerplexity,
-  "@ai-sdk/vercel": createVercel,
-  "@gitlab/gitlab-ai-provider": createGitLab,
-  "@ai-sdk/github-copilot": createGitHubCopilotOpenAICompatible,
+  '@ai-sdk/amazon-bedrock': createAmazonBedrock,
+  '@ai-sdk/anthropic': createAnthropic,
+  '@ai-sdk/azure': createAzure,
+  '@ai-sdk/google': createGoogleGenerativeAI,
+  '@ai-sdk/google-vertex': createVertex,
+  '@ai-sdk/openai': createOpenAI,
+  '@ai-sdk/openai-compatible': createOpenAICompatible,
+  '@openrouter/ai-sdk-provider': createOpenRouter,
+  '@ai-sdk/xai': createXai,
+  '@ai-sdk/mistral': createMistral,
+  '@ai-sdk/groq': createGroq,
+  '@ai-sdk/deepinfra': createDeepInfra,
+  '@ai-sdk/cerebras': createCerebras,
+  '@ai-sdk/cohere': createCohere,
+  '@ai-sdk/gateway': createGateway,
+  '@ai-sdk/togetherai': createTogetherAI,
+  '@ai-sdk/perplexity': createPerplexity,
+  '@ai-sdk/vercel': createVercel,
+  '@gitlab/gitlab-ai-provider': createGitLab,
+  '@ai-sdk/github-copilot': createGitHubCopilotOpenAICompatible,
 };
 ```
 
@@ -313,14 +310,14 @@ if (bundledFn) {
 
 // Not bundled? Install it dynamically!
 let installedPath: string;
-if (!model.api.npm.startsWith("file://")) {
-  installedPath = await BunProc.install(model.api.npm, "latest");
+if (!model.api.npm.startsWith('file://')) {
+  installedPath = await BunProc.install(model.api.npm, 'latest');
 } else {
   installedPath = model.api.npm; // local file:// path
 }
 
 const mod = await import(installedPath);
-const fn = mod[Object.keys(mod).find((key) => key.startsWith("create"))!];
+const fn = mod[Object.keys(mod).find((key) => key.startsWith('create'))!];
 const loaded = fn({ name: model.providerID, ...options });
 ```
 
@@ -467,11 +464,11 @@ Users can add or override anything from models.dev in their `opencode.json`:
           "reasoning": false,
           "tool_call": true,
           "cost": { "input": 0, "output": 0 },
-          "limit": { "context": 8192, "output": 4096 },
-        },
-      },
-    },
-  },
+          "limit": { "context": 8192, "output": 4096 }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -483,10 +480,10 @@ Users can add or override anything from models.dev in their `opencode.json`:
     "anthropic": {
       "options": {
         "baseURL": "https://my-proxy.example.com",
-        "apiKey": "sk-xxx",
-      },
-    },
-  },
+        "apiKey": "sk-xxx"
+      }
+    }
+  }
 }
 ```
 
@@ -496,9 +493,9 @@ Users can add or override anything from models.dev in their `opencode.json`:
 {
   "provider": {
     "openai": {
-      "whitelist": ["gpt-5", "gpt-5-mini", "gpt-5-nano"],
-    },
-  },
+      "whitelist": ["gpt-5", "gpt-5-mini", "gpt-5-nano"]
+    }
+  }
 }
 ```
 
@@ -507,7 +504,7 @@ Users can add or override anything from models.dev in their `opencode.json`:
 ```jsonc
 {
   "disabled_providers": ["openrouter"],
-  "enabled_providers": ["anthropic", "openai"],
+  "enabled_providers": ["anthropic", "openai"]
 }
 ```
 
@@ -542,7 +539,7 @@ function unsupportedParts(msgs, model) {
 Anthropic, Bedrock, and OpenRouter support prompt caching. The transform layer adds the appropriate cache control headers based on the provider ID:
 
 ```typescript
-if (model.providerID === "anthropic" || model.providerID.includes("bedrock")) {
+if (model.providerID === 'anthropic' || model.providerID.includes('bedrock')) {
   // Apply cacheControl: { type: "ephemeral" } to system and final messages
 }
 ```

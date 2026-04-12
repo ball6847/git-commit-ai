@@ -22,6 +22,7 @@ An AI-powered git commit message generator that follows conventional commit guid
 ## Installation
 
 ### Quick Install via JSR (Recommended)
+
 ```bash
 deno install -f --global --allow-run --allow-env --allow-read --allow-write --allow-net jsr:@ball6847/git-commit-ai
 ```
@@ -319,6 +320,35 @@ Feel free to contribute! Some ideas:
 - Git hooks integration
 - Batch processing for multiple commits
 - Web UI interface
+
+## Git Hooks (Lefthook)
+
+This project uses [Lefthook](https://github.com/evilmartians/lefthook) for pre-commit hooks that
+automatically format and lint code.
+
+**Install Lefthook:**
+
+```bash
+# macOS/Linux (Homebrew)
+brew install lefthook
+
+# Go
+go install github.com/evilmartians/lefthook@latest
+```
+
+**Setup after cloning:**
+
+```bash
+lefthook install
+```
+
+**Skip hooks (when needed):**
+
+```bash
+git commit --no-verify -m "message"
+# or
+LEFTHOOK=0 git commit -m "message"
+```
 
 ## License
 
