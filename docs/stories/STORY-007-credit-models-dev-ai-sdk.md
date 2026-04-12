@@ -40,9 +40,9 @@ Add a new section near the end of README.md (after "Contributing" or before "Lic
 
 ### Files to Modify
 
-| File        | Change                                      |
-| ----------- | ------------------------------------------- |
-| `README.md` | Add "Credits" section with attributions     |
+| File        | Change                                  |
+| ----------- | --------------------------------------- |
+| `README.md` | Add "Credits" section with attributions |
 
 ---
 
