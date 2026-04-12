@@ -1,40 +1,83 @@
-# Sprint Plan: git-commit-ai
+# Sprint Status: git-commit-ai
+# Generated: 2026-04-12
 
-**Created:** 2026-04-12
-**Project:** git-commit-ai
-**Level:** 0
+# Sprint Information
+sprint: 1
+project: git-commit-ai
+project_level: 0
+status: active
+created: '2026-04-12'
+target_completion: '2026-04-26'
 
----
+# Sprint Goal
+goal: 'Replace hardcoded provider list with models.dev-driven dynamic provider resolution, so the CLI automatically supports all providers as models.dev grows — without code changes when new providers are added.'
 
-## Goal
+# Sprint Plan Reference
+sprint_plan: 'docs/stories/sprint-1-plan.md'
 
-Replace hardcoded provider list with models.dev-driven dynamic provider resolution, so the CLI automatically supports all providers as models.dev grows — without code changes when new providers are added.
+# Key Design Decisions
+key_decisions:
+  - "Additive approach — models.dev integration adds on top of existing providers, doesn't replace them"
+  - 'Cache-first — Aggressive caching (24h) minimizes API calls to models.dev'
+  - 'Env var discovery — Providers auto-activate when their API key env var is set'
+  - '@ai-sdk/openai-compatible fallback — Any provider with an api base URL can work via this universal adapter'
+  - 'No dynamic npm install — Only use pre-bundled AI SDK packages (simpler, Deno-compatible)'
 
-## Approach (smaller scale than OpenCode)
+# Story Status Tracking
+stories:
+  - id: STORY-001
+    name: 'Fetch and Cache models.dev Database'
+    status: not_started
+    priority: high
+    file: 'docs/stories/STORY-001-fetch-cache-models-dev.md'
 
-1. **Fetch** models.dev catalog at startup (with local cache fallback)
-2. **Auto-discover** available providers by checking env vars against `provider.env` fields
-3. **Resolve** model requests using the `npm` field from models.dev
-4. **Bundled providers** for common packages; `@ai-sdk/openai-compatible` fallback for others with `api` field
-5. **CLI flag** `--model provider/model-name` (e.g. `--model anthropic/claude-sonnet-4-5`)
+  - id: STORY-002
+    name: 'Dynamic Provider Resolution'
+    status: not_started
+    priority: high
+    file: 'docs/stories/STORY-002-dynamic-provider-resolution.md'
 
-## Stories
+  - id: STORY-003
+    name: 'Vercel AI SDK Provider Loading'
+    status: not_started
+    priority: high
+    file: 'docs/stories/STORY-003-vercel-ai-sdk-provider-loading.md'
 
-### Story 1: models.dev provider integration
+  - id: STORY-004
+    name: 'Update Model Listing Command'
+    status: not_started
+    priority: medium
+    file: 'docs/stories/STORY-004-update-model-listing-command.md'
 
-**Status:** pending
+  - id: STORY-005
+    name: 'Update Generate/Commit to Use models.dev'
+    status: not_started
+    priority: high
+    file: 'docs/stories/STORY-005-update-generate-commit-use-models-dev.md'
 
-Replace the current static `src/providers/*.ts` system with a single `src/provider/` module that:
+  - id: STORY-006
+    name: 'Update Tests'
+    status: not_started
+    priority: medium
+    file: 'docs/stories/STORY-006-tests-models-dev-integration.md'
 
-- Fetches and caches `https://models.dev/api.json`
-- Filters providers by available API keys in env
-- Resolves `provider/model` strings to `LanguageModelV2` instances via Vercel AI SDK
-- Supports bundled SDK packages (anthropic, openai, google, etc.) + openai-compatible fallback
+# Sprint Metrics
+metrics:
+  total_stories: 6
+  story_points: 13
+  sprint_duration: '1-2 weeks'
 
-**Acceptance Criteria:**
-- [ ] `git-commit-ai generate --model anthropic/claude-sonnet-4-5` works when `ANTHROPIC_API_KEY` is set
-- [ ] `git-commit-ai generate --model openrouter/meta-llama/llama-3.1-8b` works when `OPENROUTER_API_KEY` is set
-- [ ] `git-commit-ai model` lists all providers with available API keys and their models
-- [ ] models.dev response is cached to `~/.git-commit-ai/models-cache.json`
-- [ ] Falls back to bundled snapshot if fetch fails and no cache exists
-- [ ] Old `src/providers/` directory is removed
+# Risks
+risks:
+  - risk: 'models.dev API downtime'
+    impact: medium
+    mitigation: 'Cache aggressively, fallback to hardcoded providers'
+  - risk: 'Provider SDK incompatibility'
+    impact: low
+    mitigation: 'Use @ai-sdk/openai-compatible as universal fallback'
+  - risk: 'Breaking existing model selection'
+    impact: high
+    mitigation: 'Keep existing provider modules, add models.dev as layer on top'
+  - risk: 'Rate limiting on models.dev'
+    impact: low
+    mitigation: '24-hour cache, only fetch on cache miss'
