@@ -163,10 +163,12 @@ deno install -f --global --allow-run --allow-env --allow-read --allow-net jsr:@b
 ```
 
 **Build Outputs:**
+
 - Bundled JavaScript: `build/cli.js`
 - Global installation: `git-commit-ai` command
 
 **Deployment Process:**
+
 1. Create semantic version tag (v1.0.0 format)
 2. Push tag to trigger GitHub Actions workflow
 3. JSR publish workflow runs automatically with these checks:
