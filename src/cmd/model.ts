@@ -1,40 +1,40 @@
-import { getModels } from '../providers/index.ts';
-import { blue, bold, cyan, green, yellow } from '@std/fmt/colors';
+import { getAvailableProviders, getModelsDevData } from '../models-dev.ts';
 
-const DEFAULT_MODEL = 'gpt-4';
+import { bold, cyan, dim, green, red } from '@std/fmt/colors';
 
 export async function handleModel() {
   console.log(cyan(bold('\n🤖 Available AI Models\n')));
 
-  try {
-    const models = await getModels();
-    const modelKeys = Object.keys(models);
+  const data = await getModelsDevData();
 
-    if (modelKeys.length < 1) {
-      console.log(yellow('No models configured.'));
-      return;
-    }
-
-    console.log(green('Supported model keys:'));
-    modelKeys.forEach((key: string, index: number) => {
-      console.log(`  ${index + 1}. ${key}`);
-    });
-
-    console.log();
-    console.log(yellow('Usage:'));
-    console.log(
-      '  Set environment variable: export GIT_COMMIT_AI_MODEL=<model-key>',
-    );
-    console.log(
-      '  Or use command line option: git-commit-ai generate --model <model-key>',
-    );
-    console.log();
-    console.log(
-      blue(
-        `Current model: ${Deno.env.get('GIT_COMMIT_AI_MODEL') || DEFAULT_MODEL}`,
-      ),
-    );
-  } catch (error) {
-    console.log(yellow('Failed to fetch models:'), error);
+  if (Object.keys(data).length === 0) {
+    console.log(red('Could not fetch models.dev data. Check your network connection.'));
+    return;
   }
+
+  const available = getAvailableProviders(data);
+  const availableIds = new Set(available.map((p) => p.id));
+
+  for (const [providerId, provider] of Object.entries(data)) {
+    const isAvailable = availableIds.has(providerId);
+    const status = isAvailable ? green('✓') : red('✗');
+    const models = Object.values(provider.models);
+
+    console.log(`${status} ${bold(provider.name)} (${providerId})`);
+
+    for (const model of models) {
+      const modelRef = `${providerId}/${model.id}`;
+      const features: string[] = [];
+      if (model.reasoning) features.push('reasoning');
+      if (model.tool_call) features.push('tools');
+      if (model.attachment) features.push('attachments');
+
+      const featureStr = features.length > 0 ? dim(` [${features.join(', ')}]`) : '';
+      console.log(`  ${modelRef}${featureStr}`);
+    }
+    console.log('');
+  }
+
+  console.log(dim('Set API key environment variables to enable providers.'));
+  console.log(dim('Use: git-commit-ai generate --model provider/model-id'));
 }

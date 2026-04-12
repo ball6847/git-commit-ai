@@ -1,31 +1,43 @@
 import { blue, green, white, yellow } from '@std/fmt/colors';
 import { generateText } from 'ai';
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import { getModels } from './providers/index.ts';
+import { getAvailableProviders, getModelFromProvider, getModelsDevData } from './models-dev.ts';
+
 import type { AIConfig, ChangeSummary, ConventionalCommitType } from './types.ts';
 
 /**
  * Get the language model for the given model name
  */
 async function getLanguageModel(modelName: string) {
-  // OpenRouter requires special handling because it's a dynamic model provider
-  // that doesn't need static model registration like other providers
-  if (modelName.startsWith('openrouter/')) {
-    const openrouter = createOpenRouter({
-      apiKey: Deno.env.get('OPENROUTER_API_KEY') || '',
-    });
-    const actualModelName = modelName.replace('openrouter/', '');
-    return openrouter(actualModelName);
+  // Check if model name contains "/" (provider/model-id format)
+  const slashIndex = modelName.indexOf('/');
+
+  if (slashIndex > 0) {
+    const providerId = modelName.substring(0, slashIndex);
+    const modelId = modelName.substring(slashIndex + 1);
+
+    // Try models.dev first
+    const data = await getModelsDevData();
+    if (Object.keys(data).length > 0) {
+      const providers = getAvailableProviders(data);
+      const provider = providers.find((p) => p.id === providerId);
+
+      if (provider) {
+        return getModelFromProvider(provider, modelId);
+      }
+
+      // Provider exists in models.dev but no API key
+      if (data[providerId]) {
+        throw new Error(
+          `Provider "${providerId}" requires API key. ` +
+            `Set one of: ${data[providerId].env.join(', ')}`,
+        );
+      }
+    }
   }
 
-  const models = await getModels();
-  if (!models[modelName]) {
-    const availableModels = Object.keys(models).join(', ');
-    throw new Error(
-      `Model "${modelName}" not found. Available models: ${availableModels}`,
-    );
-  }
-  return models[modelName];
+  throw new Error(
+    `Model "${modelName}" not found. Use "git-commit-ai model" to see available models.`,
+  );
 }
 
 /**

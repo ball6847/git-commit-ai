@@ -350,6 +350,11 @@ git commit --no-verify -m "message"
 LEFTHOOK=0 git commit -m "message"
 ```
 
+## Credits
+
+- Model metadata powered by [models.dev](https://models.dev) — an open database of AI model capabilities
+- Built with [AI SDK](https://sdk.vercel.ai) — TypeScript/JavaScript library for building AI-powered applications
+
 ## License
 
 MIT License - feel free to use this project however you'd like!

@@ -3,7 +3,7 @@
 **Epic:** EPIC-001 (models.dev Integration)
 **Sprint:** 1
 **Priority:** High
-**Status:** Not Started
+**Status:** Completed
 **Points:** 3
 **Created:** 2026-04-12
 **Depends on:** STORY-002
@@ -18,13 +18,13 @@ As a user of git-commit-ai, I want models.dev providers to work with the Vercel 
 
 ## Acceptance Criteria
 
-- [ ] Map models.dev `npm` field to Vercel AI SDK provider constructors
-- [ ] Support bundled providers: `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/cerebras`, `@ai-sdk/openai-compatible`, `@openrouter/ai-sdk-provider`
-- [ ] For providers with `api` field, use `createOpenAICompatible({ baseURL, apiKey })`
-- [ ] For OpenRouter, use existing `@openrouter/ai-sdk-provider`
-- [ ] Return `LanguageModelV2` compatible instance via `provider(modelId)`
-- [ ] Cache SDK instances to avoid duplicate initialization
-- [ ] Clear error message if npm package not in bundled list
+- [x] Map models.dev `npm` field to Vercel AI SDK provider constructors
+- [x] Support bundled providers: `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/cerebras`, `@ai-sdk/openai-compatible`, `@openrouter/ai-sdk-provider`
+- [x] For providers with `api` field, use `createOpenAICompatible({ baseURL, apiKey })`
+- [x] For OpenRouter, use existing `@openrouter/ai-sdk-provider`
+- [x] Return `LanguageModelV2` compatible instance via `provider(modelId)`
+- [x] Cache SDK instances to avoid duplicate initialization
+- [x] Clear error message if npm package not in bundled list
 
 ---
 
@@ -171,9 +171,9 @@ Then it throws an error with message listing supported packages
 
 ## Definition of Done
 
-- [ ] All bundled providers load correctly
-- [ ] OpenAI-compatible fallback works for providers with `api` field
-- [ ] SDK instances are cached
-- [ ] `deno check src/models-dev.ts` passes
-- [ ] `deno lint` passes
-- [ ] Existing provider modules still work (backward compatible)
+- [x] All bundled providers load correctly
+- [x] OpenAI-compatible fallback works for providers with `api` field
+- [x] SDK instances are cached
+- [x] `deno check src/models-dev.ts` passes
+- [x] `deno lint` passes
+- [x] Existing provider modules still work (backward compatible)

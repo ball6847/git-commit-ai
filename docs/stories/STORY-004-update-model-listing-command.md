@@ -3,7 +3,7 @@
 **Epic:** EPIC-001 (models.dev Integration)
 **Sprint:** 1
 **Priority:** Medium
-**Status:** Not Started
+**Status:** Completed
 **Points:** 2
 **Created:** 2026-04-12
 **Depends on:** STORY-002
@@ -18,12 +18,12 @@ As a user of git-commit-ai, I want to see all available models from models.dev i
 
 ## Acceptance Criteria
 
-- [ ] `model` command fetches models.dev data (via STORY-001)
-- [ ] Display models grouped by provider
-- [ ] Mark providers as available (✓) or unavailable (✗) based on env vars
-- [ ] Show model ID in `provider/model-id` format for selection
-- [ ] Fallback to existing hardcoded models if models.dev fetch fails
-- [ ] Output is clean and readable in terminal
+- [x] `model` command fetches models.dev data (via STORY-001)
+- [x] Display models grouped by provider
+- [x] Mark providers as available (✓) or unavailable (✗) based on env vars
+- [x] Show model ID in `provider/model-id` format for selection
+- [x] Fallback to existing hardcoded models if models.dev fetch fails
+- [x] Output is clean and readable in terminal
 
 ---
 
@@ -133,8 +133,8 @@ And a message indicating fallback mode
 
 ## Definition of Done
 
-- [ ] `model` command shows models.dev catalog
-- [ ] Providers marked as available/unavailable
-- [ ] Fallback to existing listing works
-- [ ] `deno check src/cmd/model.ts` passes
-- [ ] `deno lint` passes
+- [x] `model` command shows models.dev catalog
+- [x] Providers marked as available/unavailable
+- [x] Fallback to existing listing works
+- [x] `deno check src/cmd/model.ts` passes
+- [x] `deno lint` passes

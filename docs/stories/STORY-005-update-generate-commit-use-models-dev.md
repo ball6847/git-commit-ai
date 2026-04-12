@@ -3,7 +3,7 @@
 **Epic:** EPIC-001 (models.dev Integration)
 **Sprint:** 1
 **Priority:** High
-**Status:** Not Started
+**Status:** Completed
 **Points:** 2
 **Created:** 2026-04-12
 **Depends on:** STORY-003
@@ -18,11 +18,11 @@ As a user of git-commit-ai, I want to use any model from models.dev with the `ge
 
 ## Acceptance Criteria
 
-- [ ] `--model provider/model-id` resolves via models.dev data
-- [ ] Falls back to existing provider logic if models.dev lookup fails
-- [ ] Clear error message if provider not found or no API key
-- [ ] Existing `--model cerebras/zai-glm-4.6` format still works
-- [ ] Both `generate` and `commit` commands support models.dev models
+- [x] `--model provider/model-id` resolves via models.dev data
+- [x] Falls back to existing provider logic if models.dev lookup fails
+- [x] Clear error message if provider not found or no API key
+- [x] Existing `--model cerebras/zai-glm-4.6` format still works
+- [x] Both `generate` and `commit` commands support models.dev models
 
 ---
 
@@ -166,9 +166,9 @@ Then it falls back to existing provider resolution
 
 ## Definition of Done
 
-- [ ] `--model provider/model-id` works with models.dev providers
-- [ ] Existing model selection still works
-- [ ] Clear error messages for missing API keys
-- [ ] `deno check src/ai.ts` passes
-- [ ] `deno lint` passes
-- [ ] Manual test: `git-commit-ai generate --model anthropic/claude-sonnet-4-5` (with API key)
+- [x] `--model provider/model-id` works with models.dev providers
+- [x] Existing model selection still works
+- [x] Clear error messages for missing API keys
+- [x] `deno check src/ai.ts` passes
+- [x] `deno lint` passes
+- [x] Manual test: `git-commit-ai generate --model anthropic/claude-sonnet-4-5` (with API key)
