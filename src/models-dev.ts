@@ -2,7 +2,7 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { createCerebras } from '@ai-sdk/cerebras';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import type { LanguageModelV2 } from '@ai-sdk/provider';
+import type { LanguageModel } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 
 export interface ModelsDevModel {
@@ -176,7 +176,7 @@ export function isProviderAvailable(data: ModelsDevResponse, providerId: string)
 }
 
 interface SDKProvider {
-  languageModel: (modelId: string) => LanguageModelV2;
+  languageModel: (modelId: string) => LanguageModel;
 }
 
 const BUNDLED_SDK_FACTORIES: Record<
@@ -234,7 +234,7 @@ export function getProviderSDK(provider: AvailableProvider): SDKProvider {
 export function getModelFromProvider(
   provider: AvailableProvider,
   modelId: string,
-): LanguageModelV2 {
+): LanguageModel {
   const sdk = getProviderSDK(provider);
   return sdk.languageModel(modelId);
 }

@@ -16,17 +16,17 @@
     "publish:dry": "deno publish --dry-run"
   },
   "imports": {
-    "@ai-sdk/anthropic": "npm:@ai-sdk/anthropic@^2.0.43",
-    "@ai-sdk/cerebras": "npm:@ai-sdk/cerebras@^1.0.30",
-    "@ai-sdk/openai": "npm:@ai-sdk/openai@^2.0.65",
-    "@ai-sdk/openai-compatible": "npm:@ai-sdk/openai-compatible@^1.0.26",
-    "@ai-sdk/provider": "npm:@ai-sdk/provider@^2.0.0",
-    "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.8",
-    "@cliffy/prompt": "jsr:@cliffy/prompt@^1.0.0-rc.8",
-    "@openrouter/ai-sdk-provider": "npm:@openrouter/ai-sdk-provider@^1.2.1",
-    "@std/fmt/colors": "jsr:@std/fmt@^1.0.8/colors",
-    "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
-    "ai": "npm:ai@^5.0.90"
+    "@ai-sdk/anthropic": "npm:@ai-sdk/anthropic@^3.0.69",
+    "@ai-sdk/cerebras": "npm:@ai-sdk/cerebras@^2.0.45",
+    "@ai-sdk/openai": "npm:@ai-sdk/openai@^3.0.52",
+    "@ai-sdk/openai-compatible": "npm:@ai-sdk/openai-compatible@^2.0.41",
+    "@ai-sdk/provider": "npm:@ai-sdk/provider@^3.0.8",
+    "@cliffy/command": "jsr:@cliffy/command@^1.0.0",
+    "@cliffy/prompt": "jsr:@cliffy/prompt@^1.0.0",
+    "@openrouter/ai-sdk-provider": "npm:@openrouter/ai-sdk-provider@^2.5.1",
+    "@std/fmt/colors": "jsr:@std/fmt@^1.0.9/colors",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.6",
+    "ai": "npm:ai@^6.0.158"
   },
   "nodeModulesDir": "auto",
   "compilerOptions": {
