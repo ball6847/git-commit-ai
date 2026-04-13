@@ -1,6 +1,6 @@
 import { displayCommitMessage, generateCommitMessage } from '../ai.ts';
 import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from '../git.ts';
-import { Confirm } from '@cliffy/prompt';
+import { Confirm, Input } from '@cliffy/prompt';
 import type { AIConfig, CustomProviderConfig } from '../types.ts';
 import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { mergeConfig } from '../config.ts';
@@ -132,16 +132,28 @@ export async function handleGenerate(options: GenerateOptions) {
       Deno.exit(0);
     }
 
-    // Auto-commit (no confirmation - consistent with commit command)
-    const finalMessage: string = commitMessage;
+    // Auto-accept generated message if --yes is set, otherwise prompt user
+    let finalMessage: string;
+    if (options.yes) {
+      finalMessage = commitMessage;
+      console.log(green('✅ Using --yes - accepting generated message'));
+    } else {
+      const result = await promptForCommitMessage(commitMessage);
+      finalMessage = result ?? '';
+      if (finalMessage === '') {
+        console.log(blue('📋 Commit cancelled.'));
+        Deno.exit(0);
+      }
+    }
 
-    // Commit changes with the final message
     commitChanges(finalMessage);
 
-    // Push changes if commit was successful
-    // If --push or --yes flag is set, auto-confirm push; otherwise, prompt user
-    const pushOptions = options?.push || options?.yes ? options : undefined;
-    await pushChanges(pushOptions);
+    if (options.push) {
+      console.log(green('✅ Using --push flag - auto-accepting push'));
+      await pushChanges(undefined);
+    } else {
+      await pushChanges(true);
+    }
   } catch (error) {
     console.log(
       red(
@@ -179,13 +191,58 @@ function setupSignalHandlers(): void {
   });
 }
 
-async function pushChanges(options?: GenerateOptions): Promise<void> {
-  // Determine if we should push (either via flag or confirmation)
-  const shouldPush = options?.push ||
-    (await Confirm.prompt({
-      message: 'Push changes to remote?',
-      default: true,
-    }));
+/**
+ * Prompt user to edit the commit message
+ */
+async function promptForCommitMessage(
+  generatedMessage: string,
+): Promise<string | null> {
+  try {
+    console.log(
+      green(
+        '✏️  Edit the commit message below (press Enter to commit, Ctrl+C twice to cancel):',
+      ),
+    );
+    console.log(
+      yellow('💡 Tip: You can modify the message before pressing Enter\n'),
+    );
+
+    const finalMessage = await Input.prompt({
+      message: 'Commit message:',
+      default: generatedMessage,
+      suggestions: [generatedMessage],
+    });
+
+    return finalMessage?.trim() ?? '';
+  } catch (_error) {
+    return null;
+  }
+}
+
+async function pushChanges(provideConfirmation?: boolean): Promise<void> {
+  if (provideConfirmation) {
+    console.log(green('✅ Using --push flag - auto-accepting push'));
+    const command = new Deno.Command('git', {
+      args: ['push'],
+      stdout: 'inherit',
+      stderr: 'inherit',
+    });
+
+    const { success: pushSuccess } = command.outputSync();
+
+    if (pushSuccess) {
+      console.log(green('🚀 Successfully pushed changes!'));
+    } else {
+      console.log(red('❌ Push failed'));
+      Deno.exit(1);
+    }
+    return;
+  }
+
+  const shouldPush = await Confirm.prompt({
+    message: 'Push changes to remote?',
+    default: true,
+  });
 
   if (!shouldPush) {
     console.log(blue('📋 Push cancelled.'));
