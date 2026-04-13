@@ -360,3 +360,4 @@ Author: Porawit Poboonma
 Made with ❤️ using Deno and TypeScript
 # test
 # test mistral extension
+# test ollama cloud

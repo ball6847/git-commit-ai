@@ -156,6 +156,10 @@ export async function clearModelsDevCache(): Promise<void> {
 }
 
 export function getProviderApiKey(provider: ModelsDevProvider): string | null {
+  // Providers with empty env array don't require API keys (e.g., local Ollama)
+  if (provider.env.length === 0) {
+    return '';
+  }
   for (const envVar of provider.env) {
     const value = Deno.env.get(envVar);
     if (value) return value;
@@ -167,7 +171,7 @@ export function getAvailableProviders(data: ModelsDevResponse): AvailableProvide
   const providers: AvailableProvider[] = [];
   for (const provider of Object.values(data)) {
     const apiKey = getProviderApiKey(provider);
-    if (!apiKey) continue;
+    if (apiKey === null) continue;
     providers.push({
       id: provider.id,
       name: provider.name,
