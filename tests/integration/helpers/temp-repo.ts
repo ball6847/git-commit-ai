@@ -76,7 +76,11 @@ export function getRemoteLog(remoteDir: string): Result<string[], Error> {
   });
   const { success, stdout, stderr } = command.outputSync();
   if (!success) {
-    return err(new Error(`git log failed: ${new TextDecoder().decode(stderr)}`));
+    const errText = new TextDecoder().decode(stderr);
+    if (errText.includes('does not have any commits yet')) {
+      return ok([]);
+    }
+    return err(new Error(`git log failed: ${errText}`));
   }
   return ok(new TextDecoder().decode(stdout).split('\n').filter(Boolean));
 }

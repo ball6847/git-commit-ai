@@ -26,8 +26,9 @@ tests/integration/
 │   ├── ai-params.test.ts
 │   ├── debug-flag.test.ts
 │   ├── dry-run-flag.test.ts
-│   ├── yes-flag.test.ts
+│   ├── commit-flag.test.ts
 │   ├── push-flag.test.ts
+│   ├── no-push-flag.test.ts
 │   └── combinations.test.ts
 └── README.md
 ```
@@ -39,7 +40,7 @@ tests/integration/
  deno task test:integration
 
 # Run a specific test file
- deno test --allow-run --allow-env --allow-read --allow-write tests/integration/flag-tests/model-flag.test.ts
+ deno test --allow-run --allow-env --allow-read --allow-write tests/integration/generate-tests/model-flag.test.ts
 ```
 
 ## Test Harness
