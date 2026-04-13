@@ -394,14 +394,149 @@ As a user of git-commit-ai, I want the `--yes` flag renamed to `--commit` so tha
 
 ---
 
+### Story 2.8: Ensure `--dry-run` Takes Priority Over `--commit` and `--push`
+
+**Story ID:** STORY-017
+**Priority:** Medium
+**Status:** Not Started
+
+**User Story:**
+As a user of git-commit-ai, I want `--dry-run` to always take priority over `--commit` and `--push` so that passing `--dry-run --commit --push` safely generates a message without committing or pushing.
+
+**Acceptance Criteria:**
+
+- [ ] `--dry-run` always exits before commit/push, regardless of other flags
+- [ ] When `--dry-run` is combined with `--commit` and/or `--push`, a warning is displayed listing the ignored flags
+- [ ] Warning format: `--dry-run is active: ignoring --commit and --push flags`
+- [ ] Existing `--dry-run` solo behavior preserved
+
+**Technical Notes:**
+
+- Add explicit guard in `handleGenerate()` that checks for conflicting flags when `--dry-run` is active
+- Display warning before dry-run exit message
+
+**Files to Create:**
+
+- None
+
+**Files to Modify:**
+
+- `src/cmd/generate.ts`
+
+---
+
+### Story 2.9: Add `--no-push` Flag & `GIT_COMMIT_AI_NO_PUSH` Environment Variable
+
+**Story ID:** STORY-018
+**Priority:** Medium
+**Status:** Not Started
+
+**User Story:**
+As a user of git-commit-ai, I want a `--no-push` flag and `GIT_COMMIT_AI_NO_PUSH` environment variable so that I can skip the push step entirely without being prompted, unless I explicitly override with `--push`.
+
+**Acceptance Criteria:**
+
+- [ ] `--no-push` flag added to `generate` command
+- [ ] `GIT_COMMIT_AI_NO_PUSH=true` env var skips push prompt
+- [ ] `--push` flag overrides `--no-push` and `GIT_COMMIT_AI_NO_PUSH`
+- [ ] Push skipped message: `Push skipped (--no-push).`
+- [ ] Conflict warning: `--push overrides --no-push.`
+- [ ] `GenerateOptions` interface updated with `noPush?: boolean`
+
+**Technical Notes:**
+
+- Priority: `--push` > `--no-push` > `GIT_COMMIT_AI_NO_PUSH` > default prompt
+- No short flag for `--no-push` — explicit and self-documenting
+- `GIT_COMMIT_AI_NO_PUSH` only respects the exact string `'true'`
+
+**Files to Create:**
+
+- None
+
+**Files to Modify:**
+
+- `src/cli.ts`
+- `src/cmd/generate.ts`
+
+---
+
+## Epic 4: Testing Infrastructure
+
+Establish comprehensive integration testing for all generate command flags using dependency injection and ts-mockito.
+
+**Priority:** High
+
+### Story 2.10: Dependency Injection Refactor for generate.ts
+
+**Story ID:** STORY-015
+**Priority:** High
+**Status:** Not Started
+
+**User Story:**
+As a developer, I want `src/cmd/generate.ts` refactored to support dependency injection so that the generate command can be tested with mocked AI and console output without relying on real network calls or git repositories.
+
+**Acceptance Criteria:**
+
+- [ ] `GenerateDependencies` interface exported from `src/cmd/generate.ts`
+- [ ] Interface includes optional `generateCommitMessage` function and `console` object
+- [ ] `defaultDeps` object created with real implementations as defaults
+- [ ] `handleGenerate()` accepts optional `deps` parameter
+- [ ] All `console.log/error` calls use injected `cons.log/error`
+- [ ] `deno check`, `deno lint`, and `deno task test` all pass
+
+**Technical Notes:**
+
+- Non-breaking change: optional parameter with defaults
+- See full story: [STORY-015-dependency-injection-refactor.md](./STORY-015-dependency-injection-refactor.md)
+
+**Files to Modify:**
+
+- `src/cmd/generate.ts`
+
+**Story Points:** 2
+
+---
+
+### Story 2.11: Integration Testing with ts-mockito
+
+**Story ID:** STORY-016
+**Priority:** High
+**Status:** Not Started
+
+**User Story:**
+As a developer, I want comprehensive integration tests for all `generate` command flags using ts-mockito and real git sandboxes so that flag behaviors are verified behaviorally and regressions are caught early.
+
+**Acceptance Criteria:**
+
+- [ ] `ts-mockito` added to `deno.json` imports
+- [ ] `test:integration` task added to `deno.json`
+- [ ] Test helpers created: `temp-repo.ts`, `mockito-harness.ts`, `test-harness.ts`
+- [ ] Flag tests created for all 8 flags: `--model`, `--message`, `--temperature`, `--max-tokens`, `--debug`, `--dry-run`, `--yes`, `--push`
+- [ ] Combination tests for multiple flags
+- [ ] All tests pass with `deno task test:integration`
+
+**Technical Notes:**
+
+- Uses real git repositories (not mocks) for behavioral testing
+- ts-mockito mocks external AI service only
+- See full story: [STORY-016-integration-testing-ts-mockito.md](./STORY-016-integration-testing-ts-mockito.md)
+
+**Dependencies:**
+
+- **STORY-015** (Dependency Injection Refactor) - BLOCKING
+
+**Story Points:** 5
+
+---
+
 ## Sprint Metrics
 
-| Metric            | Value             |
-| ----------------- | ----------------- |
-| Total Stories     | 7                 |
-| Story Points      | 19 (3+5+5+2+2+1+1)|
-| Sprint Duration   | 2-3 weeks         |
-| Target Completion | 2026-05-04        |
+| Metric            | Value                  |
+| ----------------- | ---------------------- |
+| Total Stories     | 11                     |
+| Story Points      | 29 (3+5+5+2+2+1+1+1+1+2+5)|
+| Sprint Duration   | 2-3 weeks              |
+| Target Completion | 2026-05-04             |
 
 ## Dependencies
 
@@ -420,6 +555,12 @@ STORY-008 (XDG paths + cache migration)
           └── STORY-013 (Result: git.ts + cmds) — depends on 011, 012
 
 STORY-014 (Rename --yes to --commit) — independent
+
+STORY-017 (dry-run priority) — depends on 014
+  └── STORY-018 (--no-push flag) — depends on 017
+
+STORY-015 (Dependency Injection Refactor) — independent
+  └── STORY-016 (Integration Testing) — depends on 015
 ```
 
 ## Risks
