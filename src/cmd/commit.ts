@@ -39,12 +39,12 @@ export async function handleCommit(options: CommitOptions) {
 
     const envVars = {
       model: Deno.env.get('GIT_COMMIT_AI_MODEL'),
-      temperature: Deno.env.get('GIT_COMMIT_AI_TEMPERATURE') ?
-        Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')) :
-        undefined,
-      maxTokens: Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS') ?
-        Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')) :
-        undefined,
+      temperature: Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')
+        ? Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE'))
+        : undefined,
+      maxTokens: Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')
+        ? Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS'))
+        : undefined,
       thinkingEffort: undefined as string | undefined,
     };
 

@@ -1,6 +1,11 @@
 import { blue, green, white, yellow } from '@std/fmt/colors';
 import { generateText } from 'ai';
-import { getAvailableProviders, getModelFromProvider, getModelsDevData, mergeCustomProviders } from './models-dev.ts';
+import {
+  getAvailableProviders,
+  getModelFromProvider,
+  getModelsDevData,
+  mergeCustomProviders,
+} from './models-dev.ts';
 
 import type { AIConfig, ChangeSummary, ConventionalCommitType } from './types.ts';
 
@@ -52,8 +57,8 @@ async function getLanguageModel(modelName: string) {
         if (envValue) {
           throw new Error(
             `Provider "${providerId}" requires API key. ` +
-              `Set one of: ${envValue}`
-            + ``
+              `Set one of: ${envValue}` +
+              ``,
           );
         }
       }
@@ -61,7 +66,7 @@ async function getLanguageModel(modelName: string) {
   }
 
   throw new Error(
-    `Model "${modelName}" not found. Use "git-commit-ai model" to see available models.`
+    `Model "${modelName}" not found. Use "git-commit-ai model" to see available models.`,
   );
 }
 

@@ -1,5 +1,5 @@
 ---
-createdAt: "2026-04-13T00:00:00Z"
+createdAt: '2026-04-13T00:00:00Z'
 implementedAt: null
 reviewedAt: null
 ---
@@ -34,6 +34,7 @@ tests/integration/
 ## Dependencies to Add
 
 Add to `deno.json` imports:
+
 - `"ts-mockito": "npm:ts-mockito@^2.6.1"`
 
 Update test tasks to include `--allow-write` for temp directory creation.
@@ -85,6 +86,7 @@ Combine temp-repo + mockito-harness into unified interface:
   - `cleanup(): Promise<void>` - Cleanup temp repo
 
 The `run()` method must:
+
 1. Save original CWD
 2. Chdir to temp repo path
 3. Call `handleGenerate(fullOptions, deps)` with mocked dependencies
@@ -100,9 +102,9 @@ Deno.test('--model: passes model to AI config', async () => {
   try {
     await harness.repo.stageFile('test.ts', '// test');
     harness.mock.setResponse('feat: test');
-    
+
     await harness.run({ model: 'custom-model-123' });
-    
+
     const call = harness.mock.getLastCall();
     assertEquals(call.config.model, 'custom-model-123');
   } finally {
@@ -121,13 +123,13 @@ Deno.test('--message: passes user context to AI', async () => {
   try {
     await harness.repo.stageFile('auth.ts', '// auth');
     harness.mock.setResponse('fix: auth issue');
-    
-    await harness.run({ 
+
+    await harness.run({
       model: 'test-model',
       message: 'Fix critical XSS in auth',
-      dryRun: true 
+      dryRun: true,
     });
-    
+
     const call = harness.mock.getLastCall();
     assertEquals(call.userMessage, 'Fix critical XSS in auth');
   } finally {
@@ -146,14 +148,14 @@ Deno.test('--temperature and --max-tokens: passed to AI config', async () => {
   try {
     await harness.repo.stageFile('params.ts', '// params');
     harness.mock.setResponse('chore: params');
-    
-    await harness.run({ 
+
+    await harness.run({
       model: 'test-model',
       temperature: 0.85,
       maxTokens: 75,
-      dryRun: true 
+      dryRun: true,
     });
-    
+
     const call = harness.mock.getLastCall();
     assertEquals(call.config.temperature, 0.85);
     assertEquals(call.config.maxTokens, 75);
@@ -173,13 +175,13 @@ Deno.test('--debug: shows git diff preview and model', async () => {
   try {
     await harness.repo.stageFile('debug.ts', 'const DEBUG = true;');
     harness.mock.setResponse('feat: debug');
-    
-    await harness.run({ 
+
+    await harness.run({
       model: 'debug-model',
-      debug: true, 
-      dryRun: true 
+      debug: true,
+      dryRun: true,
     });
-    
+
     assertEquals(harness.mock.includes('Debug: Git diff preview'), true);
     assertEquals(harness.mock.includes('Debug: Using model: debug-model'), true);
     assertEquals(harness.mock.includes('const DEBUG = true'), true);
@@ -199,13 +201,13 @@ Deno.test('--dry-run: generates message but does not commit', async () => {
   try {
     await harness.repo.stageFile('feature.ts', 'export const x = 1;');
     harness.mock.setResponse('feat: add x');
-    
+
     await harness.run({ model: 'test-model', dryRun: true });
-    
+
     // Assert behavior: no commit in repo
     const committed = await harness.repo.isCommitted('feat: add x');
     assertEquals(committed, false);
-    
+
     // But AI was called and output shown
     harness.mock.verifyAiCalled();
     assertEquals(harness.mock.includes('Dry run completed'), true);
@@ -225,9 +227,9 @@ Deno.test('--yes: auto-commits without prompting', async () => {
   try {
     await harness.repo.stageFile('fix.ts', '// bugfix');
     harness.mock.setResponse('fix: resolve bug');
-    
+
     await harness.run({ model: 'test-model', commit: true });
-    
+
     const committed = await harness.repo.isCommitted('fix: resolve bug');
     assertEquals(committed, true);
     assertEquals(harness.mock.includes('Using --commit'), true);
@@ -245,30 +247,30 @@ Test `--push` pushes to remote:
 Deno.test('--push: pushes commits to remote', async () => {
   const harness = await createHarness();
   const remotePath = await Deno.makeTempDir({ prefix: 'remote-' });
-  
+
   try {
     // Create bare remote
     await Deno.remove(remotePath, { recursive: true });
-    await new Deno.Command('git', { 
+    await new Deno.Command('git', {
       args: ['init', '--bare', remotePath],
-      stdout: 'null'
+      stdout: 'null',
     }).outputSync();
-    
+
     await harness.repo.git(['remote', 'add', 'origin', remotePath]);
     await harness.repo.stageFile('push.ts', '// push');
     harness.mock.setResponse('feat: add push');
-    
+
     await harness.run({ model: 'test-model', commit: true, push: true });
-    
+
     // Verify local commit
     const committed = await harness.repo.isCommitted('feat: add push');
     assertEquals(committed, true);
-    
+
     // Verify pushed to remote
     const remoteLog = new Deno.Command('git', {
       args: ['log', '--oneline'],
       cwd: remotePath,
-      stdout: 'piped'
+      stdout: 'piped',
     }).outputSync();
     const logText = new TextDecoder().decode(remoteLog.stdout);
     assertEquals(logText.includes('feat: add push'), true);
@@ -289,18 +291,18 @@ Deno.test('combination: --debug --dry-run --message', async () => {
   try {
     await harness.repo.stageFile('combo.ts', '// combo');
     harness.mock.setResponse('feat: combo');
-    
-    await harness.run({ 
+
+    await harness.run({
       model: 'test-model',
       dryRun: true,
       debug: true,
-      message: 'Combo context'
+      message: 'Combo context',
     });
-    
+
     assertEquals(harness.mock.includes('Debug:'), true);
     assertEquals(harness.mock.includes('Dry run completed'), true);
     assertEquals(harness.mock.getLastCall()?.userMessage, 'Combo context');
-    
+
     const committed = await harness.repo.isCommitted('feat: combo');
     assertEquals(committed, false);
   } finally {
@@ -341,7 +343,7 @@ const defaultDeps: GenerateDependencies = {
 
 export async function handleGenerate(
   options: GenerateOptions,
-  deps: GenerateDependencies = {}
+  deps: GenerateDependencies = {},
 ) {
   const { generateCommitMessage, console: cons } = { ...defaultDeps, ...deps };
   // Use cons.log and generateCommitMessage instead of direct imports
@@ -351,11 +353,13 @@ export async function handleGenerate(
 ### 2. `deno.json`
 
 Add import:
+
 ```json
 "ts-mockito": "npm:ts-mockito@^2.6.1"
 ```
 
 Add test task:
+
 ```json
 "test:integration": "deno test tests/integration/ --allow-run --allow-env --allow-read --allow-write --allow-net"
 ```
@@ -379,6 +383,7 @@ deno test tests/integration/ --allow-all --coverage=cov_profile
 ```
 
 All tests should:
+
 - Complete in < 2 seconds each
 - Pass consistently (no flakes)
 - Clean up temp directories (verify with `ls /tmp/`)

@@ -290,14 +290,18 @@ export function mergeCustomProviders(
     const existingProvider = modelsDevData[providerId] as ModelsDevProvider | undefined;
     const customModelConfig = customConfigObj['models'];
 
-if (shouldExtend && existingProvider && customModelConfig) {
-      for (const [modelId, modelUnknown] of Object.entries(customModelConfig as Record<string, unknown>)) {
+    if (shouldExtend && existingProvider && customModelConfig) {
+      for (
+        const [modelId, modelUnknown] of Object.entries(
+          customModelConfig as Record<string, unknown>,
+        )
+      ) {
         const customModel = modelUnknown as unknown as Record<string, unknown>;
         if (existingProvider.models[modelId]) {
           const existingModel = existingProvider.models[modelId];
           if (!existingModel.reasoning && customModel['reasoning']) {
             console.warn(
-              `Warning: Override reasoning for already defined model "${providerId}/${modelId}"`
+              `Warning: Override reasoning for already defined model "${providerId}/${modelId}"`,
             );
           }
         }
@@ -318,7 +322,11 @@ if (shouldExtend && existingProvider && customModelConfig) {
     } else if (customModelConfig) {
       const modelsMap: Record<string, ModelsDevModel> = {};
 
-      for (const [modelId, modelUnknown] of Object.entries(customModelConfig as Record<string, unknown>)) {
+      for (
+        const [modelId, modelUnknown] of Object.entries(
+          customModelConfig as Record<string, unknown>,
+        )
+      ) {
         const customModel = modelUnknown as unknown as Record<string, unknown>;
         modelsMap[modelId] = {
           id: modelId,

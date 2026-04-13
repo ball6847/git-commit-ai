@@ -54,7 +54,7 @@ const defaultDeps: GenerateDependencies = {
 
 export async function handleGenerate(
   options: GenerateOptions,
-  deps: GenerateDependencies = {}
+  deps: GenerateDependencies = {},
 ): Promise<void> {
   const { generateCommitMessage, console: cons } = { ...defaultDeps, ...deps };
   // Use cons.log and cons.error instead of console.*

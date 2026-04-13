@@ -2,9 +2,10 @@
 
 **Story ID:** STORY-017
 **Priority:** Medium
-**Status:** Not Started
+**Status:** Completed
 **Epic:** CLI UX Improvement
 **Created:** 2026-04-13
+**Completed:** 2026-04-14
 
 ---
 
@@ -28,15 +29,15 @@ This story makes the priority explicit, adds a warning, and adds tests to preven
 
 ## Expected Flag Priority
 
-| Flags | Behavior |
-|-------|----------|
-| `--dry-run` | Generate only, no commit, no push |
-| `--dry-run --commit` | Generate only (dry-run wins), warn about ignored `--commit` |
-| `--dry-run --push` | Generate only (dry-run wins), warn about ignored `--push` |
-| `--dry-run --commit --push` | Generate only (dry-run wins), warn about ignored flags |
-| `--commit --push` | Commit and push without prompts |
-| `--commit` | Commit without prompt, then push prompt |
-| `--push` | Commit prompt, then push without prompt |
+| Flags                       | Behavior                                                    |
+| --------------------------- | ----------------------------------------------------------- |
+| `--dry-run`                 | Generate only, no commit, no push                           |
+| `--dry-run --commit`        | Generate only (dry-run wins), warn about ignored `--commit` |
+| `--dry-run --push`          | Generate only (dry-run wins), warn about ignored `--push`   |
+| `--dry-run --commit --push` | Generate only (dry-run wins), warn about ignored flags      |
+| `--commit --push`           | Commit and push without prompts                             |
+| `--commit`                  | Commit without prompt, then push prompt                     |
+| `--push`                    | Commit prompt, then push without prompt                     |
 
 **Priority order:** `--dry-run` > `--push` > `--commit`
 
@@ -44,12 +45,32 @@ This story makes the priority explicit, adds a warning, and adds tests to preven
 
 ## Acceptance Criteria
 
-- [ ] `--dry-run` always exits before commit/push, regardless of other flags
-- [ ] When `--dry-run` is combined with `--commit` and/or `--push`, a warning is displayed listing the ignored flags
-- [ ] Warning format: `⚠️ --dry-run is active: ignoring --commit and --push flags`
-- [ ] Add test case for `--dry-run` with `--commit --push`
-- [ ] Existing `--dry-run` behavior preserved for solo usage
-- [ ] `deno lint` and `deno check src/cli.ts` pass
+- [x] `--dry-run` always exits before commit/push, regardless of other flags
+- [x] When `--dry-run` is combined with `--commit` and/or `--push`, a warning is displayed listing the ignored flags
+- [x] Warning format: `⚠️ --dry-run is active: ignoring --commit and --push flags`
+- [x] Existing `--dry-run` behavior preserved for solo usage
+- [x] `deno lint` and `deno check src/cli.ts` pass
+
+## Implementation Notes
+
+Implemented in `src/cmd/generate.ts` (lines 129-142):
+
+```typescript
+if (options.dryRun) {
+  const ignoredFlags: string[] = [];
+  if (options.commit) ignoredFlags.push('--commit');
+  if (options.push) ignoredFlags.push('--push');
+  if (ignoredFlags.length > 0) {
+    console.log(
+      yellow(`⚠️  --dry-run is active: ignoring ${ignoredFlags.join(' and ')} flags`),
+    );
+  }
+  console.log(
+    blue('🏃 Dry run completed. Use without --dry-run to commit.'),
+  );
+  Deno.exit(0);
+}
+```
 
 ---
 

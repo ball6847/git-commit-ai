@@ -4,7 +4,7 @@
 **Project:** git-commit-ai
 **Level:** 0 (Single atomic change)
 **Created:** 2026-04-13
-**Status:** Planning
+**Status:** In Progress
 
 ---
 
@@ -367,12 +367,12 @@ As a user of git-commit-ai, I want the `--yes` flag renamed to `--commit` so tha
 
 **Acceptance Criteria:**
 
-- [ ] `--yes` / `-y` flag removed from `generate` command
-- [ ] `--commit` flag added to `generate` command
-- [ ] `GenerateOptions` interface updated: `yes` → `commit`
-- [ ] `handleGenerate()` uses `options.commit` instead of `options.yes`
-- [ ] Output message updated to reflect new flag name
-- [ ] No references to `--yes` or `-y` remain in source code
+- [x] `--yes` / `-y` flag removed from `generate` command
+- [x] `--commit` flag added to `generate` command
+- [x] `GenerateOptions` interface updated: `yes` → `commit`
+- [x] `handleGenerate()` uses `options.commit` instead of `options.yes`
+- [x] Output message updated to reflect new flag name
+- [x] No references to `--yes` or `-y` remain in source code
 - [ ] `deno lint` and `deno check` pass
 
 **Technical Notes:**
@@ -398,17 +398,17 @@ As a user of git-commit-ai, I want the `--yes` flag renamed to `--commit` so tha
 
 **Story ID:** STORY-017
 **Priority:** Medium
-**Status:** Not Started
+**Status:** Completed
 
 **User Story:**
 As a user of git-commit-ai, I want `--dry-run` to always take priority over `--commit` and `--push` so that passing `--dry-run --commit --push` safely generates a message without committing or pushing.
 
 **Acceptance Criteria:**
 
-- [ ] `--dry-run` always exits before commit/push, regardless of other flags
-- [ ] When `--dry-run` is combined with `--commit` and/or `--push`, a warning is displayed listing the ignored flags
-- [ ] Warning format: `--dry-run is active: ignoring --commit and --push flags`
-- [ ] Existing `--dry-run` solo behavior preserved
+- [x] `--dry-run` always exits before commit/push, regardless of other flags
+- [x] When `--dry-run` is combined with `--commit` and/or `--push`, a warning is displayed listing the ignored flags
+- [x] Warning format: `--dry-run is active: ignoring --commit and --push flags`
+- [x] Existing `--dry-run` solo behavior preserved
 
 **Technical Notes:**
 
@@ -429,19 +429,19 @@ As a user of git-commit-ai, I want `--dry-run` to always take priority over `--c
 
 **Story ID:** STORY-018
 **Priority:** Medium
-**Status:** Not Started
+**Status:** Completed
 
 **User Story:**
 As a user of git-commit-ai, I want a `--no-push` flag and `GIT_COMMIT_AI_NO_PUSH` environment variable so that I can skip the push step entirely without being prompted, unless I explicitly override with `--push`.
 
 **Acceptance Criteria:**
 
-- [ ] `--no-push` flag added to `generate` command
-- [ ] `GIT_COMMIT_AI_NO_PUSH=true` env var skips push prompt
-- [ ] `--push` flag overrides `--no-push` and `GIT_COMMIT_AI_NO_PUSH`
-- [ ] Push skipped message: `Push skipped (--no-push).`
-- [ ] Conflict warning: `--push overrides --no-push.`
-- [ ] `GenerateOptions` interface updated with `noPush?: boolean`
+- [x] `--no-push` flag added to `generate` command
+- [x] `GIT_COMMIT_AI_NO_PUSH=true` env var skips push prompt
+- [x] `--push` flag overrides `--no-push` and `GIT_COMMIT_AI_NO_PUSH`
+- [x] Push skipped message: `Push skipped (--no-push).`
+- [x] Conflict warning: `--push overrides --no-push.`
+- [x] `GenerateOptions` interface updated with `noPush?: boolean`
 
 **Technical Notes:**
 
@@ -531,12 +531,12 @@ As a developer, I want comprehensive integration tests for all `generate` comman
 
 ## Sprint Metrics
 
-| Metric            | Value                  |
-| ----------------- | ---------------------- |
-| Total Stories     | 11                     |
-| Story Points      | 29 (3+5+5+2+2+1+1+1+1+2+5)|
-| Sprint Duration   | 2-3 weeks              |
-| Target Completion | 2026-05-04             |
+| Metric            | Value                      |
+| ----------------- | -------------------------- |
+| Total Stories     | 11                         |
+| Story Points      | 29 (3+5+5+2+2+1+1+1+1+2+5) |
+| Sprint Duration   | 2-3 weeks                  |
+| Target Completion | 2026-05-04                 |
 
 ## Dependencies
 

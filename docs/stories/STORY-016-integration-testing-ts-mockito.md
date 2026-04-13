@@ -63,9 +63,9 @@ Deno.test('flag-name: expected behavior', async () => {
   try {
     await harness.repo.stageFile('test.ts', '// test');
     harness.mock.setResponse('feat: test');
-    
+
     await harness.run({ model: 'test-model', flag: value });
-    
+
     // Assert behavior, not implementation
     assertEquals(await harness.repo.isCommitted('feat: test'), expected);
   } finally {
@@ -77,11 +77,13 @@ Deno.test('flag-name: expected behavior', async () => {
 ### Behavior vs Implementation
 
 **Behavioral assertions** (what we test):
+
 - Commit exists in git log (not which git command ran)
 - AI received model in config (not how it was called)
 - Debug output contains text (not what console.log received)
 
 **Implementation assertions** (avoid):
+
 - Which exact git command was spawned
 - How many times a function was called
 - Internal variable values

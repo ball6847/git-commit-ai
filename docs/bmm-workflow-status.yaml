@@ -217,14 +217,32 @@ workflow_status:
     description: 'Rename --yes flag to --commit in generate command'
     command: '/create-story'
 
+  - name: dev-story-014
+    phase: 4
+    status: 'src/cmd/generate.ts'
+    description: 'Implement STORY-014: Rename --yes flag to --commit'
+    command: '/dev-story'
+
   - name: create-story-017
     phase: 4
     status: 'docs/stories/STORY-017-dry-run-priority.md'
     description: 'Ensure --dry-run takes priority over --commit and --push'
     command: '/create-story'
 
+  - name: dev-story-017
+    phase: 4
+    status: 'src/cmd/generate.ts'
+    description: 'Implement STORY-017: dry-run priority over --commit and --push'
+    command: '/dev-story'
+
   - name: create-story-018
     phase: 4
     status: 'docs/stories/STORY-018-no-push-flag.md'
     description: 'Add --no-push flag and GIT_COMMIT_AI_NO_PUSH env var'
     command: '/create-story'
+
+  - name: dev-story-018
+    phase: 4
+    status: 'src/cmd/generate.ts'
+    description: 'Implement STORY-018: --no-push flag and env var support'
+    command: '/dev-story'

@@ -18,16 +18,16 @@ As a user of git-commit-ai, I want the `--yes` flag renamed to `--commit` so tha
 
 Currently, the `generate` command has two "auto-accept" flags:
 
-| Flag | Behavior |
-|------|----------|
+| Flag     | Behavior                                 |
+| -------- | ---------------------------------------- |
 | `--push` | Skip push confirmation prompt, just push |
-| `--yes` | Skip message edit prompt, just commit |
+| `--yes`  | Skip message edit prompt, just commit    |
 
 `--push` describes the action being auto-confirmed. `--yes` is a generic confirmation flag that doesn't follow the same naming pattern. Renaming to `--commit` creates a consistent pair:
 
-| Flag | Behavior |
-|------|----------|
-| `--push` | Skip push prompt, just push |
+| Flag       | Behavior                         |
+| ---------- | -------------------------------- |
+| `--push`   | Skip push prompt, just push      |
 | `--commit` | Skip message prompt, just commit |
 
 Both flags describe which step to auto-accept, making the CLI more intuitive.
@@ -36,16 +36,15 @@ Both flags describe which step to auto-accept, making the CLI more intuitive.
 
 ## Acceptance Criteria
 
-- [ ] `--yes` / `-y` flag removed from `generate` command in `src/cli.ts`
-- [ ] `--commit` flag added to `generate` command in `src/cli.ts`
-- [ ] `GenerateOptions` interface in `src/cmd/generate.ts` updated: `yes` → `commit`
-- [ ] `handleGenerate()` in `src/cmd/generate.ts` uses `options.commit` instead of `options.yes`
-- [ ] Output message updated from "Using --yes - accepting generated message" to "Using --commit - auto-accepting commit"
-- [ ] Help text updated to reflect new flag name
-- [ ] FLAG_ANALYSIS_REPORT.md updated if it exists
-- [ ] No references to `--yes` or `-y` remain in source code
-- [ ] `deno lint` passes
-- [ ] `deno check src/cli.ts` passes
+- [x] `--yes` / `-y` flag removed from `generate` command in `src/cli.ts`
+- [x] `--commit` flag added to `generate` command in `src/cli.ts`
+- [x] `GenerateOptions` interface in `src/cmd/generate.ts` updated: `yes` → `commit`
+- [x] `handleGenerate()` in `src/cmd/generate.ts` uses `options.commit` instead of `options.yes`
+- [x] Output message updated from "Using --yes - accepting generated message" to "Using --commit - auto-accepting commit"
+- [x] Help text updated to reflect new flag name
+- [x] No references to `--yes` or `-y` remain in source code
+- [x] `deno lint` passes
+- [x] `deno check src/cli.ts` passes
 
 ---
 
@@ -54,11 +53,13 @@ Both flags describe which step to auto-accept, making the CLI more intuitive.
 ### CLI Flag Change (src/cli.ts)
 
 Replace:
+
 ```typescript
 .option('-y, --yes', 'Auto-accept generated message without prompting')
 ```
 
 With:
+
 ```typescript
 .option('--commit', 'Auto-accept generated message without prompting')
 ```
@@ -83,6 +84,7 @@ export interface GenerateOptions {
 ### Logic Change (src/cmd/generate.ts)
 
 Replace:
+
 ```typescript
 if (options.yes) {
   finalMessage = commitMessage;
@@ -91,6 +93,7 @@ if (options.yes) {
 ```
 
 With:
+
 ```typescript
 if (options.commit) {
   finalMessage = commitMessage;
@@ -119,6 +122,7 @@ if (options.commit) {
 ## Breaking Change Note
 
 This is a **breaking change** for users who currently use `--yes` or `-y`. However:
+
 - The tool is at v0.2.0 (pre-1.0), so breaking changes are acceptable
 - `--yes` is a non-essential UX flag, not a core feature
 - The new name is more intuitive and discoverable

@@ -55,10 +55,9 @@ export function mergeConfig(
   },
 ): ResolvedConfig {
   const model = cliOptions.model || envVars.model || configFile?.model || defaults?.model || '';
-  const temperature =
-    cliOptions.temperature ?? envVars.temperature ?? configFile?.temperature ?? defaults?.temperature ?? DEFAULT_TEMPERATURE;
-  const maxTokens =
-    cliOptions.maxTokens ??
+  const temperature = cliOptions.temperature ?? envVars.temperature ?? configFile?.temperature ??
+    defaults?.temperature ?? DEFAULT_TEMPERATURE;
+  const maxTokens = cliOptions.maxTokens ??
     envVars.maxTokens ??
     configFile?.maxTokens ??
     defaults?.maxTokens ??
