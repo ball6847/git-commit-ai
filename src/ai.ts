@@ -1,22 +1,43 @@
 import { blue, green, white, yellow } from '@std/fmt/colors';
 import { generateText } from 'ai';
-import { getAvailableProviders, getModelFromProvider, getModelsDevData } from './models-dev.ts';
+import { getAvailableProviders, getModelFromProvider, getModelsDevData, mergeCustomProviders } from './models-dev.ts';
 
 import type { AIConfig, ChangeSummary, ConventionalCommitType } from './types.ts';
+
+async function resolveCustomProviders(): Promise<ModelsDevResponse> {
+  const data = await getModelsDevData();
+
+  let customProviders: Record<string, unknown> | undefined = undefined;
+  try {
+    const { loadConfig } = await import('./config.ts');
+    const configResult = await loadConfig();
+    if (configResult.ok && configResult.value) {
+      customProviders = configResult.value.providers;
+    }
+  } catch {
+    customProviders = undefined;
+  }
+
+  if (!customProviders || Object.keys(customProviders).length === 0) {
+    return data;
+  }
+
+  return mergeCustomProviders(data, customProviders);
+}
+
+type ModelsDevResponse = ReturnType<typeof getModelsDevData>;
 
 /**
  * Get the language model for the given model name
  */
 async function getLanguageModel(modelName: string) {
-  // Check if model name contains "/" (provider/model-id format)
   const slashIndex = modelName.indexOf('/');
 
   if (slashIndex > 0) {
     const providerId = modelName.substring(0, slashIndex);
     const modelId = modelName.substring(slashIndex + 1);
 
-    // Try models.dev first
-    const data = await getModelsDevData();
+    const data = await resolveCustomProviders();
     if (Object.keys(data).length > 0) {
       const providers = getAvailableProviders(data);
       const provider = providers.find((p) => p.id === providerId);
@@ -25,18 +46,22 @@ async function getLanguageModel(modelName: string) {
         return getModelFromProvider(provider, modelId);
       }
 
-      // Provider exists in models.dev but no API key
-      if (data[providerId]) {
-        throw new Error(
-          `Provider "${providerId}" requires API key. ` +
-            `Set one of: ${data[providerId].env.join(', ')}`,
-        );
+      const providerData = data[providerId];
+      if (providerData) {
+        const envValue = (providerData as { env: string[] }).env?.join(' ');
+        if (envValue) {
+          throw new Error(
+            `Provider "${providerId}" requires API key. ` +
+              `Set one of: ${envValue}`
+            + ``
+          );
+        }
       }
     }
   }
 
   throw new Error(
-    `Model "${modelName}" not found. Use "git-commit-ai model" to see available models.`,
+    `Model "${modelName}" not found. Use "git-commit-ai model" to see available models.`
   );
 }
 
@@ -73,10 +98,8 @@ export async function generateCommitMessage(
 
     const commitMessage = result.text.trim();
 
-    // Remove quotes if present
     const cleanMessage = commitMessage.replace(/^["']|["']$/g, '');
 
-    // Validate the commit message format
     if (!isValidConventionalCommit(cleanMessage)) {
       console.log(
         yellow(
@@ -166,9 +189,8 @@ Respond with ONLY the commit message, no explanations or additional text.`;
  * Validate if a commit message follows conventional commit format
  */
 function isValidConventionalCommit(message: string): boolean {
-  // Basic regex for conventional commit format
   const conventionalCommitRegex =
-    /^(feat|fix|docs|style|refactor|test|chore|perf|ci|build)(\(.+\))?: .{1,50}$/;
+    /^(feat|fix|docs|style|refactor|test|chore|perf|ci|build)(\(.+?\))?: .{1,50}$/;
   return conventionalCommitRegex.test(message);
 }
 
@@ -182,7 +204,7 @@ export function parseConventionalCommit(message: string): {
   isValid: boolean;
 } {
   const match = message.match(
-    /^(feat|fix|docs|style|refactor|test|chore|perf|ci|build)(\((.+)\))?: (.+)$/,
+    /^(feat|fix|docs|style|refactor|test|chore|perf|ci|build)(\((.+?)\))?: (.+)$/,
   );
 
   if (!match) {

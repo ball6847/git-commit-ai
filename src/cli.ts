@@ -9,13 +9,53 @@ import { handleCommit } from './cmd/commit.ts';
 import { handleModel } from './cmd/model.ts';
 import { handleStatus } from './cmd/status.ts';
 import { handleVersion } from './cmd/version.ts';
+import { mergeConfig } from './config.ts';
 
 // Load environment variables
 await load({ export: true });
 
 const VERSION = '0.2.0';
 
-// Create CLI application
+function loadConfigAtStartup(): {
+  model: string;
+  maxTokens: number;
+  temperature: number;
+  thinkingEffort?: 'low' | 'medium' | 'high';
+  providers: Record<string, unknown>;
+} {
+  const cliOptions = {} as {
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+  };
+
+  const defaultConfig = {
+    model: '',
+    maxTokens: 200,
+    temperature: 0.3,
+    providers: {},
+  };
+
+  return mergeConfig(
+    cliOptions,
+    {
+      model: Deno.env.get('GIT_COMMIT_AI_MODEL'),
+      temperature: Deno.env.get('GIT_COMMIT_AI_TEMPERATURE') ?
+        Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')) :
+        undefined,
+      maxTokens: Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS') ?
+        Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')) :
+        undefined,
+    },
+    undefined,
+    defaultConfig,
+  );
+}
+
+const ENV = await loadConfigAtStartup();
+
+export { ENV };
+
 const cli = new Command()
   .name('git-commit-ai')
   .version(VERSION)

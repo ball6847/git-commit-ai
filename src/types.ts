@@ -22,6 +22,38 @@ export interface GitStatus {
   [key: string]: string;
 }
 
+export interface ConfigFile {
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  thinkingEffort?: 'low' | 'medium' | 'high';
+  providers?: Record<string, CustomProviderConfig>;
+}
+
+export interface CustomProviderConfig {
+  npm?: string;
+  api?: string;
+  env: string[];
+  extend?: boolean;
+  models?: Record<string, CustomModelConfig>;
+}
+
+export interface CustomModelConfig {
+  name: string;
+  reasoning?: boolean;
+  tool_call?: boolean;
+  attachment?: boolean;
+  temperature?: boolean;
+}
+
+export interface ResolvedConfig {
+  model: string;
+  maxTokens: number;
+  temperature: number;
+  thinkingEffort?: 'low' | 'medium' | 'high';
+  providers: Record<string, CustomProviderConfig>;
+}
+
 // Conventional commit types
 export type ConventionalCommitType =
   | 'feat'

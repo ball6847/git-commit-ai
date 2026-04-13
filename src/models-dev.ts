@@ -4,6 +4,12 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import type { LanguageModel } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { getCacheDir, getModelsCacheFile, migrateLegacyCache } from './paths.ts';
+
+interface CustomModelsDevProvider extends ModelsDevProvider {
+  isCustom: true;
+  isExtended?: boolean;
+}
 
 export interface ModelsDevModel {
   id: string;
@@ -25,7 +31,7 @@ export interface ModelsDevProvider {
   models: Record<string, ModelsDevModel>;
 }
 
-export type ModelsDevResponse = Record<string, ModelsDevProvider>;
+export type ModelsDevResponse = Record<string, ModelsDevProvider | CustomModelsDevProvider>;
 
 export interface AvailableProvider {
   id: string;
@@ -42,8 +48,6 @@ interface CachedModelsDev {
 }
 
 const MODELS_DEV_API_URL = 'https://models.dev/api.json';
-const CACHE_DIR = `${Deno.env.get('HOME') || '.'}/.git-commit-ai`;
-const CACHE_FILE = `${CACHE_DIR}/models-cache.json`;
 const DEFAULT_CACHE_TTL = 86400; // 24 hours in seconds
 
 function getCacheTTL(): number {
@@ -58,8 +62,10 @@ function getCacheTTL(): number {
 }
 
 async function loadCache(): Promise<CachedModelsDev | null> {
+  await migrateLegacyCache();
+
   try {
-    const raw = await Deno.readTextFile(CACHE_FILE);
+    const raw = await Deno.readTextFile(getModelsCacheFile());
     const cached: CachedModelsDev = JSON.parse(raw);
     return cached;
   } catch {
@@ -68,14 +74,16 @@ async function loadCache(): Promise<CachedModelsDev | null> {
 }
 
 async function saveCache(data: ModelsDevResponse): Promise<void> {
+  await migrateLegacyCache();
+
   const cached: CachedModelsDev = {
     data,
     timestamp: Date.now(),
   };
 
   try {
-    await Deno.mkdir(CACHE_DIR, { recursive: true });
-    await Deno.writeTextFile(CACHE_FILE, JSON.stringify(cached));
+    await Deno.mkdir(getCacheDir(), { recursive: true });
+    await Deno.writeTextFile(getModelsCacheFile(), JSON.stringify(cached));
   } catch (error) {
     console.warn('Failed to save models.dev cache:', error);
   }
@@ -137,10 +145,12 @@ export async function refreshModelsDevCache(): Promise<ModelsDevResponse> {
 }
 
 export async function clearModelsDevCache(): Promise<void> {
+  await migrateLegacyCache();
+
   try {
-    await Deno.remove(CACHE_FILE);
+    await Deno.remove(getModelsCacheFile());
   } catch {
-    // Cache file doesn't exist, nothing to clear
+    console.warn('Models cache file does not exist');
   }
 }
 
@@ -237,4 +247,109 @@ export function getModelFromProvider(
 ): LanguageModel {
   const sdk = getProviderSDK(provider);
   return sdk.languageModel(modelId);
+}
+
+export function getModelsFromProvider(
+  provider: ModelsDevProvider | CustomModelsDevProvider,
+): ModelsDevModel[] {
+  return Object.values(provider.models);
+}
+
+export function isCustomProvider(
+  provider: ModelsDevProvider | CustomModelsDevProvider,
+): provider is CustomModelsDevProvider {
+  return (provider as CustomModelsDevProvider).isCustom === true;
+}
+
+export function isExtendedProvider(
+  provider: ModelsDevProvider | CustomModelsDevProvider,
+): provider is CustomModelsDevProvider {
+  return (provider as CustomModelsDevProvider).isExtended === true;
+}
+
+export function mergeCustomProviders(
+  modelsDevData: ModelsDevResponse,
+  customProviders: Record<string, unknown>,
+): ModelsDevResponse {
+  const merged: ModelsDevResponse = { ...modelsDevData };
+
+  for (const providerId of Object.keys(customProviders)) {
+    const customConfig = customProviders[providerId];
+    if (!customConfig) continue;
+
+    const customConfigObj = customConfig as unknown as Record<string, unknown>;
+    if (!customConfigObj) continue;
+
+    const shouldExtend = customConfigObj['extend'] === true;
+    const existingProvider = modelsDevData[providerId] as ModelsDevProvider | undefined;
+    const customModelConfig = customConfigObj['models'];
+
+if (shouldExtend && existingProvider && customModelConfig) {
+      for (const [modelId, modelUnknown] of Object.entries(customModelConfig as Record<string, unknown>)) {
+        const customModel = modelUnknown as unknown as Record<string, unknown>;
+        if (existingProvider.models[modelId]) {
+          const existingModel = existingProvider.models[modelId];
+          if (!existingModel.reasoning && customModel['reasoning']) {
+            console.warn(
+              `Warning: Override reasoning for already defined model "${providerId}/${modelId}"`
+            );
+          }
+        }
+
+        existingProvider.models[modelId] = {
+          id: modelId,
+          name: String(customModel['name']),
+          attachment: !!customModel['attachment'],
+          reasoning: !!customModel['reasoning'],
+          tool_call: !!customModel['tool_call'],
+          temperature: !!customModel['temperature'],
+          cost: existingProvider.models[modelId]?.cost,
+          limit: existingProvider.models[modelId]?.limit,
+        };
+      }
+
+      merged[providerId as string] = existingProvider as ModelsDevResponse[string];
+    } else if (customModelConfig) {
+      const modelsMap: Record<string, ModelsDevModel> = {};
+
+      for (const [modelId, modelUnknown] of Object.entries(customModelConfig as Record<string, unknown>)) {
+        const customModel = modelUnknown as unknown as Record<string, unknown>;
+        modelsMap[modelId] = {
+          id: modelId,
+          name: String(customModel['name']),
+          attachment: !!customModel['attachment'],
+          reasoning: !!customModel['reasoning'],
+          tool_call: !!customModel['tool_call'],
+          temperature: !!customModel['temperature'],
+        };
+      }
+
+      const customEnvArr = customConfigObj['env'];
+      const envList = Array.isArray(customEnvArr) ? customEnvArr : [];
+
+      const customNpmStr = customConfigObj['npm'];
+      const customNpm = typeof customNpmStr === 'string' ? customNpmStr : undefined;
+
+      const customApiStr = customConfigObj['api'];
+      const customApi = typeof customApiStr === 'string' ? customApiStr : undefined;
+
+      const mergedProvider: CustomModelsDevProvider = {
+        id: providerId,
+        name: providerId,
+        env: envList as string[],
+        npm: customNpm || '@ai-sdk/openai-compatible',
+        api: customApi,
+        models: modelsMap,
+        isCustom: true as const,
+      };
+
+      if (customApi && !customNpm) {
+        mergedProvider.npm = '@ai-sdk/openai-compatible';
+      }
+
+      merged[providerId as string] = mergedProvider as ModelsDevResponse[string];
+    }
+  }
+
+  return merged;
 }

@@ -1,11 +1,10 @@
 import { Confirm, Input } from '@cliffy/prompt';
 import { displayCommitMessage, generateCommitMessage } from '../ai.ts';
 import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from '../git.ts';
-import type { AIConfig } from '../types.ts';
+import type { AIConfig, CustomProviderConfig } from '../types.ts';
 import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
-
-const DEFAULT_MAX_TOKENS = 200;
-const DEFAULT_TEMPERATURE = 0.3;
+import { mergeConfig } from '../config.ts';
+import { ENV } from '../cli.ts';
 
 export interface GenerateOptions {
   model?: string;
@@ -67,7 +66,7 @@ export async function handleGenerate(options: GenerateOptions) {
       console.log();
     }
 
-    if (!options.model && !Deno.env.get('GIT_COMMIT_AI_MODEL')) {
+    if (!options.model) {
       console.log(
         red(
           '❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.',
@@ -76,16 +75,31 @@ export async function handleGenerate(options: GenerateOptions) {
       Deno.exit(1);
     }
 
-    // Initialize AI config
-    const aiConfig: AIConfig = {
-      model: options.model || Deno.env.get('GIT_COMMIT_AI_MODEL')!,
-      maxTokens: options.maxTokens ||
-        Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')) ||
-        DEFAULT_MAX_TOKENS,
-      temperature: options.temperature ||
-        Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')) ||
-        DEFAULT_TEMPERATURE,
+    const envVars = {
+      model: Deno.env.get('GIT_COMMIT_AI_MODEL'),
+      temperature: Deno.env.get('GIT_COMMIT_AI_TEMPERATURE') ?
+        Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')) :
+        undefined,
+      maxTokens: Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS') ?
+        Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')) :
+        undefined,
+      thinkingEffort: undefined as string | undefined,
     };
+
+    const defaults = {
+      model: ENV.model,
+      maxTokens: ENV.maxTokens,
+      temperature: ENV.temperature,
+      thinkingEffort: ENV.thinkingEffort,
+      providers: ENV.providers as Record<string, CustomProviderConfig>,
+    };
+
+    const aiConfig: AIConfig = mergeConfig(
+      { model: options.model, temperature: options.temperature, maxTokens: options.maxTokens },
+      envVars,
+      undefined,
+      defaults,
+    );
 
     // Generate commit message
     let commitMessage: string;

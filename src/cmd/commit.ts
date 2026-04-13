@@ -1,10 +1,9 @@
 import { generateCommitMessage } from '../ai.ts';
 import { getChangeSummary, getStagedDiff, isGitRepository } from '../git.ts';
-import { AIConfig } from '../types.ts';
+import type { AIConfig, CustomProviderConfig } from '../types.ts';
+import { mergeConfig } from '../config.ts';
+import { ENV } from '../cli.ts';
 import { bold, cyan, red } from '@std/fmt/colors';
-
-const DEFAULT_MAX_TOKENS = 200;
-const DEFAULT_TEMPERATURE = 0.3;
 
 export interface CommitOptions {
   model?: string;
@@ -29,7 +28,7 @@ export async function handleCommit(options: CommitOptions) {
       Deno.exit(1);
     }
 
-    if (!options.model && !Deno.env.get('GIT_COMMIT_AI_MODEL')) {
+    if (!options.model) {
       console.log(
         red(
           '❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.',
@@ -38,16 +37,31 @@ export async function handleCommit(options: CommitOptions) {
       Deno.exit(1);
     }
 
-    // Initialize AI config
-    const config: AIConfig = {
-      model: options.model || Deno.env.get('GIT_COMMIT_AI_MODEL')!,
-      maxTokens: options.maxTokens ||
-        Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')) ||
-        DEFAULT_MAX_TOKENS,
-      temperature: options.temperature ||
-        Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')) ||
-        DEFAULT_TEMPERATURE,
+    const envVars = {
+      model: Deno.env.get('GIT_COMMIT_AI_MODEL'),
+      temperature: Deno.env.get('GIT_COMMIT_AI_TEMPERATURE') ?
+        Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')) :
+        undefined,
+      maxTokens: Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS') ?
+        Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')) :
+        undefined,
+      thinkingEffort: undefined as string | undefined,
     };
+
+    const defaults = {
+      model: ENV.model,
+      maxTokens: ENV.maxTokens,
+      temperature: ENV.temperature,
+      thinkingEffort: ENV.thinkingEffort,
+      providers: ENV.providers as Record<string, CustomProviderConfig>,
+    };
+
+    const aiConfig: AIConfig = mergeConfig(
+      { model: options.model, temperature: options.temperature, maxTokens: options.maxTokens },
+      envVars,
+      undefined,
+      defaults,
+    );
 
     // By default, stage all changes unless --staged is explicitly specified
     if (!options.staged) {
@@ -101,7 +115,7 @@ export async function handleCommit(options: CommitOptions) {
 
     console.log(cyan('Generating commit message...'));
     const commitMessage = await generateCommitMessage(
-      config,
+      aiConfig,
       diff,
       changeSummary,
       options.message,

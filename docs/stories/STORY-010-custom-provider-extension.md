@@ -2,7 +2,7 @@
 
 **Story ID:** STORY-010
 **Priority:** High
-**Status:** Not Started
+**Status:** Implemented
 **Epic:** Epic 1 — Configuration File Support
 **Created:** 2026-04-13
 
@@ -22,12 +22,12 @@ While models.dev provides a large catalog, it may not include every provider or 
 
 ## Acceptance Criteria
 
-- [ ] Custom providers in config file are resolved alongside models.dev providers
-- [ ] Custom providers can specify `npm` (bundled SDK), `api` (openai-compatible URL), and `env` (env var names for API key)
-- [ ] Custom providers appear in `model` command output with a custom marker (e.g., `[custom]`)
-- [ ] Custom providers work with `--model custom-provider/model-id`
-- [ ] Provider extension: can add models to an existing models.dev provider via `extend: true`
-- [ ] Conflicting provider IDs: config definition merges/extends models.dev, with a console warning for full overrides
+- [x] Custom providers in config file are resolved alongside models.dev providers
+- [x] Custom providers can specify `npm` (bundled SDK), `api` (openai-compatible URL), and `env` (env var names for API key)
+- [x] Custom providers appear in `model` command output with a custom marker (e.g., `[custom]`)
+- [x] Custom providers work with `--model custom-provider/model-id`
+- [x] Provider extension: can add models to an existing models.dev provider via `extend: true`
+- [x] Conflicting provider IDs: config definition merges/extends models.dev, with a console warning for full overrides
 
 ---
 
