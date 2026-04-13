@@ -1,6 +1,6 @@
-import { Confirm, Input } from '@cliffy/prompt';
 import { displayCommitMessage, generateCommitMessage } from '../ai.ts';
 import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from '../git.ts';
+import { Confirm } from '@cliffy/prompt';
 import type { AIConfig, CustomProviderConfig } from '../types.ts';
 import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { mergeConfig } from '../config.ts';
@@ -132,23 +132,8 @@ export async function handleGenerate(options: GenerateOptions) {
       Deno.exit(0);
     }
 
-    // Handle auto-accept or prompt for confirmation
-    let finalMessage: string = commitMessage;
-    if (!options.yes) {
-      const promptedMessage = await promptForCommitMessage(commitMessage);
-
-      if (!promptedMessage) {
-        console.log(blue('📋 Commit cancelled. No commit was made.'));
-        Deno.exit(0);
-      }
-
-      if (promptedMessage.trim() === '') {
-        console.log(red('❌ Empty commit message. Commit cancelled.'));
-        Deno.exit(1);
-      }
-
-      finalMessage = promptedMessage;
-    }
+    // Auto-commit (no confirmation - consistent with commit command)
+    const finalMessage: string = commitMessage;
 
     // Commit changes with the final message
     commitChanges(finalMessage);
@@ -190,35 +175,6 @@ function setupSignalHandlers(): void {
       ctrlCCount = 0;
     }, 3000);
   });
-}
-
-/**
- * Prompt user to edit the commit message
- */
-async function promptForCommitMessage(
-  generatedMessage: string,
-): Promise<string | null> {
-  try {
-    console.log(
-      green(
-        '✏️  Edit the commit message below (press Enter to commit, Ctrl+C twice to cancel):',
-      ),
-    );
-    console.log(
-      yellow('💡 Tip: You can modify the message before pressing Enter\n'),
-    );
-
-    const finalMessage = await Input.prompt({
-      message: 'Commit message:',
-      default: generatedMessage,
-      suggestions: [generatedMessage],
-    });
-
-    return finalMessage.trim();
-  } catch (_error) {
-    // User pressed Ctrl+C during input
-    return null;
-  }
 }
 
 async function pushChanges(options?: GenerateOptions): Promise<void> {
