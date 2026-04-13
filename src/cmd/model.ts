@@ -1,11 +1,32 @@
-import { getAvailableProviders, getModelsDevData } from '../models-dev.ts';
+import { getAvailableProviders, getModelsDevData, mergeCustomProviders } from '../models-dev.ts';
 
 import { bold, cyan, dim, green, red } from '@std/fmt/colors';
+
+async function resolveCustomProviders() {
+  const data = await getModelsDevData();
+
+  let customProviders: Record<string, unknown> | undefined = undefined;
+  try {
+    const { loadConfig } = await import('../config.ts');
+    const configResult = await loadConfig();
+    if (configResult.ok && configResult.value) {
+      customProviders = configResult.value.providers;
+    }
+  } catch {
+    customProviders = undefined;
+  }
+
+  if (!customProviders || Object.keys(customProviders).length === 0) {
+    return data;
+  }
+
+  return mergeCustomProviders(data, customProviders);
+}
 
 export async function handleModel() {
   console.log(cyan(bold('\n🤖 Available AI Models\n')));
 
-  const data = await getModelsDevData();
+  const data = await resolveCustomProviders();
 
   if (Object.keys(data).length === 0) {
     console.log(red('Could not fetch models.dev data. Check your network connection.'));
