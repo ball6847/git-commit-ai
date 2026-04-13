@@ -221,6 +221,7 @@ deno task start generate --model "meta-llama/llama-3.2-3b-instruct" --commit
 - Used in `src/cmd/generate.ts:151-156`
 - Calls `pushChanges(undefined)` which auto-accepts the push
 - Skips the push confirmation prompt
+- Overrides `--no-push` flag and `GIT_COMMIT_AI_NO_PUSH` environment variable
 
 **Example Usage:**
 
@@ -241,6 +242,84 @@ deno task start generate --model "meta-llama/llama-3.2-3b-instruct" --push
 - Automated deployment workflows
 - CI/CD pipelines
 - When you want to commit and push in one step
+
+---
+
+### 9. `--no-push`
+
+**Effect:** Skips the push step entirely without prompting. Useful for workflows that commit but handle push separately.
+
+**Implementation:**
+
+- Used in `src/cmd/generate.ts:160-170`
+- Skips push confirmation prompt and push operation entirely
+- Can be overridden by `--push` flag
+
+**Priority:** `--push` > `--no-push` > `GIT_COMMIT_AI_NO_PUSH` env var > default (show prompt)
+
+**Example Usage:**
+
+```bash
+# Skip push entirely
+deno task start generate --model "meta-llama/llama-3.2-3b-instruct" --no-push
+
+# --push overrides --no-push
+deno task start generate --model "meta-llama/llama-3.2-3b-instruct" --push --no-push
+```
+
+**Expected Output:**
+
+```
+# With --no-push only:
+✅ Successfully committed!
+📋 Push skipped (--no-push).
+
+# With --push --no-push:
+⚠️  --push overrides --no-push.
+✅ Successfully committed!
+✅ Using --push flag - auto-accepting push
+🚀 Successfully pushed changes!
+```
+
+**Use Cases:**
+
+- Users who never push from the generate command
+- CI/CD pipelines that commit but handle push separately
+- Users who want to review before pushing later
+
+---
+
+## Flag Priority Rules
+
+### Priority Order: `--dry-run` > `--push` > `--commit`
+
+When conflicting flags are combined, the following priority rules apply:
+
+| Flags Combined              | Behavior                                | Output                                                       |
+| --------------------------- | --------------------------------------- | ------------------------------------------------------------ |
+| `--dry-run`                 | Generate only, no commit, no push       | "🏃 Dry run completed. Use without --dry-run to commit."     |
+| `--dry-run --commit`        | Generate only (dry-run wins)            | "⚠️ --dry-run is active: ignoring --commit flags"            |
+| `--dry-run --push`          | Generate only (dry-run wins)            | "⚠️ --dry-run is active: ignoring --push flags"              |
+| `--dry-run --commit --push` | Generate only (dry-run wins)            | "⚠️ --dry-run is active: ignoring --commit and --push flags" |
+| `--commit --push`           | Commit and push without prompts         | Both actions auto-accepted                                   |
+| `--commit`                  | Commit without prompt, then push prompt | "Using --commit - auto-accepting commit"                     |
+| `--push`                    | Commit prompt, then push without prompt | "Using --push flag - auto-accepting push"                    |
+
+### Push Decision Priority
+
+When multiple push-related options are present:
+
+```
+--push (CLI flag) > --no-push (CLI flag) > GIT_COMMIT_AI_NO_PUSH (env var) > default (show prompt)
+```
+
+| `--push` | `--no-push` | `GIT_COMMIT_AI_NO_PUSH` | Behavior                           |
+| -------- | ----------- | ----------------------- | ---------------------------------- |
+| -        | -           | -                       | Show push prompt (current default) |
+| yes      | -           | any                     | Auto-push (override everything)    |
+| -        | yes         | any                     | Skip push entirely                 |
+| -        | -           | `true`                  | Skip push entirely                 |
+| yes      | yes         | any                     | Auto-push (`--push` always wins)   |
 
 ---
 
@@ -292,6 +371,7 @@ Most flags can also be set via environment variables:
 | `--model`       | `GIT_COMMIT_AI_MODEL`       | (required)    |
 | `--temperature` | `GIT_COMMIT_AI_TEMPERATURE` | 0.3           |
 | `--max-tokens`  | `GIT_COMMIT_AI_MAX_TOKENS`  | 200           |
+| `--no-push`     | `GIT_COMMIT_AI_NO_PUSH`     | (unset)       |
 
 **Priority Order:** CLI flags > Environment variables > Defaults
 
@@ -309,15 +389,18 @@ Most flags can also be set via environment variables:
 | `--dry-run`     | none  | boolean | false      | Preview without commit                |
 | `--commit`      | none  | boolean | false      | Auto-accept message without prompting |
 | `--push`        | `-p`  | boolean | false      | Auto-accept push without prompting    |
+| `--no-push`     | none  | boolean | false      | Skip push step entirely               |
 
 ---
 
 ## Recommendations
 
 1. **For CI/CD:** Use `--commit --push` for fully automated workflows
-2. **For testing:** Use `--dry-run` to preview messages
+2. **For testing:** Use `--dry-run` to preview messages (takes priority over `--commit` and `--push`)
 3. **For debugging:** Use `--debug` to troubleshoot issues
 4. **For consistency:** Use lower temperature (0.1-0.3) for predictable messages
 5. **For creativity:** Use higher temperature (0.7-0.9) for varied messages
+6. **For commit-only workflows:** Use `--commit --no-push` to commit without pushing
+7. **For environment-based push control:** Set `GIT_COMMIT_AI_NO_PUSH=true` to skip push by default
 
 This comprehensive analysis shows that all flags are properly implemented and serve distinct purposes in the commit generation workflow.

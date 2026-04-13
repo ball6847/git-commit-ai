@@ -1,10 +1,25 @@
-import { displayCommitMessage, generateCommitMessage } from '../ai.ts';
+import { displayCommitMessage, generateCommitMessage as aiGenerateCommitMessage } from '../ai.ts';
 import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository } from '../git.ts';
 import { Confirm, Input } from '@cliffy/prompt';
 import type { AIConfig, CustomProviderConfig } from '../types.ts';
 import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { mergeConfig } from '../config.ts';
 import { ENV } from '../cli.ts';
+
+export interface GenerateDependencies {
+  generateCommitMessage?: typeof aiGenerateCommitMessage;
+  logger?: {
+    log: (...args: unknown[]) => void;
+    error: (...args: unknown[]) => void;
+  };
+}
+
+type DepsLogger = NonNullable<GenerateDependencies['logger']>;
+
+const defaultDeps: Required<GenerateDependencies> = {
+  generateCommitMessage: aiGenerateCommitMessage,
+  logger: globalThis.console,
+};
 
 export interface GenerateOptions {
   model?: string;
@@ -18,23 +33,25 @@ export interface GenerateOptions {
   message?: string;
 }
 
-export async function handleGenerate(options: GenerateOptions) {
-  try {
-    // Setup signal handlers for graceful cancellation
-    setupSignalHandlers();
+export async function handleGenerate(
+  options: GenerateOptions,
+  deps: GenerateDependencies = {},
+): Promise<void> {
+  const { generateCommitMessage = defaultDeps.generateCommitMessage, logger = defaultDeps.logger } =
+    deps;
 
-    // Print header
-    console.log(
+  try {
+    setupSignalHandlers(logger);
+
+    logger.log(
       cyan(bold('\n🚀 Git Commit AI - Conventional Commit Generator\n')),
     );
 
-    // Check if we're in a git repository
     if (!isGitRepository()) {
-      console.log(red('❌ Error: Not in a git repository.'));
+      logger.log(red('❌ Error: Not in a git repository.'));
       Deno.exit(1);
     }
 
-    // Get staged changes
     let diff = '';
     let changeSummary;
     try {
@@ -43,32 +60,31 @@ export async function handleGenerate(options: GenerateOptions) {
         diff = getStagedDiff();
       }
     } catch (error) {
-      console.log(
+      logger.log(
         red(`❌ ${error instanceof Error ? error.message : 'Unknown error'}`),
       );
       if (
         error instanceof Error &&
         error.message.includes('No staged changes')
       ) {
-        console.log(
+        logger.log(
           yellow('💡 Tip: Use "git add <files>" to stage your changes first.'),
         );
       }
       Deno.exit(1);
     }
 
-    // Display change summary
     displayChangeSummary(changeSummary);
 
     if (options.debug) {
-      console.log(yellow('Debug: Git diff preview:'));
-      console.log(yellow(diff.substring(0, 500) + '...'));
-      console.log(yellow(`Debug: Using model: ${options.model}`));
-      console.log();
+      logger.log(yellow('Debug: Git diff preview:'));
+      logger.log(yellow(diff.substring(0, 500) + '...'));
+      logger.log(yellow(`Debug: Using model: ${options.model}`));
+      logger.log();
     }
 
     if (!options.model) {
-      console.log(
+      logger.log(
         red(
           '❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.',
         ),
@@ -102,7 +118,6 @@ export async function handleGenerate(options: GenerateOptions) {
       defaults,
     );
 
-    // Generate commit message
     let commitMessage: string;
     try {
       commitMessage = await generateCommitMessage(
@@ -112,18 +127,17 @@ export async function handleGenerate(options: GenerateOptions) {
         options.message,
       );
     } catch (error) {
-      console.log(
+      logger.log(
         red(
           `❌ AI Generation Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         ),
       );
-      console.log(
+      logger.log(
         yellow('💡 Please check your API key and internet connection.'),
       );
       Deno.exit(1);
     }
 
-    // Display generated message
     displayCommitMessage(commitMessage);
 
     if (options.dryRun) {
@@ -131,93 +145,85 @@ export async function handleGenerate(options: GenerateOptions) {
       if (options.commit) ignoredFlags.push('--commit');
       if (options.push) ignoredFlags.push('--push');
       if (ignoredFlags.length > 0) {
-        console.log(
+        logger.log(
           yellow(`⚠️  --dry-run is active: ignoring ${ignoredFlags.join(' and ')} flags`),
         );
       }
-      console.log(
+      logger.log(
         blue('🏃 Dry run completed. Use without --dry-run to commit.'),
       );
       Deno.exit(0);
     }
 
-    // Auto-accept generated message if --commit is set, otherwise prompt user
     let finalMessage: string;
     if (options.commit) {
       finalMessage = commitMessage;
-      console.log(green('✅ Using --commit - auto-accepting commit'));
+      logger.log(green('✅ Using --commit - auto-accepting commit'));
     } else {
-      const result = await promptForCommitMessage(commitMessage);
+      const result = await promptForCommitMessage(commitMessage, logger);
       finalMessage = result ?? '';
       if (finalMessage === '') {
-        console.log(blue('📋 Commit cancelled.'));
+        logger.log(blue('📋 Commit cancelled.'));
         Deno.exit(0);
       }
     }
 
-    commitChanges(finalMessage);
+    commitChanges(finalMessage, logger);
 
-    // Push decision: --push overrides --no-push and env var
     if (options.push) {
       if (options.noPush) {
-        console.log(yellow('⚠️  --push overrides --no-push.'));
+        logger.log(yellow('⚠️  --push overrides --no-push.'));
       }
-      await pushChanges(true);
+      await pushChanges(true, logger);
     } else if (options.noPush || Deno.env.get('GIT_COMMIT_AI_NO_PUSH') === 'true') {
-      console.log(blue('📋 Push skipped (--no-push).'));
+      logger.log(blue('📋 Push skipped (--no-push).'));
     } else {
-      await pushChanges(false);
+      await pushChanges(false, logger);
     }
   } catch (error) {
-    console.log(
+    logger.log(
       red(
         `❌ Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`,
       ),
     );
     if (options.debug && error instanceof Error) {
-      console.log(yellow(error.stack || 'No stack trace available'));
+      logger.log(yellow(error.stack || 'No stack trace available'));
     }
     Deno.exit(1);
   }
 }
 
-/**
- * Setup signal handlers for graceful cancellation
- */
-function setupSignalHandlers(): void {
+function setupSignalHandlers(logger: DepsLogger): void {
   let ctrlCCount = 0;
 
   Deno.addSignalListener('SIGINT', () => {
     ctrlCCount++;
     if (ctrlCCount === 1) {
-      console.log(
+      logger.log(
         yellow('\n⚠️  Press Ctrl+C again to cancel without committing...'),
       );
     } else {
-      console.log(blue('\n📋 Operation cancelled. No commit was made.'));
+      logger.log(blue('\n📋 Operation cancelled. No commit was made.'));
       Deno.exit(0);
     }
 
-    // Reset counter after 3 seconds
     setTimeout(() => {
       ctrlCCount = 0;
     }, 3000);
   });
 }
 
-/**
- * Prompt user to edit the commit message
- */
 async function promptForCommitMessage(
   generatedMessage: string,
+  logger: DepsLogger,
 ): Promise<string | null> {
   try {
-    console.log(
+    logger.log(
       green(
         '✏️  Edit the commit message below (press Enter to commit, Ctrl+C twice to cancel):',
       ),
     );
-    console.log(
+    logger.log(
       yellow('💡 Tip: You can modify the message before pressing Enter\n'),
     );
 
@@ -233,9 +239,9 @@ async function promptForCommitMessage(
   }
 }
 
-async function pushChanges(autoPush: boolean): Promise<void> {
+async function pushChanges(autoPush: boolean, logger: DepsLogger): Promise<void> {
   if (autoPush) {
-    console.log(green('✅ Using --push - auto-accepting push'));
+    logger.log(green('✅ Using --push - auto-accepting push'));
     const command = new Deno.Command('git', {
       args: ['push'],
       stdout: 'inherit',
@@ -245,9 +251,9 @@ async function pushChanges(autoPush: boolean): Promise<void> {
     const { success: pushSuccess } = command.outputSync();
 
     if (pushSuccess) {
-      console.log(green('🚀 Successfully pushed changes!'));
+      logger.log(green('🚀 Successfully pushed changes!'));
     } else {
-      console.log(red('❌ Push failed'));
+      logger.log(red('❌ Push failed'));
       Deno.exit(1);
     }
     return;
@@ -259,7 +265,7 @@ async function pushChanges(autoPush: boolean): Promise<void> {
   });
 
   if (!shouldPush) {
-    console.log(blue('📋 Push cancelled.'));
+    logger.log(blue('📋 Push cancelled.'));
     Deno.exit(0);
   }
 
@@ -272,14 +278,14 @@ async function pushChanges(autoPush: boolean): Promise<void> {
   const { success: pushSuccess } = pushCommand.outputSync();
 
   if (pushSuccess) {
-    console.log(green('🚀 Successfully pushed changes!'));
+    logger.log(green('🚀 Successfully pushed changes!'));
   } else {
-    console.log(red('❌ Push failed'));
+    logger.log(red('❌ Push failed'));
     Deno.exit(1);
   }
 }
 
-function commitChanges(commitMessage: string): void {
+function commitChanges(commitMessage: string, logger: DepsLogger): void {
   try {
     const command = new Deno.Command('git', {
       args: ['commit', '-m', commitMessage],
@@ -290,13 +296,13 @@ function commitChanges(commitMessage: string): void {
     const { success } = command.outputSync();
 
     if (success) {
-      console.log(green('✅ Successfully committed!'));
+      logger.log(green('✅ Successfully committed!'));
     } else {
-      console.log(red('❌ Commit failed'));
+      logger.log(red('❌ Commit failed'));
       Deno.exit(1);
     }
   } catch (error) {
-    console.log(
+    logger.log(
       red(
         `❌ Operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       ),

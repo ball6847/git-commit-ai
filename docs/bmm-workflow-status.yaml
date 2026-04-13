@@ -8,7 +8,7 @@ project_type: 'cli'
 project_level: 0
 communication_language: 'English'
 output_language: 'English'
-last_updated: '2026-04-13T18:00:00Z'
+last_updated: '2026-04-14T00:00:00Z'
 
 # Workflow Status Tracking
 workflow_status:
@@ -110,7 +110,7 @@ workflow_status:
 
   - name: dev-story-006
     phase: 4
-    status: 'tests/main_test.ts'
+    status: 'completed'
     description: 'Implement STORY-006: Tests for models.dev Integration'
     command: '/dev-story'
 
@@ -122,37 +122,37 @@ workflow_status:
 
   - name: dev-story-001
     phase: 4
-    status: 'src/models-dev.ts'
+    status: 'completed'
     description: 'Implement STORY-001: Fetch and Cache models.dev Database'
     command: '/dev-story'
 
   - name: dev-story-002
     phase: 4
-    status: 'src/models-dev.ts'
+    status: 'completed'
     description: 'Implement STORY-002: Dynamic Provider Resolution'
     command: '/dev-story'
 
   - name: dev-story-003
     phase: 4
-    status: 'src/models-dev.ts'
+    status: 'completed'
     description: 'Implement STORY-003: Vercel AI SDK Provider Loading'
     command: '/dev-story'
 
   - name: dev-story-004
     phase: 4
-    status: 'src/cmd/model.ts'
+    status: 'completed'
     description: 'Implement STORY-004: Update Model Listing Command'
     command: '/dev-story'
 
   - name: dev-story-005
     phase: 4
-    status: 'src/ai.ts'
+    status: 'completed'
     description: 'Implement STORY-005: Update Generate/Commit to Use models.dev'
     command: '/dev-story'
 
   - name: dev-story-007
     phase: 4
-    status: 'README.md'
+    status: 'completed'
     description: 'Implement STORY-007: Credit models.dev and AI SDK in README'
     command: '/dev-story'
 
@@ -181,11 +181,23 @@ workflow_status:
     description: 'XDG Base Directory Paths & Cache Migration'
     command: '/create-story'
 
+  - name: dev-story-008
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-008: XDG Base Directory Paths & Cache Migration'
+    command: '/dev-story'
+
   - name: create-story-009
     phase: 4
     status: 'docs/stories/STORY-009-config-file-support.md'
     description: 'Config File Loading & Merging (~/.config/git-commit-ai/config.json)'
     command: '/create-story'
+
+  - name: dev-story-009
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-009: Config File Loading & Merging'
+    command: '/dev-story'
 
   - name: create-story-010
     phase: 4
@@ -193,11 +205,23 @@ workflow_status:
     description: 'Custom Provider & Extension Registration'
     command: '/create-story'
 
+  - name: dev-story-010
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-010: Custom Provider & Extension Registration'
+    command: '/dev-story'
+
   - name: create-story-011
     phase: 4
     status: 'docs/stories/STORY-011-result-pattern-models-dev.md'
     description: 'Result Pattern — models-dev.ts'
     command: '/create-story'
+
+  - name: dev-story-011
+    phase: 4
+    status: 'not-started'
+    description: 'Implement STORY-011: Result Pattern — models-dev.ts'
+    command: '/dev-story'
 
   - name: create-story-012
     phase: 4
@@ -205,11 +229,23 @@ workflow_status:
     description: 'Result Pattern — ai.ts'
     command: '/create-story'
 
+  - name: dev-story-012
+    phase: 4
+    status: 'not-started'
+    description: 'Implement STORY-012: Result Pattern — ai.ts'
+    command: '/dev-story'
+
   - name: create-story-013
     phase: 4
     status: 'docs/stories/STORY-013-result-pattern-git-cmd.md'
     description: 'Result Pattern — git.ts & cmd/*.ts'
     command: '/create-story'
+
+  - name: dev-story-013
+    phase: 4
+    status: 'not-started'
+    description: 'Implement STORY-013: Result Pattern — git.ts & cmd/*.ts'
+    command: '/dev-story'
 
   - name: create-story-014
     phase: 4
@@ -219,8 +255,32 @@ workflow_status:
 
   - name: dev-story-014
     phase: 4
-    status: 'src/cmd/generate.ts'
+    status: 'completed'
     description: 'Implement STORY-014: Rename --yes flag to --commit'
+    command: '/dev-story'
+
+  - name: create-story-015
+    phase: 4
+    status: 'docs/stories/STORY-015-dependency-injection-refactor.md'
+    description: 'Dependency Injection Refactor for Testability'
+    command: '/create-story'
+
+  - name: dev-story-015
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-015: Dependency Injection Refactor'
+    command: '/dev-story'
+
+  - name: create-story-016
+    phase: 4
+    status: 'docs/stories/STORY-016-integration-testing-ts-mockito.md'
+    description: 'Integration Testing Framework with ts-mockito'
+    command: '/create-story'
+
+  - name: dev-story-016
+    phase: 4
+    status: 'not-started'
+    description: 'Implement STORY-016: Integration Testing Framework'
     command: '/dev-story'
 
   - name: create-story-017
@@ -231,7 +291,7 @@ workflow_status:
 
   - name: dev-story-017
     phase: 4
-    status: 'src/cmd/generate.ts'
+    status: 'completed'
     description: 'Implement STORY-017: dry-run priority over --commit and --push'
     command: '/dev-story'
 
@@ -243,6 +303,6 @@ workflow_status:
 
   - name: dev-story-018
     phase: 4
-    status: 'src/cmd/generate.ts'
+    status: 'completed'
     description: 'Implement STORY-018: --no-push flag and env var support'
     command: '/dev-story'

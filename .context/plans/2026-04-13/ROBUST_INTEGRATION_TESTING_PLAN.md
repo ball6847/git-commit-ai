@@ -25,8 +25,9 @@ tests/integration/
 │   ├── temperature-flag.test.ts
 │   ├── debug-flag.test.ts
 │   ├── dry-run-flag.test.ts
-│   ├── yes-flag.test.ts
+│   ├── commit-flag.test.ts
 │   ├── push-flag.test.ts
+│   ├── no-push-flag.test.ts
 │   └── combinations.test.ts
 └── README.md                 # Testing documentation
 ```
@@ -217,12 +218,12 @@ Deno.test('--dry-run: generates message but does not commit', async () => {
 });
 ```
 
-### 9. `tests/integration/flag-tests/yes-flag.test.ts`
+### 9. `tests/integration/flag-tests/commit-flag.test.ts`
 
-Test `--yes` (`--commit`) auto-commits without prompt:
+Test `--commit` auto-commits without prompt:
 
 ```typescript
-Deno.test('--yes: auto-commits without prompting', async () => {
+Deno.test('--commit: auto-commits without prompting', async () => {
   const harness = await createHarness();
   try {
     await harness.repo.stageFile('fix.ts', '// bugfix');
@@ -281,7 +282,80 @@ Deno.test('--push: pushes commits to remote', async () => {
 });
 ```
 
-### 11. `tests/integration/flag-tests/combinations.test.ts`
+### 11. `tests/integration/flag-tests/no-push-flag.test.ts`
+
+Test `--no-push` skips push step:
+
+```typescript
+Deno.test('--no-push: skips push without prompting', async () => {
+  const harness = await createHarness();
+  try {
+    await harness.repo.stageFile('feature.ts', '// feature');
+    harness.mock.setResponse('feat: add feature');
+
+    await harness.run({
+      model: 'test-model',
+      commit: true,
+      noPush: true,
+    });
+
+    // Commit should exist
+    const committed = await harness.repo.isCommitted('feat: add feature');
+    assertEquals(committed, true);
+
+    // But push should be skipped
+    assertEquals(harness.mock.includes('Push skipped (--no-push)'), true);
+  } finally {
+    await harness.cleanup();
+  }
+});
+
+Deno.test('--push overrides --no-push with warning', async () => {
+  const harness = await createHarness();
+  const remotePath = await Deno.makeTempDir({ prefix: 'remote-' });
+
+  try {
+    // Create bare remote
+    await Deno.remove(remotePath, { recursive: true });
+    await new Deno.Command('git', {
+      args: ['init', '--bare', remotePath],
+      stdout: 'null',
+    }).output();
+
+    await harness.repo.git(['remote', 'add', 'origin', remotePath]);
+    await harness.repo.stageFile('override.ts', '// override');
+    harness.mock.setResponse('feat: override test');
+
+    await harness.run({
+      model: 'test-model',
+      commit: true,
+      push: true,
+      noPush: true,
+    });
+
+    // Verify warning
+    assertEquals(harness.mock.includes('--push overrides --no-push'), true);
+
+    // Verify commit and push still happen (--push wins)
+    const committed = await harness.repo.isCommitted('feat: override test');
+    assertEquals(committed, true);
+
+    // Verify pushed to remote
+    const remoteLog = new Deno.Command('git', {
+      args: ['log', '--oneline'],
+      cwd: remotePath,
+      stdout: 'piped',
+    }).output();
+    const logText = new TextDecoder().decode(remoteLog.stdout);
+    assertEquals(logText.includes('feat: override test'), true);
+  } finally {
+    await harness.cleanup();
+    await Deno.remove(remotePath, { recursive: true }).catch(() => {});
+  }
+});
+```
+
+### 12. `tests/integration/flag-tests/combinations.test.ts`
 
 Test multiple flags together:
 
@@ -309,9 +383,121 @@ Deno.test('combination: --debug --dry-run --message', async () => {
     await harness.cleanup();
   }
 });
+
+Deno.test('--dry-run takes priority over --commit and --push', async () => {
+  const harness = await createHarness();
+  try {
+    await harness.repo.stageFile('priority.ts', '// priority');
+    harness.mock.setResponse('feat: priority test');
+
+    await harness.run({
+      model: 'test-model',
+      dryRun: true,
+      commit: true,
+      push: true,
+    });
+
+    // No commit should be made
+    const committed = await harness.repo.isCommitted('feat: priority test');
+    assertEquals(committed, false);
+
+    // Warning about ignored flags should be shown
+    assertEquals(harness.mock.includes('--dry-run is active: ignoring'), true);
+    assertEquals(harness.mock.includes('--commit'), true);
+    assertEquals(harness.mock.includes('--push'), true);
+    assertEquals(harness.mock.includes('Dry run completed'), true);
+  } finally {
+    await harness.cleanup();
+  }
+});
+
+Deno.test('--dry-run with only --commit shows warning', async () => {
+  const harness = await createHarness();
+  try {
+    await harness.repo.stageFile('commit-only.ts', '// commit-only');
+    harness.mock.setResponse('feat: commit only');
+
+    await harness.run({
+      model: 'test-model',
+      dryRun: true,
+      commit: true,
+    });
+
+    const committed = await harness.repo.isCommitted('feat: commit only');
+    assertEquals(committed, false);
+
+    assertEquals(harness.mock.includes('--dry-run is active: ignoring --commit flags'), true);
+  } finally {
+    await harness.cleanup();
+  }
+});
+
+Deno.test('--dry-run with only --push shows warning', async () => {
+  const harness = await createHarness();
+  try {
+    await harness.repo.stageFile('push-only.ts', '// push-only');
+    harness.mock.setResponse('feat: push only');
+
+    await harness.run({
+      model: 'test-model',
+      dryRun: true,
+      push: true,
+    });
+
+    const committed = await harness.repo.isCommitted('feat: push only');
+    assertEquals(committed, false);
+
+    assertEquals(harness.mock.includes('--dry-run is active: ignoring --push flags'), true);
+  } finally {
+    await harness.cleanup();
+  }
+});
+
+Deno.test('full automated workflow: --commit --push', async () => {
+  const harness = await createHarness();
+  const remotePath = await Deno.makeTempDir({ prefix: 'remote-' });
+
+  try {
+    await Deno.remove(remotePath, { recursive: true });
+    await new Deno.Command('git', {
+      args: ['init', '--bare', remotePath],
+      stdout: 'null',
+    }).output();
+
+    await harness.repo.git(['remote', 'add', 'origin', remotePath]);
+    await harness.repo.stageFile('full-auto.ts', '// full automation');
+    harness.mock.setResponse('feat: full automation');
+
+    await harness.run({
+      model: 'test-model',
+      commit: true,
+      push: true,
+    });
+
+    // Verify local commit
+    const committed = await harness.repo.isCommitted('feat: full automation');
+    assertEquals(committed, true);
+
+    // Verify auto-commit and auto-push messages
+    assertEquals(harness.mock.includes('Using --commit'), true);
+    assertEquals(harness.mock.includes('Using --push flag'), true);
+
+    // Verify pushed to remote
+    const remoteLog = new Deno.Command('git', {
+      args: ['log', '--oneline'],
+      cwd: remotePath,
+      stdout: 'piped',
+    }).output();
+    const logText = new TextDecoder().decode(remoteLog.stdout);
+    assertEquals(logText.includes('feat: full automation'), true);
+  } finally {
+    await harness.cleanup();
+    await Deno.remove(remotePath, { recursive: true }).catch(() => {});
+  }
+});
 ```
 
-### 12. `tests/integration/README.md`
+### 13. `tests/integration/README.md`
 
 Document the testing setup:
 
@@ -320,6 +506,7 @@ Document the testing setup:
 - How to add new flag tests
 - Architecture overview
 - Troubleshooting
+- Flag priority behavior documentation (reference STORY-017 and STORY-018)
 
 ## Files to Modify
 
@@ -389,9 +576,16 @@ All tests should:
 - Clean up temp directories (verify with `ls /tmp/`)
 - Show clear assertion failures if behavior changes
 
+**New Flag Behavior Tests (STORY-017 & STORY-018):**
+
+- `--dry-run` priority tests verify the warning message format and early exit behavior
+- `--no-push` tests verify push is skipped with correct output message
+- `--push --no-push` override test verifies warning and that push still occurs
+- Flag combination tests ensure priority rules are respected
+
 ## Expected Outcome
 
-1. All 8 flag behaviors are tested with real git repositories
+1. All 9 flag behaviors are tested with real git repositories (--model, --message, --max-tokens, --temperature, --debug, --dry-run, --commit, --push, --no-push)
 2. Tests assert on behavior (commits exist in log) not implementation (which git command ran)
 3. ts-mockito provides type-safe, expressive mocking
 4. Test harness pattern makes each test ~10 lines
