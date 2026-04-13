@@ -149,10 +149,9 @@ export async function handleGenerate(options: GenerateOptions) {
     commitChanges(finalMessage);
 
     if (options.push) {
-      console.log(green('✅ Using --push flag - auto-accepting push'));
-      await pushChanges(undefined);
-    } else {
       await pushChanges(true);
+    } else {
+      await pushChanges(false);
     }
   } catch (error) {
     console.log(
@@ -219,9 +218,9 @@ async function promptForCommitMessage(
   }
 }
 
-async function pushChanges(provideConfirmation?: boolean): Promise<void> {
-  if (provideConfirmation) {
-    console.log(green('✅ Using --push flag - auto-accepting push'));
+async function pushChanges(autoPush: boolean): Promise<void> {
+  if (autoPush) {
+    console.log(green('✅ Using --push - auto-accepting push'));
     const command = new Deno.Command('git', {
       args: ['push'],
       stdout: 'inherit',
@@ -249,7 +248,6 @@ async function pushChanges(provideConfirmation?: boolean): Promise<void> {
     Deno.exit(0);
   }
 
-  // Execute git push
   const pushCommand = new Deno.Command('git', {
     args: ['push'],
     stdout: 'inherit',
