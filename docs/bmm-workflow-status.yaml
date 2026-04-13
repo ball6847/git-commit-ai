@@ -306,3 +306,27 @@ workflow_status:
     status: 'completed'
     description: 'Implement STORY-018: --no-push flag and env var support'
     command: '/dev-story'
+
+  - name: create-story-019
+    phase: 4
+    status: 'docs/stories/STORY-019-integration-tests-commit-command.md'
+    description: 'Integration Tests for commit Command'
+    command: '/create-story'
+
+  - name: create-story-020
+    phase: 4
+    status: 'docs/stories/STORY-020-integration-tests-model-command.md'
+    description: 'Integration Tests for model Command'
+    command: '/create-story'
+
+  - name: create-story-021
+    phase: 4
+    status: 'docs/stories/STORY-021-integration-tests-status-command.md'
+    description: 'Integration Tests for status Command'
+    command: '/create-story'
+
+  - name: create-story-022
+    phase: 4
+    status: 'docs/stories/STORY-022-integration-tests-version-command.md'
+    description: 'Integration Tests for version Command'
+    command: '/create-story'
