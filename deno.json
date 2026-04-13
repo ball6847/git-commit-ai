@@ -9,7 +9,7 @@
     "start": "deno run --allow-run --allow-env --allow-read --allow-write --allow-net src/cli.ts",
     "dev": "deno run --allow-run --allow-env --allow-read --allow-write --allow-net --watch src/cli.ts",
     "install:local": "deno install --global --allow-run --allow-env --allow-read --allow-write --allow-net -n git-commit-ai-local --config deno.json --force ./src/cli.ts",
-    "test": "deno test --allow-run --allow-env --allow-read",
+    "test": "deno test --allow-run --allow-env --allow-read --allow-write",
     "check": "deno check src/cli.ts",
     "lint": "deno lint",
     "fmt": "deno fmt",
