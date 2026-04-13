@@ -363,3 +363,4 @@ Made with ❤️ using Deno and TypeScript
 # test ollama cloud
 test readme
 # auto commit test
+test readme
