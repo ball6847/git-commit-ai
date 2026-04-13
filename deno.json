@@ -6,8 +6,8 @@
     "include": ["src/**/*.ts", "README.md"]
   },
   "tasks": {
-    "start": "deno run --allow-run --allow-env --allow-read src/cli.ts",
-    "dev": "deno run --allow-run --allow-env --allow-read --watch src/cli.ts",
+    "start": "deno run --allow-run --allow-env --allow-read --allow-write --allow-net src/cli.ts",
+    "dev": "deno run --allow-run --allow-env --allow-read --allow-write --allow-net --watch src/cli.ts",
     "install:local": "deno install --global --allow-run --allow-env --allow-read --allow-write --allow-net -n git-commit-ai-local --config deno.json --force ./src/cli.ts",
     "test": "deno test --allow-run --allow-env --allow-read",
     "check": "deno check src/cli.ts",
@@ -32,11 +32,7 @@
   },
   "nodeModulesDir": "auto",
   "compilerOptions": {
-    "lib": [
-      "deno.ns",
-      "dom",
-      "es2022"
-    ],
+    "lib": ["deno.ns", "dom", "es2022"],
     "strict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -53,9 +49,7 @@
   },
   "lint": {
     "rules": {
-      "tags": [
-        "recommended"
-      ]
+      "tags": ["recommended"]
     }
   }
 }
