@@ -14,6 +14,7 @@ export interface GenerateOptions {
   dryRun?: boolean;
   commit?: boolean;
   push?: boolean;
+  noPush?: boolean;
   message?: string;
 }
 
@@ -126,6 +127,14 @@ export async function handleGenerate(options: GenerateOptions) {
     displayCommitMessage(commitMessage);
 
     if (options.dryRun) {
+      const ignoredFlags: string[] = [];
+      if (options.commit) ignoredFlags.push('--commit');
+      if (options.push) ignoredFlags.push('--push');
+      if (ignoredFlags.length > 0) {
+        console.log(
+          yellow(`⚠️  --dry-run is active: ignoring ${ignoredFlags.join(' and ')} flags`),
+        );
+      }
       console.log(
         blue('🏃 Dry run completed. Use without --dry-run to commit.'),
       );
@@ -148,8 +157,14 @@ export async function handleGenerate(options: GenerateOptions) {
 
     commitChanges(finalMessage);
 
+    // Push decision: --push overrides --no-push and env var
     if (options.push) {
+      if (options.noPush) {
+        console.log(yellow('⚠️  --push overrides --no-push.'));
+      }
       await pushChanges(true);
+    } else if (options.noPush || Deno.env.get('GIT_COMMIT_AI_NO_PUSH') === 'true') {
+      console.log(blue('📋 Push skipped (--no-push).'));
     } else {
       await pushChanges(false);
     }
