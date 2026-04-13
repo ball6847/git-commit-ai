@@ -49,7 +49,6 @@ export interface GenerateOptions {
   commit?: boolean;
   push?: boolean;
   noPush?: boolean;
-  message?: string;
 }
 
 export async function handleGenerate(
@@ -153,7 +152,6 @@ export async function handleGenerate(
         aiConfig,
         diff,
         changeSummary,
-        options.message,
       );
     } catch (error) {
       logger.log(

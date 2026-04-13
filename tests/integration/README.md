@@ -22,7 +22,6 @@ tests/integration/
 │   └── test-harness.ts     # Combines repo + mock + harness.run()
 ├── generate-tests/
 │   ├── model-flag.test.ts
-│   ├── message-flag.test.ts
 │   ├── ai-params.test.ts
 │   ├── debug-flag.test.ts
 │   ├── dry-run-flag.test.ts

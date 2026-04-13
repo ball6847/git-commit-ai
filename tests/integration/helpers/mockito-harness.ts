@@ -6,7 +6,6 @@ export interface AIService {
     config: AIConfig,
     gitDiff: string,
     changeSummary: ChangeSummary,
-    userMessage?: string,
   ): Promise<string>;
 }
 
@@ -22,7 +21,7 @@ export function createMockitoHarness(): MockitoHarness {
     mock: aiMock,
     instance: instance(aiMock),
     setResponse(response: string) {
-      when(aiMock.generateCommitMessage(anything(), anything(), anything(), anything()))
+      when(aiMock.generateCommitMessage(anything(), anything(), anything()))
         .thenResolve(response);
     },
   };

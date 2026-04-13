@@ -12,7 +12,6 @@ export interface CommitOptions {
   debug?: boolean;
   provider?: string;
   staged?: boolean;
-  message?: string;
 }
 
 export async function handleCommit(options: CommitOptions) {
@@ -118,7 +117,6 @@ export async function handleCommit(options: CommitOptions) {
       aiConfig,
       diff,
       changeSummary,
-      options.message,
     );
 
     console.log(`\n${commitMessage}\n`);

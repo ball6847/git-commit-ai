@@ -34,8 +34,8 @@ function createGenerateRunner(
 ): (opts: GenerateOptions) => Promise<void> {
   return (opts: GenerateOptions) =>
     handleGenerate(opts, {
-      generateCommitMessage: (config, diff, summary, message) =>
-        ai.instance.generateCommitMessage(config, diff, summary, message),
+      generateCommitMessage: (config, diff, summary) =>
+        ai.instance.generateCommitMessage(config, diff, summary),
       isGitRepository: () => isGitRepository(repo.dir),
       getChangeSummary: () => getChangeSummary(repo.dir),
       getStagedDiff: () => getStagedDiff(repo.dir),

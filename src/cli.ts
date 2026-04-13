@@ -72,10 +72,6 @@ cli
   .alias('gen')
   .alias('g')
   .option('-m, --model <model:string>', 'AI model to use')
-  .option(
-    '-M, --message <message:string>',
-    'User message to guide AI (e.g., "refactor this function")',
-  )
   .option('--max-tokens <maxTokens:number>', 'Maximum tokens for AI response')
   .option('--temperature <temperature:number>', 'AI temperature (0.0-1.0)')
   .option('-d, --debug', 'Enable debug output')
@@ -97,10 +93,6 @@ cli
   .alias('c')
   .option('--model <model:string>', 'AI model to use')
   .option('-p, --provider <provider:string>', 'AI provider to use')
-  .option(
-    '-m, --message <message:string>',
-    'User message to guide AI (e.g., "refactor this function")',
-  )
   .option('--staged', 'Only commit staged changes (default: stage all)')
   .option('-d, --debug', 'Enable debug output')
   .action(handleCommit);
