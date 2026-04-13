@@ -1,5 +1,6 @@
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createCerebras } from '@ai-sdk/cerebras';
+import { createMistral } from '@ai-sdk/mistral';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import type { LanguageModel } from 'ai';
@@ -194,8 +195,9 @@ const BUNDLED_SDK_FACTORIES: Record<
   (opts: { apiKey: string; baseURL?: string }) => SDKProvider
 > = {
   '@ai-sdk/anthropic': (opts) => createAnthropic(opts),
-  '@ai-sdk/openai': (opts) => createOpenAI(opts),
   '@ai-sdk/cerebras': (opts) => createCerebras(opts),
+  '@ai-sdk/mistral': (opts) => createMistral(opts),
+  '@ai-sdk/openai': (opts) => createOpenAI(opts),
   '@ai-sdk/openai-compatible': (opts) =>
     createOpenAICompatible({
       apiKey: opts.apiKey,
