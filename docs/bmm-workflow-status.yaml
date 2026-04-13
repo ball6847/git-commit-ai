@@ -279,7 +279,7 @@ workflow_status:
 
   - name: dev-story-016
     phase: 4
-    status: 'not-started'
+    status: 'completed'
     description: 'Implement STORY-016: Integration Testing Framework'
     command: '/dev-story'
 

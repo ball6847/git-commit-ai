@@ -11,7 +11,7 @@ epic: Epic 4 - Testing Infrastructure
 
 **Story ID:** STORY-016
 **Priority:** High
-**Status:** Not Started
+**Status:** Completed
 **Sprint:** Sprint 2
 **Epic:** Epic 4 - Testing Infrastructure
 
@@ -23,33 +23,33 @@ As a developer, I want comprehensive integration tests for all `generate` comman
 
 ### Infrastructure
 
-- [ ] `ts-mockito` added to `deno.json` imports (`npm:ts-mockito@^2.6.1`)
-- [ ] `test:integration` task added to `deno.json`
-- [ ] Directory structure created: `tests/integration/helpers/` and `tests/integration/flag-tests/`
+- [x] `ts-mockito` added to `deno.json` imports (`npm:ts-mockito@^2.6.1`)
+- [x] `test:integration` task added to `deno.json`
+- [x] Directory structure created: `tests/integration/helpers/` and `tests/integration/flag-tests/`
 
 ### Test Helpers
 
-- [ ] `temp-repo.ts` created with `createTempRepo()`, `stageFile()`, `getLog()`, `isCommitted()`, `cleanup()`
-- [ ] `mockito-harness.ts` created with `createMockitoHarness()` returning AI mock + console capture
-- [ ] `test-harness.ts` created combining temp-repo + mockito-harness with `run()` method
+- [x] `temp-repo.ts` created with `createTempRepo()`, `stageFile()`, `getLog()`, `isCommitted()`, `cleanup()`
+- [x] `mockito-harness.ts` created with `createMockitoHarness()` returning AI mock + console capture
+- [x] `test-harness.ts` created combining temp-repo + mockito-harness with `run()` method
 
 ### Flag Tests
 
-- [ ] `model-flag.test.ts` - Asserts model ID passed to AI config
-- [ ] `message-flag.test.ts` - Asserts user message passed to AI
-- [ ] `ai-params.test.ts` - Asserts temperature and maxTokens in AI config
-- [ ] `debug-flag.test.ts` - Asserts debug output contains diff and model info
-- [ ] `dry-run-flag.test.ts` - Asserts AI called but commit NOT in git log
-- [ ] `yes-flag.test.ts` - Asserts commit IS in git log without prompt
-- [ ] `push-flag.test.ts` - Asserts commit pushed to bare remote repo
-- [ ] `combinations.test.ts` - Asserts multiple flags work together
+- [x] `model-flag.test.ts` - Asserts model ID passed to AI config
+- [x] `message-flag.test.ts` - Asserts user message passed to AI
+- [x] `ai-params.test.ts` - Asserts temperature and maxTokens in AI config
+- [x] `debug-flag.test.ts` - Asserts debug output contains diff and model info
+- [x] `dry-run-flag.test.ts` - Asserts AI called but commit NOT in git log
+- [x] `yes-flag.test.ts` - Asserts commit IS in git log without prompt
+- [x] `push-flag.test.ts` - Asserts commit pushed to bare remote repo
+- [x] `combinations.test.ts` - Asserts multiple flags work together
 
 ### Test Execution
 
-- [ ] `deno task test:integration` runs all flag tests
-- [ ] All tests pass (< 2 seconds each)
-- [ ] Tests are parallel-safe (isolated temp repos)
-- [ ] Tests clean up temp directories (no pollution)
+- [x] `deno task test:integration` runs all flag tests
+- [x] All tests pass (< 2 seconds each)
+- [x] Tests are parallel-safe (isolated temp repos)
+- [x] Tests clean up temp directories (no pollution)
 
 ## Technical Notes
 

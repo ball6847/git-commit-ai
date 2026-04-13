@@ -4,12 +4,13 @@ import type { ChangeSummary, FileChange, GitStatus } from './types.ts';
 /**
  * Get the current git diff for staged changes
  */
-export function getStagedDiff(): string {
+export function getStagedDiff(cwd?: string): string {
   try {
     const command = new Deno.Command('git', {
       args: ['diff', '--cached', '--diff-filter=d'],
       stdout: 'piped',
       stderr: 'piped',
+      cwd,
     });
 
     const { success, stdout, stderr } = command.outputSync();
@@ -40,12 +41,13 @@ export function getStagedDiff(): string {
 /**
  * Get a summary of changed files
  */
-export function getChangeSummary(): ChangeSummary {
+export function getChangeSummary(cwd?: string): ChangeSummary {
   try {
     const command = new Deno.Command('git', {
       args: ['diff', '--cached', '--name-status'],
       stdout: 'piped',
       stderr: 'piped',
+      cwd,
     });
 
     const { success, stdout, stderr } = command.outputSync();
@@ -101,12 +103,13 @@ function getStatusDescription(status: string): string {
 /**
  * Check if we're in a git repository
  */
-export function isGitRepository(): boolean {
+export function isGitRepository(cwd?: string): boolean {
   try {
     const command = new Deno.Command('git', {
       args: ['rev-parse', '--git-dir'],
       stdout: 'piped',
       stderr: 'piped',
+      cwd,
     });
 
     const { success } = command.outputSync();

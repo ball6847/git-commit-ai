@@ -12,6 +12,14 @@ export function wrap<T>(fn: () => T): Result<T, Error> {
   }
 }
 
+export async function wrapAsync<T>(fn: () => Promise<T>): Promise<Result<T, Error>> {
+  try {
+    return { ok: true, value: await fn() };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error : new Error(String(error)) };
+  }
+}
+
 export function unwrap<T>(result: Result<T>): T {
   if (result.ok) return result.value as T;
   throw result.error as Error;
