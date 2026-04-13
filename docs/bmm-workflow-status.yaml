@@ -167,3 +167,46 @@ workflow_status:
     status: 'optional'
     description: 'Review implemented code for quality and standards'
     command: '/code-review'
+
+  # Sprint 2 Stories
+  - name: sprint-2-planning
+    phase: 4
+    status: 'docs/stories/sprint-2-plan.md'
+    description: 'Sprint 2: XDG paths, config file, custom providers & Result refactoring'
+    command: '/sprint-planning'
+
+  - name: create-story-008
+    phase: 4
+    status: 'docs/stories/STORY-008-xdg-paths-cache-migration.md'
+    description: 'XDG Base Directory Paths & Cache Migration'
+    command: '/create-story'
+
+  - name: create-story-009
+    phase: 4
+    status: 'docs/stories/STORY-009-config-file-support.md'
+    description: 'Config File Loading & Merging (~/.config/git-commit-ai/config.json)'
+    command: '/create-story'
+
+  - name: create-story-010
+    phase: 4
+    status: 'docs/stories/STORY-010-custom-provider-extension.md'
+    description: 'Custom Provider & Extension Registration'
+    command: '/create-story'
+
+  - name: create-story-011
+    phase: 4
+    status: 'docs/stories/STORY-011-result-pattern-models-dev.md'
+    description: 'Result Pattern — models-dev.ts'
+    command: '/create-story'
+
+  - name: create-story-012
+    phase: 4
+    status: 'docs/stories/STORY-012-result-pattern-ai.md'
+    description: 'Result Pattern — ai.ts'
+    command: '/create-story'
+
+  - name: create-story-013
+    phase: 4
+    status: 'docs/stories/STORY-013-result-pattern-git-cmd.md'
+    description: 'Result Pattern — git.ts & cmd/*.ts'
+    command: '/create-story'
