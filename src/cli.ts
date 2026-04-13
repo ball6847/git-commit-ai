@@ -82,6 +82,7 @@ cli
   .option('--dry-run', 'Generate message without committing')
   .option('--commit', 'Auto-accept generated message without prompting')
   .option('-p, --push', 'Auto-accept push to remote without prompting')
+  .option('--no-push', 'Skip push step entirely (overridden by --push)')
   .action(handleGenerate);
 
 // Add version command
