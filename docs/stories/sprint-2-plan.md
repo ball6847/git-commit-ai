@@ -350,14 +350,58 @@ Migration from old layout:
 
 ---
 
+## Epic 3: CLI UX Improvement
+
+Improve CLI flag naming for consistency and discoverability.
+
+**Priority:** Medium
+
+### Story 2.7: Rename `--yes` Flag to `--commit`
+
+**Story ID:** STORY-014
+**Priority:** Medium
+**Status:** Not Started
+
+**User Story:**
+As a user of git-commit-ai, I want the `--yes` flag renamed to `--commit` so that the flag naming is consistent with `--push` — both flags describe the action being auto-confirmed without prompting.
+
+**Acceptance Criteria:**
+
+- [ ] `--yes` / `-y` flag removed from `generate` command
+- [ ] `--commit` flag added to `generate` command
+- [ ] `GenerateOptions` interface updated: `yes` → `commit`
+- [ ] `handleGenerate()` uses `options.commit` instead of `options.yes`
+- [ ] Output message updated to reflect new flag name
+- [ ] No references to `--yes` or `-y` remain in source code
+- [ ] `deno lint` and `deno check` pass
+
+**Technical Notes:**
+
+- Replace `-y, --yes` with `--commit` (no short flag — explicit and self-documenting)
+- Update `src/cli.ts` flag definition
+- Update `src/cmd/generate.ts` interface and logic
+- This is a breaking change but acceptable at v0.2.0
+
+**Files to Create:**
+
+- None
+
+**Files to Modify:**
+
+- `src/cli.ts`
+- `src/cmd/generate.ts`
+- `FLAG_ANALYSIS_REPORT.md` (if exists)
+
+---
+
 ## Sprint Metrics
 
-| Metric            | Value            |
-| ----------------- | ---------------- |
-| Total Stories     | 6                |
-| Story Points      | 18 (3+5+5+2+2+1) |
-| Sprint Duration   | 2-3 weeks        |
-| Target Completion | 2026-05-04       |
+| Metric            | Value             |
+| ----------------- | ----------------- |
+| Total Stories     | 7                 |
+| Story Points      | 19 (3+5+5+2+2+1+1)|
+| Sprint Duration   | 2-3 weeks         |
+| Target Completion | 2026-05-04        |
 
 ## Dependencies
 
@@ -374,6 +418,8 @@ STORY-008 (XDG paths + cache migration)
   └── STORY-011 (Result: models-dev.ts) — depends on 008
       └── STORY-012 (Result: ai.ts) — depends on 011
           └── STORY-013 (Result: git.ts + cmds) — depends on 011, 012
+
+STORY-014 (Rename --yes to --commit) — independent
 ```
 
 ## Risks

@@ -80,8 +80,8 @@ cli
   .option('--temperature <temperature:number>', 'AI temperature (0.0-1.0)')
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')
-  .option('-y, --yes', 'Auto-accept generated message without prompting')
-  .option('-p, --push', 'Push changes to remote after commit')
+  .option('--commit', 'Auto-accept generated message without prompting')
+  .option('-p, --push', 'Auto-accept push to remote without prompting')
   .action(handleGenerate);
 
 // Add version command

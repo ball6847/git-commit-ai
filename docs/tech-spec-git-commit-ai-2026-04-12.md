@@ -67,7 +67,7 @@ git-commit-ai is a Deno-based CLI tool that generates conventional commit messag
 - Calls `generateCommitMessage()` from ai.ts
 - Interactive prompt to edit/confirm commit message
 - Optional push to remote
-- Supports `--dry-run`, `--yes`, `--debug`, `--push`, `--model`, `--message`
+- Supports `--dry-run`, `--commit`, `--debug`, `--push`, `--model`, `--message`
 
 ### `src/cmd/commit.ts` — Quick Commit Command
 

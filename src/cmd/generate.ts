@@ -12,7 +12,7 @@ export interface GenerateOptions {
   temperature?: number;
   debug?: boolean;
   dryRun?: boolean;
-  yes?: boolean;
+  commit?: boolean;
   push?: boolean;
   message?: string;
 }
@@ -132,11 +132,11 @@ export async function handleGenerate(options: GenerateOptions) {
       Deno.exit(0);
     }
 
-    // Auto-accept generated message if --yes is set, otherwise prompt user
+    // Auto-accept generated message if --commit is set, otherwise prompt user
     let finalMessage: string;
-    if (options.yes) {
+    if (options.commit) {
       finalMessage = commitMessage;
-      console.log(green('✅ Using --yes - accepting generated message'));
+      console.log(green('✅ Using --commit - auto-accepting commit'));
     } else {
       const result = await promptForCommitMessage(commitMessage);
       finalMessage = result ?? '';

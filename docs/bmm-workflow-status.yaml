@@ -210,3 +210,9 @@ workflow_status:
     status: 'docs/stories/STORY-013-result-pattern-git-cmd.md'
     description: 'Result Pattern — git.ts & cmd/*.ts'
     command: '/create-story'
+
+  - name: create-story-014
+    phase: 4
+    status: 'docs/stories/STORY-014-rename-yes-to-commit-flag.md'
+    description: 'Rename --yes flag to --commit in generate command'
+    command: '/create-story'

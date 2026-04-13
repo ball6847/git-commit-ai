@@ -301,7 +301,7 @@ deno task start generate --debug
 - [ ] Allow OpenRouter provider to be provided via environment variable or command line argument
 - [x] Allow OpenRouter model to be provided via environment variable, prioritize lower than command line argument
 - [x] Ask if user wants to push to current tracking remote and branch, default to No
-- [x] Add non-interactive flag `-y` to accept all prompts with default behavior
+- [x] Add non-interactive flag `--commit` to auto-accept generated message without prompting
 - [x] Be smarter about detecting deleted files/code, and not detect feature removal as implementation
 - [x] Allow user to edit commit message before committing, with Ctrl+C to cancel
 
