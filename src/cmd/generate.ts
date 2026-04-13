@@ -139,7 +139,9 @@ export async function handleGenerate(options: GenerateOptions) {
     commitChanges(finalMessage);
 
     // Push changes if commit was successful
-    await pushChanges(options);
+    // If --push or --yes flag is set, auto-confirm push; otherwise, prompt user
+    const pushOptions = options?.push || options?.yes ? options : undefined;
+    await pushChanges(pushOptions);
   } catch (error) {
     console.log(
       red(
