@@ -101,6 +101,8 @@ git-commit-ai generate --dry-run
 git-commit-ai generate --debug
 ```
 
+**Smart Staging:** If you have no staged changes, `generate` will automatically stage all files for you. If you already staged some files, it will only generate a message for those staged files.
+
 #### `status`
 
 Show current git status and staged changes:

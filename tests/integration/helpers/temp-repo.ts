@@ -2,6 +2,7 @@ import { Result } from 'typescript-result';
 
 export interface TempRepo {
   dir: string;
+  writeFile(name: string, content: string): void;
   stageFile(name: string, content: string): void;
   getLog(): string[];
   isCommitted(message: string): boolean;
@@ -32,7 +33,7 @@ export function createTempRepo(): TempRepo {
   runGit(['config', 'user.email', 'test@example.com']);
   runGit(['config', 'user.name', 'Test User']);
 
-  function stageFile(name: string, content: string): void {
+  function writeFile(name: string, content: string): void {
     const filePath = `${dir}/${name}`;
     const lastSlash = name.lastIndexOf('/');
     if (lastSlash > 0) {
@@ -40,6 +41,10 @@ export function createTempRepo(): TempRepo {
       Deno.mkdirSync(subdir, { recursive: true });
     }
     Deno.writeTextFileSync(filePath, content);
+  }
+
+  function stageFile(name: string, content: string): void {
+    writeFile(name, content);
     runGit(['add', name]);
   }
 
@@ -64,7 +69,7 @@ export function createTempRepo(): TempRepo {
     await Deno.remove(dir, { recursive: true }).catch(() => {});
   }
 
-  return { dir, stageFile, getLog, isCommitted, addRemote, cleanup };
+  return { dir, writeFile, stageFile, getLog, isCommitted, addRemote, cleanup };
 }
 
 export function getRemoteLog(remoteDir: string): Result<string[], Error> {

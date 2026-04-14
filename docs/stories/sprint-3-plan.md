@@ -10,7 +10,7 @@
 
 ## Sprint Goal
 
-Simplify the CLI by removing the redundant `commit` command and consolidating its behavior into `generate` via a new `--stage` flag. Add integration tests to verify config file loading and custom provider merging work correctly in isolation.
+Simplify the CLI by removing the redundant `commit` command and consolidating its behavior into `generate` via smart auto-staging. Add integration tests to verify config file loading and custom provider merging work correctly in isolation.
 
 ---
 
@@ -19,7 +19,7 @@ Simplify the CLI by removing the redundant `commit` command and consolidating it
 **Epic ID:** EPIC-006
 **Priority:** High
 
-Remove the `commit` command (which duplicates `generate --commit`) and add `--stage` to the `generate` command so users can stage unstaged changes before generating a commit message.
+Remove the `commit` command (which duplicates `generate --commit`) and make `generate` smart about staging: auto-stage all changes when nothing is staged, and respect explicitly staged files when present.
 
 ### Stories
 
@@ -65,7 +65,7 @@ Add isolated integration tests for config file loading and custom provider mergi
 
 | Risk                             | Impact | Mitigation                                |
 | -------------------------------- | ------ | ----------------------------------------- |
-| Users depend on `commit` command | Low    | `generate --stage --commit` is equivalent |
+| Users depend on `commit` command | Low    | `generate --commit` is equivalent         |
 | Integration tests touch real FS  | Low    | Use temp directories in tests             |
 
 ---

@@ -16,6 +16,7 @@ export interface Harness {
   logs: string[];
   errors: string[];
   exitCode: number | null;
+  stageAllCalled: boolean;
   run(options: GenerateOptions): Promise<Result<void, Error>>;
   cleanup(): Promise<void>;
 }
@@ -31,6 +32,7 @@ function createGenerateRunner(
   ai: MockitoHarness,
   logs: string[],
   errors: string[],
+  stageAllCalledRef: { value: boolean },
 ): (opts: GenerateOptions) => Promise<void> {
   return (opts: GenerateOptions) =>
     handleGenerate(opts, {
@@ -39,6 +41,16 @@ function createGenerateRunner(
       isGitRepository: () => isGitRepository(repo.dir),
       getChangeSummary: () => getChangeSummary(repo.dir),
       getStagedDiff: () => getStagedDiff(repo.dir),
+      stageAllChanges: () => {
+        stageAllCalledRef.value = true;
+        const { success } = new Deno.Command('git', {
+          args: ['add', '.'],
+          stdout: 'piped',
+          stderr: 'piped',
+          cwd: repo.dir,
+        }).outputSync();
+        return Promise.resolve(success);
+      },
       cwd: repo.dir,
       setupSignalHandlers: false,
       logger: {
@@ -59,9 +71,12 @@ export function createHarness(): Harness {
   const logs: string[] = [];
   const errors: string[] = [];
   let exitCode: number | null = null;
+  const stageAllCalledRef = { value: false };
 
   async function run(options: GenerateOptions): Promise<Result<void, Error>> {
-    const result = await Result.wrap(() => createGenerateRunner(repo, ai, logs, errors)(options))();
+    const result = await Result.wrap(() =>
+      createGenerateRunner(repo, ai, logs, errors, stageAllCalledRef)(options)
+    )();
     if (!result.ok) {
       if (result.error instanceof ProcessExitError) {
         exitCode = result.error.code;
@@ -79,6 +94,9 @@ export function createHarness(): Harness {
     errors,
     get exitCode() {
       return exitCode;
+    },
+    get stageAllCalled() {
+      return stageAllCalledRef.value;
     },
     run,
     cleanup: repo.cleanup,
