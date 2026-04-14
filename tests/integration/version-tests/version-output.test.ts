@@ -1,5 +1,11 @@
 import { assertEquals, assertStringIncludes } from '@std/assert';
+import { join } from '@std/path';
 import { handleVersion, VERSION } from '../../../src/cmd/version.ts';
+
+const DENO_JSON_PATH = join(import.meta.dirname!, '..', '..', '..', 'deno.json');
+const DENO_JSON_VERSION: string = JSON.parse(
+  await Deno.readTextFile(DENO_JSON_PATH),
+).version;
 
 Deno.test('version command output', async (t) => {
   await t.step('outputs version string with expected format', () => {
@@ -32,5 +38,9 @@ Deno.test('version command output', async (t) => {
   await t.step('VERSION constant is a valid semver-like string', () => {
     const semverPattern = /^\d+\.\d+\.\d+$/;
     assertEquals(semverPattern.test(VERSION), true);
+  });
+
+  await t.step('VERSION matches deno.json version', () => {
+    assertEquals(VERSION, DENO_JSON_VERSION);
   });
 });
