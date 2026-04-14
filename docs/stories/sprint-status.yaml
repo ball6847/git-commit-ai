@@ -5,7 +5,7 @@
 sprint: 3
 project: git-commit-ai
 project_level: 0
-status: active
+status: completed
 created: '2026-04-14'
 target_completion: '2026-05-11'
 
@@ -37,7 +37,7 @@ stories:
 
   - id: STORY-025
     name: 'Fix GIT_COMMIT_AI_MODEL environment variable ignored'
-    status: not_started
+    status: completed
     priority: high
     file: 'docs/stories/STORY-025-fix-env-model-variable.md'
 

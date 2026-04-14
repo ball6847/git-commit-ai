@@ -63,10 +63,10 @@ Add isolated integration tests for config file loading and custom provider mergi
 
 ## Risks
 
-| Risk                             | Impact | Mitigation                                |
-| -------------------------------- | ------ | ----------------------------------------- |
-| Users depend on `commit` command | Low    | `generate --commit` is equivalent         |
-| Integration tests touch real FS  | Low    | Use temp directories in tests             |
+| Risk                             | Impact | Mitigation                        |
+| -------------------------------- | ------ | --------------------------------- |
+| Users depend on `commit` command | Low    | `generate --commit` is equivalent |
+| Integration tests touch real FS  | Low    | Use temp directories in tests     |
 
 ---
 
