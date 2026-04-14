@@ -1,23 +1,25 @@
 # Git Commit AI 🤖
 
-An AI-powered git commit message generator that follows conventional commit guidelines using TypeScript and Deno via OpenRouter.
+An AI-powered git commit message generator that follows conventional commit guidelines. Built with TypeScript and Deno, supporting multiple AI providers via [models.dev](https://models.dev).
 
 ## Features
 
 - 🎯 **Conventional Commits**: Automatically generates standardized commit messages
-- 🧠 **AI-Powered**: Uses AI for intelligent analysis
+- 🧠 **AI-Powered**: Uses AI for intelligent analysis of your changes
+- 🔌 **Multi-Provider**: Supports OpenRouter, Anthropic, OpenAI, Cerebras, Mistral, Ollama, and custom OpenAI-compatible providers
 - 📁 **File Analysis**: Analyzes staged changes and file modifications
 - 🎨 **Beautiful CLI**: Colorful and intuitive command-line interface
 - 🔍 **Smart Detection**: Identifies the type of changes (feat, fix, docs, etc.)
 - 🛡️ **Validation**: Ensures generated messages follow conventional commit format
+- ⚙️ **Configurable**: Environment variables and JSON config file support
 - ⚡ **Deno Native**: Built with modern TypeScript and Deno runtime
-- 🔒 **Secure**: No node_modules, URL-based imports, built-in permissions
+- 🔒 **Secure**: Explicit permissions, local config in standard XDG directories
 
 ## Prerequisites
 
 - **Deno 1.40+**: [Install Deno](https://deno.land/manual/getting_started/installation)
 - **Git**: Version control system
-- **OpenRouter API Key**: [Get your key](https://openrouter.ai/)
+- **AI Provider API Key**: Get a key from your chosen provider (e.g., [OpenRouter](https://openrouter.ai/), [Anthropic](https://anthropic.com), [OpenAI](https://openai.com), etc.)
 
 ## Installation
 
@@ -40,9 +42,10 @@ deno install -f --global --allow-run --allow-env --allow-read --allow-write --al
    cp .env.example .env
    ```
 
-3. **Add your OpenRouter API key to `.env`:**
+3. **Add your settings to `.env`:**
    ```env
-   OPENROUTER_API_KEY=your_openrouter_api_key_here
+   GIT_COMMIT_AI_MODEL=your-provider/your-model
+   # Also set your provider's API key environment variable
    ```
 
 4. **Install locally for testing (optional):**
@@ -65,7 +68,7 @@ git-commit-ai generate
 deno task start generate
 
 # Or run directly from source
-deno run --allow-run --allow-env --allow-read src/cli.ts generate
+deno run --allow-run --allow-env --allow-read --allow-write --allow-net src/cli.ts generate
 ```
 
 ### Available Tasks
@@ -79,11 +82,26 @@ deno task dev
 
 # Install locally for testing
 deno task install:local
+
+# Run tests
+deno task test
+
+# Type checking
+deno task check
+
+# Linting
+deno task lint
+
+# Formatting
+deno task fmt
+
+# Dry run publish check
+deno task publish:dry
 ```
 
 ### Commands
 
-#### `generate` (or `gen`)
+#### `generate` (or `gen`, `g`)
 
 Generate a conventional commit message for staged changes:
 
@@ -91,11 +109,23 @@ Generate a conventional commit message for staged changes:
 # Basic usage
 deno task start generate
 
-# Use different model
-git-commit-ai generate --model meta-llama/llama-3.2-1b-instruct
+# Use a specific model
+git-commit-ai generate --model cerebras/llama-3.1-70b
+
+# Adjust AI parameters
+git-commit-ai generate --temperature 0.5 --max-tokens 300
 
 # Dry run (generate without committing)
 git-commit-ai generate --dry-run
+
+# Auto-accept generated message without prompting
+git-commit-ai generate --commit
+
+# Auto-push after commit
+git-commit-ai generate --push
+
+# Skip push prompt entirely
+git-commit-ai generate --no-push
 
 # Debug mode
 git-commit-ai generate --debug
@@ -103,7 +133,7 @@ git-commit-ai generate --debug
 
 **Smart Staging:** If you have no staged changes, `generate` will automatically stage all files for you. If you already staged some files, it will only generate a message for those staged files.
 
-#### `status`
+#### `status` (or `s`)
 
 Show current git status and staged changes:
 
@@ -113,17 +143,35 @@ deno task start status
 git-commit-ai status
 ```
 
+#### `model` (or `m`)
+
+List all available AI models and providers:
+
+```bash
+git-commit-ai model
+```
+
+Providers with a configured API key are marked with `✓`. Use this command to find the correct `--model` value.
+
+#### `version` (or `v`)
+
+Show version information:
+
+```bash
+git-commit-ai version
+```
+
 ### Direct Execution Examples
 
 ```bash
 # Generate with specific model
-deno run --allow-run --allow-env --allow-read src/cli.ts generate --model meta-llama/llama-3.2-1b-instruct
+deno run --allow-run --allow-env --allow-read --allow-write --allow-net src/cli.ts generate --model cerebras/llama-3.1-70b
 
 # Dry run
-deno run --allow-run --allow-env --allow-read src/cli.ts generate --dry-run
+deno run --allow-run --allow-env --allow-read --allow-write --allow-net src/cli.ts generate --dry-run
 
 # Check status
-deno run --allow-run --allow-env --allow-read src/cli.ts status
+deno run --allow-run --allow-env --allow-read --allow-write --allow-net src/cli.ts status
 ```
 
 ### Workflow Example
@@ -145,12 +193,14 @@ deno task start generate
 # 📁 Files to be committed (1):
 #   A hello.ts (added)
 #
-# 🤖 Analyzing changes with AI...
+# 🤖 Analyzing changes with AI using model: cerebras/llama-3.1-70b...
 # ✨ Generated Commit Message:
 # "feat: add hello world console log"
 #
-# Would you like to commit with this message? (y/N): y
+# ✏️  Edit the commit message below (press Enter to commit, Ctrl+C twice to cancel):
+# Commit message: feat: add hello world console log
 # ✅ Successfully committed!
+# Push changes to remote? (Y/n): n
 ```
 
 ## Conventional Commit Types
@@ -172,26 +222,61 @@ The AI automatically detects and uses these conventional commit types:
 
 ### Environment Variables
 
-- `OPENROUTER_API_KEY` (required): Your OpenRouter API key
-- `OPENROUTER_MODEL` (optional): Model to use (default: meta-llama/llama-3.2-3b-instruct)
-- `DEBUG` (optional): Enable debug output
+- `GIT_COMMIT_AI_MODEL` (optional): Default model to use (e.g., `cerebras/llama-3.1-70b`)
+- `GIT_COMMIT_AI_TEMPERATURE` (optional): AI temperature from `0.0` to `1.0` (default: `0.3`)
+- `GIT_COMMIT_AI_MAX_TOKENS` (optional): Maximum tokens for AI response (default: `200`)
+- `GIT_COMMIT_AI_NO_PUSH` (optional): Set to `true` to skip push prompts by default
+- `GIT_COMMIT_AI_CACHE_TTL` (optional): Cache TTL for models.dev data in seconds (default: `86400`)
 
-### Deno Configuration
+**Provider API Keys:** Each provider requires its own API key. Set the appropriate environment variable for your chosen provider. Common examples include:
 
-The project uses `deno.json` for configuration:
+- `OPENROUTER_API_KEY`
+- `ANTHROPIC_API_KEY`
+- `OPENAI_API_KEY`
+- `CEREBRAS_API_KEY`
+- `MISTRAL_API_KEY`
+
+Run `git-commit-ai model` to see which environment variable each provider requires.
+
+### Config File
+
+You can also configure the tool via a JSON config file at:
+
+```
+~/.config/git-commit-ai/config.json
+```
+
+Example:
 
 ```json
 {
-  "tasks": {
-    "start": "deno run --allow-run --allow-env --allow-read src/cli.ts",
-    "generate": "deno run --allow-run --allow-env --allow-read src/cli.ts generate"
-  },
-  "imports": {
-    "@cliffy/command": "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts",
-    "@std/fmt": "https://deno.land/std@0.224.0/fmt/colors.ts"
+  "model": "cerebras/llama-3.1-70b",
+  "temperature": 0.3,
+  "maxTokens": 200,
+  "providers": {
+    "my-provider": {
+      "api": "https://api.my-provider.com/v1",
+      "env": ["MY_PROVIDER_API_KEY"],
+      "models": {
+        "my-model": {
+          "name": "My Custom Model"
+        }
+      }
+    }
   }
 }
 ```
+
+Configuration precedence (highest to lowest):
+
+1. CLI flags (`--model`, `--temperature`, `--max-tokens`)
+2. Environment variables
+3. Config file (`~/.config/git-commit-ai/config.json`)
+4. Built-in defaults
+
+### Deno Configuration
+
+The project uses `deno.json` for configuration. See the file in the repository for the full import map, tasks, and compiler options.
 
 ### Permissions
 
@@ -199,14 +284,17 @@ This app requires the following Deno permissions:
 
 - `--allow-run`: Execute git commands
 - `--allow-env`: Read environment variables
-- `--allow-read`: Read .env files
+- `--allow-read`: Read config files and `.env`
+- `--allow-write`: Write models.dev cache to `~/.cache/git-commit-ai/`
+- `--allow-net`: Fetch model metadata and make AI API requests
 
 ## API Integration
 
 This project uses:
 
-- **[OpenRouter](https://openrouter.ai/)**: AI model access via HTTP API
-- **AI Model**: The AI model for text generation
+- **[models.dev](https://models.dev)**: Open database of AI model capabilities and provider metadata
+- **[AI SDK](https://sdk.vercel.ai)**: TypeScript library for building AI-powered applications
+- **Bundled providers**: Anthropic, Cerebras, Mistral, OpenAI, OpenRouter, and OpenAI-compatible endpoints
 - **Deno Standard Library**: Built-in utilities and formatting
 - **Cliffy**: Modern CLI framework for Deno
 
@@ -215,13 +303,24 @@ This project uses:
 ```
 git-commit-ai/
 ├── src/
-│   ├── cli.ts          # Command-line interface
-│   ├── ai.ts           # OpenRouter integration
+│   ├── cli.ts          # CLI entry point and command definitions
+│   ├── ai.ts           # AI integration and prompt engineering
 │   ├── git.ts          # Git operations and utilities
-│   └── types.ts        # TypeScript type definitions
+│   ├── models-dev.ts   # models.dev fetching, caching, and provider resolution
+│   ├── config.ts       # Configuration loading and merging
+│   ├── paths.ts        # XDG config/cache path resolution
+│   ├── services.ts     # Dependency injection interfaces
+│   ├── types.ts        # TypeScript type definitions
+│   └── cmd/
+│       ├── generate.ts # Generate commit message command
+│       ├── model.ts    # Model management command
+│       ├── status.ts   # Status check command
+│       └── version.ts  # Version command
+├── tests/
+│   └── main_test.ts    # Main test suite
 ├── deno.json           # Deno configuration
 ├── .env.example        # Environment variables template
-└── README.md          # This file
+└── README.md           # This file
 ```
 
 ## Development
@@ -229,25 +328,25 @@ git-commit-ai/
 ### Type Checking
 
 ```bash
-deno check src/cli.ts
+deno task check
 ```
 
 ### Linting
 
 ```bash
-deno lint
+deno task lint
 ```
 
 ### Formatting
 
 ```bash
-deno fmt
+deno task fmt
 ```
 
 ### Running Tests
 
 ```bash
-deno test --allow-run --allow-env --allow-read
+deno task test
 ```
 
 ## Troubleshooting
@@ -265,22 +364,23 @@ deno test --allow-run --allow-env --allow-read
 - If you prefer manual control, stage your changes first: `git add <files>`
 - Check status: `git status`
 
-**"OPENROUTER_API_KEY not found"**
+**"No model specified" or API key errors**
 
-- Copy `.env.example` to `.env`
-- Add your OpenRouter API key
+- Set `GIT_COMMIT_AI_MODEL` in your `.env` or use `--model`
+- Ensure the API key environment variable for your provider is set
+- Run `git-commit-ai model` to verify provider availability
 
 **"Permission denied"**
 
 - Ensure you're running with proper Deno permissions:
   ```bash
-  deno run --allow-run --allow-env --allow-read src/cli.ts
+  deno run --allow-run --allow-env --allow-read --allow-write --allow-net src/cli.ts
   ```
 
 **"Failed to generate commit message"**
 
 - Check your internet connection
-- Verify your API key is correct
+- Verify your API key is correct and has sufficient quota
 - Try again in a few moments
 
 ### Debug Mode
@@ -295,15 +395,15 @@ deno task start generate --debug
 
 - **🚀 Fast startup**: No node_modules scanning
 - **🔒 Secure by default**: Explicit permissions required
-- **📦 No package.json**: Direct URL imports
+- **📦 Modern package management**: JSR and npm compatibility
 - **✨ TypeScript native**: Built-in TypeScript support
 - **🎯 Modern**: ES modules, Web APIs, and modern JavaScript features
 
 ## TODO
 
-- [ ] Allow OpenRouter provider to be provided via environment variable or command line argument
-- [x] Allow OpenRouter model to be provided via environment variable, prioritize lower than command line argument
-- [x] Ask if user wants to push to current tracking remote and branch, default to No
+- [x] Allow provider/model to be provided via environment variable or command line argument
+- [x] Allow model to be provided via environment variable, prioritize lower than command line argument
+- [x] Ask if user wants to push to current tracking remote and branch
 - [x] Add non-interactive flag `--commit` to auto-accept generated message without prompting
 - [x] Be smarter about detecting deleted files/code, and not detect feature removal as implementation
 - [x] Allow user to edit commit message before committing, with Ctrl+C to cancel
