@@ -52,7 +52,13 @@ function loadConfigAtStartup(): {
   );
 }
 
-const ENV = await loadConfigAtStartup();
+const ENV: {
+  model: string;
+  maxTokens: number;
+  temperature: number;
+  thinkingEffort?: 'low' | 'medium' | 'high';
+  providers: Record<string, unknown>;
+} = await loadConfigAtStartup();
 
 export { ENV };
 
