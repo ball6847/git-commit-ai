@@ -380,6 +380,18 @@ workflow_status:
     description: 'Implement STORY-023: Remove commit command and add smart auto-staging'
     command: '/dev-story'
 
+  - name: create-story-025
+    phase: 4
+    status: 'docs/stories/STORY-025-fix-env-model-variable.md'
+    description: 'Fix GIT_COMMIT_AI_MODEL environment variable ignored'
+    command: '/create-story'
+
+  - name: dev-story-025
+    phase: 4
+    status: 'not-started'
+    description: 'Implement STORY-025: Fix GIT_COMMIT_AI_MODEL environment variable ignored'
+    command: '/dev-story'
+
   - name: dev-story-024
     phase: 4
     status: 'completed'
