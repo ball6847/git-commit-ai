@@ -1,5 +1,7 @@
 import { blue, green, white, yellow } from '@std/fmt/colors';
 import { generateText } from 'ai';
+import type { LanguageModel } from 'ai';
+import { Result } from 'typescript-result';
 import {
   getAvailableProviders,
   getModelFromProvider,
@@ -9,64 +11,71 @@ import {
 
 import type { AIConfig, ChangeSummary, ConventionalCommitType } from './types.ts';
 
-async function resolveCustomProviders(): Promise<ModelsDevResponse> {
-  const data = await getModelsDevData();
-
-  let customProviders: Record<string, unknown> | undefined = undefined;
-  try {
-    const { loadConfig } = await import('./config.ts');
-    const configResult = await loadConfig();
-    if (configResult.ok && configResult.value) {
-      customProviders = configResult.value.providers;
-    }
-  } catch {
-    customProviders = undefined;
+async function resolveCustomProviders(): Promise<Result<ModelsDevResponse, Error>> {
+  const dataResult = await getModelsDevData();
+  if (!dataResult.ok) {
+    return dataResult;
   }
 
+  const loadConfigModuleResult = await Result.wrap(() => import('./config.ts'))();
+  if (!loadConfigModuleResult.ok) {
+    return Result.ok(dataResult.value);
+  }
+
+  const configResult = await loadConfigModuleResult.value.loadConfig();
+  if (!configResult.ok || !configResult.value) {
+    return Result.ok(dataResult.value);
+  }
+
+  const customProviders = configResult.value.providers;
   if (!customProviders || Object.keys(customProviders).length === 0) {
-    return data;
+    return Result.ok(dataResult.value);
   }
 
-  return mergeCustomProviders(data, customProviders);
+  return Result.ok(mergeCustomProviders(dataResult.value, customProviders));
 }
 
-type ModelsDevResponse = ReturnType<typeof getModelsDevData>;
+type ModelsDevResponse = Awaited<ReturnType<typeof getModelsDevData>> extends Result<infer T, Error>
+  ? T
+  : never;
 
 /**
  * Get the language model for the given model name
  */
-async function getLanguageModel(modelName: string) {
+async function getLanguageModel(modelName: string): Promise<Result<LanguageModel, Error>> {
   const slashIndex = modelName.indexOf('/');
 
   if (slashIndex > 0) {
     const providerId = modelName.substring(0, slashIndex);
     const modelId = modelName.substring(slashIndex + 1);
 
-    const data = await resolveCustomProviders();
-    if (Object.keys(data).length > 0) {
-      const providers = getAvailableProviders(data);
+    const dataResult = await resolveCustomProviders();
+    if (!dataResult.ok) {
+      return dataResult;
+    }
+
+    if (Object.keys(dataResult.value).length > 0) {
+      const providers = getAvailableProviders(dataResult.value);
       const provider = providers.find((p) => p.id === providerId);
 
       if (provider) {
         return getModelFromProvider(provider, modelId);
       }
 
-      const providerData = data[providerId];
+      const providerData = dataResult.value[providerId];
       if (providerData) {
         const envValue = (providerData as { env: string[] }).env?.join(' ');
         if (envValue) {
-          throw new Error(
-            `Provider "${providerId}" requires API key. ` +
-              `Set one of: ${envValue}` +
-              ``,
+          return Result.error(
+            new Error(`Provider "${providerId}" requires API key. Set one of: ${envValue}`),
           );
         }
       }
     }
   }
 
-  throw new Error(
-    `Model "${modelName}" not found. Use "git-commit-ai model" to see available models.`,
+  return Result.error(
+    new Error(`Model "${modelName}" not found. Use "git-commit-ai model" to see available models.`),
   );
 }
 
@@ -77,48 +86,50 @@ export async function generateCommitMessage(
   config: AIConfig,
   gitDiff: string,
   changeSummary: ChangeSummary,
-): Promise<string> {
+): Promise<Result<string, Error>> {
   if (!config.model) {
-    throw new Error(
-      'Model is required. Please set MODEL in your .env file or use --model flag.',
+    return Result.error(
+      new Error('Model is required. Please set MODEL in your .env file or use --model flag.'),
     );
   }
 
   const prompt = createCommitPrompt(gitDiff, changeSummary);
 
-  try {
-    console.log(
-      blue(`🤖 Analyzing changes with AI using model: ${config.model}...`),
+  console.log(blue(`🤖 Analyzing changes with AI using model: ${config.model}...`));
+
+  const languageModelResult = await getLanguageModel(config.model);
+  if (!languageModelResult.ok) {
+    return Result.error(
+      new Error(`Failed to generate commit message: ${languageModelResult.error.message}`),
     );
+  }
 
-    const languageModel = await getLanguageModel(config.model);
-
-    const result = await generateText({
-      model: languageModel,
+  const generateResult = await Result.wrap(() =>
+    generateText({
+      model: languageModelResult.value,
       system: getSystemPrompt(),
       prompt: prompt,
       temperature: config.temperature,
-    });
+    })
+  )();
 
-    const commitMessage = result.text.trim();
-
-    const cleanMessage = commitMessage.replace(/^["']|["']$/g, '');
-
-    if (!isValidConventionalCommit(cleanMessage)) {
-      console.log(
-        yellow(
-          '⚠️  Generated message may not follow conventional commit format perfectly.',
-        ),
-      );
-    }
-
-    return cleanMessage;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to generate commit message: ${error.message}`);
-    }
-    throw new Error('Unknown error occurred during AI generation');
+  if (!generateResult.ok) {
+    return Result.error(
+      new Error(`Failed to generate commit message: ${generateResult.error.message}`),
+    );
   }
+
+  const commitMessage = generateResult.value.text.trim();
+
+  const cleanMessage = commitMessage.replace(/^["']|["']$/g, '');
+
+  if (!isValidConventionalCommit(cleanMessage)) {
+    console.log(
+      yellow('⚠️  Generated message may not follow conventional commit format perfectly.'),
+    );
+  }
+
+  return Result.ok(cleanMessage);
 }
 
 /**

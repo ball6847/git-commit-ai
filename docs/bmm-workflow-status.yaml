@@ -219,7 +219,7 @@ workflow_status:
 
   - name: dev-story-011
     phase: 4
-    status: 'not-started'
+    status: 'completed'
     description: 'Implement STORY-011: Result Pattern — models-dev.ts'
     command: '/dev-story'
 
@@ -231,7 +231,7 @@ workflow_status:
 
   - name: dev-story-012
     phase: 4
-    status: 'not-started'
+    status: 'completed'
     description: 'Implement STORY-012: Result Pattern — ai.ts'
     command: '/dev-story'
 
@@ -243,7 +243,7 @@ workflow_status:
 
   - name: dev-story-013
     phase: 4
-    status: 'not-started'
+    status: 'completed'
     description: 'Implement STORY-013: Result Pattern — git.ts & cmd/*.ts'
     command: '/dev-story'
 

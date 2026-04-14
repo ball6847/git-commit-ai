@@ -73,7 +73,7 @@ if (!options.model) {
 const aiConfig: AIConfig = mergeConfig(
   { model: options.model, temperature: options.temperature, maxTokens: options.maxTokens },
   envVars,
-  undefined,  // <-- configFile is never loaded!
+  undefined, // <-- configFile is never loaded!
   defaults,
 );
 ```

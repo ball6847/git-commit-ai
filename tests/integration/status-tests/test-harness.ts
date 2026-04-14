@@ -89,12 +89,13 @@ export function createNoRepoHarness(): {
     const result = Result.wrap(() =>
       handleStatus({
         git: {
-          isRepository: () => false,
-          getChangeSummary: () => ({
-            files: [],
-            totalFiles: 0,
-            allDeletions: false,
-          }),
+          isRepository: () => Result.ok(false),
+          getChangeSummary: () =>
+            Result.ok({
+              files: [],
+              totalFiles: 0,
+              allDeletions: false,
+            }),
         },
         logger: {
           log: (...args: unknown[]) => {

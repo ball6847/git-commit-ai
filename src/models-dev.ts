@@ -5,6 +5,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import type { LanguageModel } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { Result } from 'typescript-result';
 import { getCacheDir, getModelsCacheFile, migrateLegacyCache } from './paths.ts';
 
 interface CustomModelsDevProvider extends ModelsDevProvider {
@@ -51,6 +52,12 @@ interface CachedModelsDev {
 const MODELS_DEV_API_URL = 'https://models.dev/api.json';
 const DEFAULT_CACHE_TTL = 86400; // 24 hours in seconds
 
+const readTextFile = Result.wrap(Deno.readTextFile);
+const writeTextFile = Result.wrap(Deno.writeTextFile);
+const mkdir = Result.wrap(Deno.mkdir);
+const removeFile = Result.wrap(Deno.remove);
+const fetchWrapped = Result.wrap(globalThis.fetch);
+
 function getCacheTTL(): number {
   const envTTL = Deno.env.get('GIT_COMMIT_AI_CACHE_TTL');
   if (envTTL) {
@@ -62,32 +69,56 @@ function getCacheTTL(): number {
   return DEFAULT_CACHE_TTL;
 }
 
-async function loadCache(): Promise<CachedModelsDev | null> {
-  await migrateLegacyCache();
-
-  try {
-    const raw = await Deno.readTextFile(getModelsCacheFile());
-    const cached: CachedModelsDev = JSON.parse(raw);
-    return cached;
-  } catch {
-    return null;
+async function loadCache(): Promise<Result<CachedModelsDev | null, Error>> {
+  const migrateResult = await Result.wrap(migrateLegacyCache)();
+  if (!migrateResult.ok) {
+    return Result.error(
+      new Error(`Failed to migrate legacy cache: ${migrateResult.error.message}`),
+    );
   }
+
+  const rawResult = await readTextFile(getModelsCacheFile());
+  if (!rawResult.ok) {
+    if (rawResult.error instanceof Deno.errors.NotFound) {
+      return Result.ok(null);
+    }
+    return Result.error(new Error(`Failed to read cache: ${rawResult.error.message}`));
+  }
+
+  const parseResult = Result.wrap((text: string): unknown => JSON.parse(text))(rawResult.value);
+  if (!parseResult.ok) {
+    return Result.error(new Error(`Failed to parse cache: ${parseResult.error.message}`));
+  }
+
+  return Result.ok(parseResult.value as CachedModelsDev);
 }
 
-async function saveCache(data: ModelsDevResponse): Promise<void> {
-  await migrateLegacyCache();
+async function saveCache(data: ModelsDevResponse): Promise<Result<void, Error>> {
+  const migrateResult = await Result.wrap(migrateLegacyCache)();
+  if (!migrateResult.ok) {
+    return Result.error(
+      new Error(`Failed to migrate legacy cache: ${migrateResult.error.message}`),
+    );
+  }
 
   const cached: CachedModelsDev = {
     data,
     timestamp: Date.now(),
   };
 
-  try {
-    await Deno.mkdir(getCacheDir(), { recursive: true });
-    await Deno.writeTextFile(getModelsCacheFile(), JSON.stringify(cached));
-  } catch (error) {
-    console.warn('Failed to save models.dev cache:', error);
+  const mkdirResult = await mkdir(getCacheDir(), { recursive: true });
+  if (!mkdirResult.ok) {
+    return Result.error(
+      new Error(`Failed to create cache directory: ${mkdirResult.error.message}`),
+    );
   }
+
+  const writeResult = await writeTextFile(getModelsCacheFile(), JSON.stringify(cached));
+  if (!writeResult.ok) {
+    return Result.error(new Error(`Failed to write cache file: ${writeResult.error.message}`));
+  }
+
+  return Result.ok(undefined);
 }
 
 function isCacheValid(cached: CachedModelsDev): boolean {
@@ -95,64 +126,96 @@ function isCacheValid(cached: CachedModelsDev): boolean {
   return Date.now() - cached.timestamp < ttlMs;
 }
 
-async function fetchFromApi(): Promise<ModelsDevResponse> {
-  const response = await fetch(MODELS_DEV_API_URL);
+async function fetchFromApi(): Promise<Result<ModelsDevResponse, Error>> {
+  const responseResult = await fetchWrapped(MODELS_DEV_API_URL);
+  if (!responseResult.ok) {
+    return Result.error(new Error(`Failed to fetch models.dev: ${responseResult.error.message}`));
+  }
 
+  const response = responseResult.value;
   if (!response.ok) {
-    throw new Error(`HTTP error fetching models.dev: ${response.status}`);
+    return Result.error(new Error(`HTTP error fetching models.dev: ${response.status}`));
   }
 
-  return await response.json();
+  const jsonResult = await Result.wrap(() => response.json())();
+  if (!jsonResult.ok) {
+    return Result.error(
+      new Error(`Failed to parse models.dev response: ${jsonResult.error.message}`),
+    );
+  }
+
+  return Result.ok(jsonResult.value as ModelsDevResponse);
 }
 
-export async function getModelsDevData(): Promise<ModelsDevResponse> {
-  const cached = await loadCache();
+export async function getModelsDevData(): Promise<Result<ModelsDevResponse, Error>> {
+  const cachedResult = await loadCache();
+  if (!cachedResult.ok) {
+    return Result.error(new Error(`Failed to load cache: ${cachedResult.error.message}`));
+  }
 
+  const cached = cachedResult.value;
   if (cached && isCacheValid(cached)) {
-    return cached.data;
+    return Result.ok(cached.data);
   }
 
-  try {
-    const data = await fetchFromApi();
-    await saveCache(data);
-    return data;
-  } catch (error) {
-    console.warn('Failed to fetch models.dev data:', error);
-
-    if (cached) {
-      console.warn('Using stale cached data');
-      return cached.data;
+  const dataResult = await fetchFromApi();
+  if (dataResult.ok) {
+    const saveResult = await saveCache(dataResult.value);
+    if (!saveResult.ok) {
+      console.warn('Failed to save models.dev cache:', saveResult.error.message);
     }
-
-    return {};
+    return Result.ok(dataResult.value);
   }
+
+  console.warn('Failed to fetch models.dev data:', dataResult.error.message);
+
+  if (cached) {
+    console.warn('Using stale cached data');
+    return Result.ok(cached.data);
+  }
+
+  return Result.ok({});
 }
 
-export async function refreshModelsDevCache(): Promise<ModelsDevResponse> {
-  try {
-    const data = await fetchFromApi();
-    await saveCache(data);
-    return data;
-  } catch (error) {
-    console.warn('Failed to refresh models.dev cache:', error);
-
-    const cached = await loadCache();
-    if (cached) {
-      return cached.data;
+export async function refreshModelsDevCache(): Promise<Result<ModelsDevResponse, Error>> {
+  const dataResult = await fetchFromApi();
+  if (dataResult.ok) {
+    const saveResult = await saveCache(dataResult.value);
+    if (!saveResult.ok) {
+      console.warn('Failed to save models.dev cache:', saveResult.error.message);
     }
-
-    return {};
+    return Result.ok(dataResult.value);
   }
+
+  console.warn('Failed to refresh models.dev cache:', dataResult.error.message);
+
+  const cachedResult = await loadCache();
+  if (!cachedResult.ok) {
+    return Result.error(new Error(`Failed to load cache: ${cachedResult.error.message}`));
+  }
+
+  if (cachedResult.value) {
+    return Result.ok(cachedResult.value.data);
+  }
+
+  return Result.ok({});
 }
 
-export async function clearModelsDevCache(): Promise<void> {
-  await migrateLegacyCache();
-
-  try {
-    await Deno.remove(getModelsCacheFile());
-  } catch {
-    console.warn('Models cache file does not exist');
+export async function clearModelsDevCache(): Promise<Result<void, Error>> {
+  const migrateResult = await Result.wrap(migrateLegacyCache)();
+  if (!migrateResult.ok) {
+    console.warn('Failed to migrate legacy cache:', migrateResult.error.message);
   }
+
+  const removeResult = await removeFile(getModelsCacheFile());
+  if (!removeResult.ok) {
+    if (removeResult.error instanceof Deno.errors.NotFound) {
+      return Result.ok(undefined);
+    }
+    return Result.error(new Error(`Failed to clear cache: ${removeResult.error.message}`));
+  }
+
+  return Result.ok(undefined);
 }
 
 export function getProviderApiKey(provider: ModelsDevProvider): string | null {
@@ -213,11 +276,11 @@ const BUNDLED_SDK_FACTORIES: Record<
 
 const sdkCache = new Map<string, SDKProvider>();
 
-export function getProviderSDK(provider: AvailableProvider): SDKProvider {
+export function getProviderSDK(provider: AvailableProvider): Result<SDKProvider, Error> {
   const cacheKey = `${provider.npm}:${provider.apiKey}`;
 
   if (sdkCache.has(cacheKey)) {
-    return sdkCache.get(cacheKey)!;
+    return Result.ok(sdkCache.get(cacheKey)!);
   }
 
   const factory = BUNDLED_SDK_FACTORIES[provider.npm];
@@ -229,11 +292,13 @@ export function getProviderSDK(provider: AvailableProvider): SDKProvider {
         name: provider.id,
       });
       sdkCache.set(cacheKey, sdk);
-      return sdk;
+      return Result.ok(sdk);
     }
-    throw new Error(
-      `Provider "${provider.id}" uses npm package "${provider.npm}" which is not bundled. ` +
-        `Supported: ${Object.keys(BUNDLED_SDK_FACTORIES).join(', ')}`,
+    return Result.error(
+      new Error(
+        `Provider "${provider.id}" uses npm package "${provider.npm}" which is not bundled. ` +
+          `Supported: ${Object.keys(BUNDLED_SDK_FACTORIES).join(', ')}`,
+      ),
     );
   }
 
@@ -244,15 +309,19 @@ export function getProviderSDK(provider: AvailableProvider): SDKProvider {
 
   const sdk = factory(opts);
   sdkCache.set(cacheKey, sdk);
-  return sdk;
+  return Result.ok(sdk);
 }
 
 export function getModelFromProvider(
   provider: AvailableProvider,
   modelId: string,
-): LanguageModel {
-  const sdk = getProviderSDK(provider);
-  return sdk.languageModel(modelId);
+): Result<LanguageModel, Error> {
+  const sdkResult = getProviderSDK(provider);
+  if (!sdkResult.ok) {
+    return sdkResult;
+  }
+
+  return Result.ok(sdkResult.value.languageModel(modelId));
 }
 
 export function getModelsFromProvider(

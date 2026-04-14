@@ -28,17 +28,17 @@ export async function handleModel(deps: ModelDependencies = {}): Promise<void> {
 
   logger.log(cyan(bold('\n🤖 Available AI Models\n')));
 
-  const data = await modelService.getModelsDevData();
-
-  let customProviders: Record<string, unknown> | undefined = undefined;
-  try {
-    const configResult = await modelService.loadConfig();
-    if (configResult.ok && configResult.value) {
-      customProviders = configResult.value.providers;
-    }
-  } catch {
-    customProviders = undefined;
+  const dataResult = await modelService.getModelsDevData();
+  if (!dataResult.ok) {
+    logger.log(red('Could not fetch models.dev data. Check your network connection.'));
+    return;
   }
+  const data = dataResult.value;
+
+  const configResult = await modelService.loadConfig();
+  const customProviders = (configResult.ok && configResult.value)
+    ? configResult.value.providers
+    : undefined;
 
   const mergedData = (!customProviders || Object.keys(customProviders).length === 0)
     ? data

@@ -1,4 +1,5 @@
 import { anything, instance, mock, when } from 'ts-mockito';
+import { Result } from 'typescript-result';
 import type { AIConfig, ChangeSummary } from '../../../src/types.ts';
 
 export interface AIService {
@@ -6,7 +7,7 @@ export interface AIService {
     config: AIConfig,
     gitDiff: string,
     changeSummary: ChangeSummary,
-  ): Promise<string>;
+  ): Promise<Result<string, Error>>;
 }
 
 export interface MockitoHarness {
@@ -22,7 +23,7 @@ export function createMockitoHarness(): MockitoHarness {
     instance: instance(aiMock),
     setResponse(response: string) {
       when(aiMock.generateCommitMessage(anything(), anything(), anything()))
-        .thenResolve(response);
+        .thenResolve(Result.ok(response));
     },
   };
 }

@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from '@std/assert';
+import { assertEquals } from '@std/assert';
 import { getChangeSummary, isGitRepository } from '../src/git.ts';
 import { initializeAI, parseConventionalCommit } from '../src/ai.ts';
 import {
@@ -15,21 +15,17 @@ import {
 
 Deno.test('Git operations', async (t) => {
   await t.step('should detect if in git repository', () => {
-    // This will depend on where the test is run
     const result = isGitRepository();
-    // Just ensure it returns a boolean
-    assertEquals(typeof result, 'boolean');
+    assertEquals(result.ok, true);
+    assertEquals(typeof result.value, 'boolean');
   });
 
   await t.step('should get change summary without errors', () => {
-    // This might throw if no git repo, which is fine for testing
-    try {
-      const summary = getChangeSummary();
-      assertEquals(typeof summary.totalFiles, 'number');
-      assertEquals(Array.isArray(summary.files), true);
-    } catch (error) {
-      // Expected if not in a git repo
-      assertEquals(error instanceof Error, true);
+    const result = getChangeSummary();
+    assertEquals(result.ok, true);
+    if (result.ok) {
+      assertEquals(typeof result.value.totalFiles, 'number');
+      assertEquals(Array.isArray(result.value.files), true);
     }
   });
 });
@@ -208,14 +204,16 @@ Deno.test('models.dev provider discovery', async (t) => {
 
 Deno.test('models.dev caching', async (t) => {
   await t.step('should clear cache without error when no cache exists', async () => {
-    await clearModelsDevCache();
+    const result = await clearModelsDevCache();
+    assertEquals(result.ok, true);
   });
 
   await t.step('should return empty object when no cache and fetch fails', async () => {
     await clearModelsDevCache();
     Deno.env.set('GIT_COMMIT_AI_CACHE_TTL', '0');
     const result = await getModelsDevData();
-    assertEquals(typeof result, 'object');
+    assertEquals(result.ok, true);
+    assertEquals(typeof result.value, 'object');
     Deno.env.delete('GIT_COMMIT_AI_CACHE_TTL');
   });
 });
@@ -232,8 +230,11 @@ Deno.test('models.dev SDK loading', async (t) => {
         ? Object.values(MOCK_MODELS_DEV_DATA.anthropic.models)
         : [],
     };
-    const sdk = getProviderSDK(provider);
-    assertEquals(typeof sdk.languageModel, 'function');
+    const result = getProviderSDK(provider);
+    assertEquals(result.ok, true);
+    if (result.ok) {
+      assertEquals(typeof result.value.languageModel, 'function');
+    }
     Deno.env.delete('TEST_ANTHROPIC_API_KEY');
   });
 
@@ -247,8 +248,11 @@ Deno.test('models.dev SDK loading', async (t) => {
         ? Object.values(MOCK_MODELS_DEV_DATA.openai.models)
         : [],
     };
-    const sdk = getProviderSDK(provider);
-    assertEquals(typeof sdk.languageModel, 'function');
+    const result = getProviderSDK(provider);
+    assertEquals(result.ok, true);
+    if (result.ok) {
+      assertEquals(typeof result.value.languageModel, 'function');
+    }
   });
 
   await t.step('should fallback to openai-compatible for unknown npm with api', () => {
@@ -262,8 +266,11 @@ Deno.test('models.dev SDK loading', async (t) => {
         ? Object.values(MOCK_MODELS_DEV_DATA.unknown_provider.models)
         : [],
     };
-    const sdk = getProviderSDK(provider);
-    assertEquals(typeof sdk.languageModel, 'function');
+    const result = getProviderSDK(provider);
+    assertEquals(result.ok, true);
+    if (result.ok) {
+      assertEquals(typeof result.value.languageModel, 'function');
+    }
   });
 
   await t.step('should cache SDK instances', () => {
@@ -274,9 +281,13 @@ Deno.test('models.dev SDK loading', async (t) => {
       npm: '@ai-sdk/openai',
       models: [],
     };
-    const sdk1 = getProviderSDK(provider);
-    const sdk2 = getProviderSDK(provider);
-    assertEquals(sdk1, sdk2);
+    const result1 = getProviderSDK(provider);
+    const result2 = getProviderSDK(provider);
+    assertEquals(result1.ok, true);
+    assertEquals(result2.ok, true);
+    if (result1.ok && result2.ok) {
+      assertEquals(result1.value, result2.value);
+    }
   });
 
   await t.step('should return language model from provider', () => {
@@ -287,11 +298,14 @@ Deno.test('models.dev SDK loading', async (t) => {
       npm: '@ai-sdk/openai',
       models: [],
     };
-    const model = getModelFromProvider(provider, 'gpt-4o');
-    assertEquals(typeof model, 'object');
+    const result = getModelFromProvider(provider, 'gpt-4o');
+    assertEquals(result.ok, true);
+    if (result.ok) {
+      assertEquals(typeof result.value, 'object');
+    }
   });
 
-  await t.step('should throw for unknown npm without api field', () => {
+  await t.step('should return error for unknown npm without api field', () => {
     const provider = {
       id: 'bad_provider',
       name: 'Bad Provider',
@@ -299,10 +313,10 @@ Deno.test('models.dev SDK loading', async (t) => {
       npm: '@unknown/no-fallback-sdk',
       models: [],
     };
-    assertThrows(
-      () => getProviderSDK(provider),
-      Error,
-      'not bundled',
-    );
+    const result = getProviderSDK(provider);
+    assertEquals(result.ok, false);
+    if (!result.ok) {
+      assertEquals(result.error.message.includes('not bundled'), true);
+    }
   });
 });

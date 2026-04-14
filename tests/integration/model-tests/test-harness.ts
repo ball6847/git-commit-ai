@@ -27,7 +27,7 @@ export function createModelHarness(mockData: ModelsDevResponse): ModelHarness {
     errors.length = 0;
 
     const defaultModelService: ModelsService = {
-      getModelsDevData: () => Promise.resolve(mockData),
+      getModelsDevData: () => Promise.resolve(Result.ok(mockData)),
       getProviderApiKey: () => null,
       mergeCustomProviders: (data, custom) => {
         const merged: ModelsDevResponse = { ...data };
@@ -63,8 +63,7 @@ export function createModelHarness(mockData: ModelsDevResponse): ModelHarness {
         }
         return merged;
       },
-      loadConfig: () =>
-        Promise.resolve({ ok: true, value: {} as ConfigFile } as Result<ConfigFile, Error>),
+      loadConfig: () => Promise.resolve(Result.ok({} as ConfigFile)),
     };
 
     const defaultLogger = {

@@ -1,88 +1,78 @@
 import { blue, bold, green, red, yellow } from '@std/fmt/colors';
+import { Result } from 'typescript-result';
 import type { ChangeSummary, FileChange, GitStatus } from './types.ts';
 
 /**
  * Get the current git diff for staged changes
  */
-export function getStagedDiff(cwd?: string): string {
-  try {
-    const command = new Deno.Command('git', {
-      args: ['diff', '--cached', '--diff-filter=d'],
-      stdout: 'piped',
-      stderr: 'piped',
-      cwd,
-    });
+export function getStagedDiff(cwd?: string): Result<string, Error> {
+  const runCommand = (args: string[]) => {
+    const command = new Deno.Command('git', { args, stdout: 'piped', stderr: 'piped', cwd });
+    return command.outputSync();
+  };
 
-    const { success, stdout, stderr } = command.outputSync();
-
-    if (!success) {
-      const errorText = new TextDecoder().decode(stderr);
-      throw new Error(`Git error: ${errorText}`);
-    }
-
-    const diff = new TextDecoder().decode(stdout);
-
-    if (!diff.trim()) {
-      throw new Error('No staged changes found. Please stage your changes with "git add" first.');
-    }
-
-    return diff;
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message.includes('No staged changes')) {
-        throw error;
-      }
-      throw new Error(`Git error: ${error.message}`);
-    }
-    throw new Error('Unknown git error occurred');
+  const result = Result.wrap(() => runCommand(['diff', '--cached', '--diff-filter=d']))();
+  if (!result.ok) {
+    return Result.error(new Error(`Git error: ${result.error.message}`));
   }
+
+  const { success, stdout, stderr } = result.value;
+  if (!success) {
+    const errorText = new TextDecoder().decode(stderr);
+    return Result.error(new Error(`Git error: ${errorText}`));
+  }
+
+  const diff = new TextDecoder().decode(stdout);
+
+  if (!diff.trim()) {
+    return Result.error(
+      new Error('No staged changes found. Please stage your changes with "git add" first.'),
+    );
+  }
+
+  return Result.ok(diff);
 }
 
 /**
  * Get a summary of changed files
  */
-export function getChangeSummary(cwd?: string): ChangeSummary {
-  try {
-    const command = new Deno.Command('git', {
-      args: ['diff', '--cached', '--name-status'],
-      stdout: 'piped',
-      stderr: 'piped',
-      cwd,
-    });
+export function getChangeSummary(cwd?: string): Result<ChangeSummary, Error> {
+  const runCommand = (args: string[]) => {
+    const command = new Deno.Command('git', { args, stdout: 'piped', stderr: 'piped', cwd });
+    return command.outputSync();
+  };
 
-    const { success, stdout, stderr } = command.outputSync();
-
-    if (!success) {
-      const errorText = new TextDecoder().decode(stderr);
-      throw new Error(`Failed to get change summary: ${errorText}`);
-    }
-
-    const statusOutput = new TextDecoder().decode(stdout);
-
-    if (!statusOutput.trim()) {
-      return { files: [], totalFiles: 0, allDeletions: false };
-    }
-
-    const files: FileChange[] = statusOutput.trim().split('\n').map((line) => {
-      const [status, filename] = line.split('\t');
-      return {
-        status: status,
-        filename: filename,
-        statusDescription: getStatusDescription(status),
-      };
-    });
-
-    return {
-      files,
-      totalFiles: files.length,
-      allDeletions: files.length > 0 && files.every((f) => f.status === 'D'),
-    };
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to get change summary: ${error.message}`);
-    }
-    throw new Error('Unknown error getting change summary');
+  const result = Result.wrap(() => runCommand(['diff', '--cached', '--name-status']))();
+  if (!result.ok) {
+    return Result.error(new Error(`Failed to get change summary: ${result.error.message}`));
   }
+
+  const { success, stdout, stderr } = result.value;
+  if (!success) {
+    const errorText = new TextDecoder().decode(stderr);
+    return Result.error(new Error(`Failed to get change summary: ${errorText}`));
+  }
+
+  const statusOutput = new TextDecoder().decode(stdout);
+
+  if (!statusOutput.trim()) {
+    return Result.ok({ files: [], totalFiles: 0, allDeletions: false });
+  }
+
+  const files: FileChange[] = statusOutput.trim().split('\n').map((line) => {
+    const [status, filename] = line.split('\t');
+    return {
+      status: status,
+      filename: filename,
+      statusDescription: getStatusDescription(status),
+    };
+  });
+
+  return Result.ok({
+    files,
+    totalFiles: files.length,
+    allDeletions: files.length > 0 && files.every((f) => f.status === 'D'),
+  });
 }
 
 /**
@@ -103,20 +93,22 @@ function getStatusDescription(status: string): string {
 /**
  * Check if we're in a git repository
  */
-export function isGitRepository(cwd?: string): boolean {
-  try {
+export function isGitRepository(cwd?: string): Result<boolean, Error> {
+  const result = Result.wrap(() => {
     const command = new Deno.Command('git', {
       args: ['rev-parse', '--git-dir'],
       stdout: 'piped',
       stderr: 'piped',
       cwd,
     });
+    return command.outputSync();
+  })();
 
-    const { success } = command.outputSync();
-    return success;
-  } catch {
-    return false;
+  if (!result.ok) {
+    return Result.ok(false);
   }
+
+  return Result.ok(result.value.success);
 }
 
 /**

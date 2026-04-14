@@ -30,42 +30,36 @@ export function handleStatus(deps: StatusDependencies = {}): void {
     process = defaultDeps.process,
   } = deps;
 
-  try {
-    if (!git.isRepository(cwd)) {
-      logger.log(red('❌ Not in a git repository.'));
-      process.exit(1);
-    }
+  const isRepoResult = git.isRepository(cwd);
+  if (!isRepoResult.ok || !isRepoResult.value) {
+    logger.log(red('❌ Not in a git repository.'));
+    return process.exit(1);
+  }
 
-    const changeSummary = git.getChangeSummary(cwd);
-    logger.log(cyan(bold('\n📊 Git Status Summary\n')));
-    displayChangeSummaryInline(changeSummary, logger);
+  const changeSummaryResult = git.getChangeSummary(cwd);
+  if (!changeSummaryResult.ok) {
+    logger.log(red(`❌ ${changeSummaryResult.error.message}`));
+    return process.exit(1);
+  }
 
-    if (changeSummary.totalFiles === 0) {
-      logger.log(
-        blue(
-          '💡 Stage some changes with "git add" to generate a commit message.',
-        ),
-      );
-    } else {
-      logger.log(
-        green(
-          `Ready to generate commit message for ${changeSummary.totalFiles} file(s).`,
-        ),
-      );
-      logger.log(
-        blue('Run "git-commit-ai generate" to create a commit message.'),
-      );
-    }
-  } catch (error) {
-    if (error instanceof ProcessExitError) {
-      throw error;
-    }
+  logger.log(cyan(bold('\n📊 Git Status Summary\n')));
+  displayChangeSummaryInline(changeSummaryResult.value, logger);
+
+  if (changeSummaryResult.value.totalFiles === 0) {
     logger.log(
-      red(
-        `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      blue(
+        '💡 Stage some changes with "git add" to generate a commit message.',
       ),
     );
-    process.exit(1);
+  } else {
+    logger.log(
+      green(
+        `Ready to generate commit message for ${changeSummaryResult.value.totalFiles} file(s).`,
+      ),
+    );
+    logger.log(
+      blue('Run "git-commit-ai generate" to create a commit message.'),
+    );
   }
 }
 

@@ -28,9 +28,9 @@ export interface ProcessRunner {
  * Git repository reading operations
  */
 export interface GitReader {
-  isRepository: (cwd?: string) => boolean;
-  getChangeSummary: (cwd?: string) => ChangeSummary;
-  getStagedDiff: (cwd?: string) => string;
+  isRepository: (cwd?: string) => Result<boolean, Error>;
+  getChangeSummary: (cwd?: string) => Result<ChangeSummary, Error>;
+  getStagedDiff: (cwd?: string) => Result<string, Error>;
 }
 
 /**
@@ -61,14 +61,14 @@ export interface AIService {
     config: AIConfig,
     gitDiff: string,
     changeSummary: ChangeSummary,
-  ) => Promise<string>;
+  ) => Promise<Result<string, Error>>;
 }
 
 /**
  * Models.dev data and provider management service
  */
 export interface ModelsService {
-  getModelsDevData: () => Promise<ModelsDevResponse>;
+  getModelsDevData: () => Promise<Result<ModelsDevResponse, Error>>;
   getProviderApiKey: (provider: ModelsDevProvider) => string | null;
   mergeCustomProviders: (
     data: ModelsDevResponse,
