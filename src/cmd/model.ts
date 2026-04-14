@@ -1,14 +1,55 @@
-import { getAvailableProviders, getModelsDevData, mergeCustomProviders } from '../models-dev.ts';
-
+import { getModelsDevData, getProviderApiKey, mergeCustomProviders } from '../models-dev.ts';
+import type { ModelsDevResponse } from '../models-dev.ts';
 import { bold, cyan, dim, green, red } from '@std/fmt/colors';
+import type { Result } from '../result.ts';
+import type { ConfigFile } from '../types.ts';
 
-async function resolveCustomProviders() {
-  const data = await getModelsDevData();
+export interface ModelDependencies {
+  getModelsDevData?: () => Promise<ModelsDevResponse>;
+  getProviderApiKey?: (provider: Parameters<typeof getProviderApiKey>[0]) => string | null;
+  mergeCustomProviders?: typeof mergeCustomProviders;
+  loadConfig?: () => Promise<Result<ConfigFile, Error>>;
+  logger?: {
+    log: (...args: unknown[]) => void;
+    error: (...args: unknown[]) => void;
+  };
+}
+
+type DepsLogger = NonNullable<ModelDependencies['logger']>;
+
+const defaultDeps: {
+  getModelsDevData: () => Promise<ModelsDevResponse>;
+  getProviderApiKey: (provider: Parameters<typeof getProviderApiKey>[0]) => string | null;
+  mergeCustomProviders: typeof mergeCustomProviders;
+  loadConfig: () => Promise<Result<ConfigFile, Error>>;
+  logger: DepsLogger;
+} = {
+  getModelsDevData,
+  getProviderApiKey,
+  mergeCustomProviders,
+  loadConfig: async () => {
+    const { loadConfig: realLoadConfig } = await import('../config.ts');
+    return realLoadConfig();
+  },
+  logger: globalThis.console,
+};
+
+export async function handleModel(deps: ModelDependencies = {}): Promise<void> {
+  const {
+    getModelsDevData: fetchModelsDevData = defaultDeps.getModelsDevData,
+    getProviderApiKey: resolveProviderApiKey = defaultDeps.getProviderApiKey,
+    mergeCustomProviders: doMergeCustomProviders = defaultDeps.mergeCustomProviders,
+    loadConfig: loadCfg = defaultDeps.loadConfig,
+    logger = defaultDeps.logger,
+  } = deps;
+
+  logger.log(cyan(bold('\n🤖 Available AI Models\n')));
+
+  const data = await fetchModelsDevData();
 
   let customProviders: Record<string, unknown> | undefined = undefined;
   try {
-    const { loadConfig } = await import('../config.ts');
-    const configResult = await loadConfig();
+    const configResult = await loadCfg();
     if (configResult.ok && configResult.value) {
       customProviders = configResult.value.providers;
     }
@@ -16,32 +57,29 @@ async function resolveCustomProviders() {
     customProviders = undefined;
   }
 
-  if (!customProviders || Object.keys(customProviders).length === 0) {
-    return data;
-  }
+  const mergedData = (!customProviders || Object.keys(customProviders).length === 0)
+    ? data
+    : doMergeCustomProviders(data, customProviders);
 
-  return mergeCustomProviders(data, customProviders);
-}
-
-export async function handleModel() {
-  console.log(cyan(bold('\n🤖 Available AI Models\n')));
-
-  const data = await resolveCustomProviders();
-
-  if (Object.keys(data).length === 0) {
-    console.log(red('Could not fetch models.dev data. Check your network connection.'));
+  if (Object.keys(mergedData).length === 0) {
+    logger.log(red('Could not fetch models.dev data. Check your network connection.'));
     return;
   }
 
-  const available = getAvailableProviders(data);
-  const availableIds = new Set(available.map((p) => p.id));
+  const availableIds = new Set<string>();
+  for (const provider of Object.values(mergedData)) {
+    const apiKey = resolveProviderApiKey(provider);
+    if (apiKey !== null) {
+      availableIds.add(provider.id);
+    }
+  }
 
-  for (const [providerId, provider] of Object.entries(data)) {
+  for (const [providerId, provider] of Object.entries(mergedData)) {
     const isAvailable = availableIds.has(providerId);
     const status = isAvailable ? green('✓') : red('✗');
     const models = Object.values(provider.models);
 
-    console.log(`${status} ${bold(provider.name)} (${providerId})`);
+    logger.log(`${status} ${bold(provider.name)} (${providerId})`);
 
     for (const model of models) {
       const modelRef = `${providerId}/${model.id}`;
@@ -51,11 +89,11 @@ export async function handleModel() {
       if (model.attachment) features.push('attachments');
 
       const featureStr = features.length > 0 ? dim(` [${features.join(', ')}]`) : '';
-      console.log(`  ${modelRef}${featureStr}`);
+      logger.log(`  ${modelRef}${featureStr}`);
     }
-    console.log('');
+    logger.log('');
   }
 
-  console.log(dim('Set API key environment variables to enable providers.'));
-  console.log(dim('Use: git-commit-ai generate --model provider/model-id'));
+  logger.log(dim('Set API key environment variables to enable providers.'));
+  logger.log(dim('Use: git-commit-ai generate --model provider/model-id'));
 }

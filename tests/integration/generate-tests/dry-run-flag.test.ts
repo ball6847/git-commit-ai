@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts';
+import { assertEquals } from '@std/assert';
 import { createHarness } from '../helpers/test-harness.ts';
 
 Deno.test('dry-run flag: AI called but no commit in git log', async () => {

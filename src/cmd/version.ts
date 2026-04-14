@@ -1,7 +1,18 @@
 import { bold, cyan } from '@std/fmt/colors';
 
-const VERSION = '0.2.0';
+export const VERSION = '0.2.0';
 
-export function handleVersion() {
-  console.log(cyan(bold(`git-commit-ai v${VERSION}`)));
+export interface VersionDependencies {
+  logger?: {
+    log: (...args: unknown[]) => void;
+  };
+}
+
+const defaultDeps: Required<VersionDependencies> = {
+  logger: globalThis.console,
+};
+
+export function handleVersion(deps: VersionDependencies = {}): void {
+  const { logger = defaultDeps.logger } = deps;
+  logger.log(cyan(bold(`git-commit-ai v${VERSION}`)));
 }

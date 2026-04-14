@@ -1,0 +1,78 @@
+import { handleModel, type ModelDependencies } from '../../../src/cmd/model.ts';
+import type {
+  ModelsDevModel,
+  ModelsDevProvider,
+  ModelsDevResponse,
+} from '../../../src/models-dev.ts';
+import type { Result } from '../../../src/result.ts';
+import type { ConfigFile } from '../../../src/types.ts';
+
+export interface ModelHarness {
+  logs: string[];
+  errors: string[];
+  run(overrides?: Partial<ModelDependencies>): Promise<void>;
+}
+
+export function createModelHarness(mockData: ModelsDevResponse): ModelHarness {
+  const logs: string[] = [];
+  const errors: string[] = [];
+
+  function run(overrides: Partial<ModelDependencies> = {}): Promise<void> {
+    logs.length = 0;
+    errors.length = 0;
+
+    const deps: ModelDependencies = {
+      getModelsDevData: () => Promise.resolve(mockData),
+      getProviderApiKey: () => null,
+      mergeCustomProviders: (data, custom) => {
+        const merged: ModelsDevResponse = { ...data };
+        for (const [id, config] of Object.entries(custom)) {
+          const cfg = config as Record<string, unknown>;
+          const modelsCfg = cfg['models'] as Record<string, unknown> | undefined;
+          if (!modelsCfg) continue;
+          const modelsMap: Record<string, ModelsDevModel> = {};
+          for (const [modelId, modelUnknown] of Object.entries(modelsCfg)) {
+            const m = modelUnknown as Record<string, unknown>;
+            modelsMap[modelId] = {
+              id: modelId,
+              name: String(m['name']),
+              attachment: !!m['attachment'],
+              reasoning: !!m['reasoning'],
+              tool_call: !!m['tool_call'],
+              temperature: !!m['temperature'],
+            };
+          }
+          const envArr = Array.isArray(cfg['env']) ? cfg['env'] as string[] : [];
+          const npmStr = typeof cfg['npm'] === 'string'
+            ? cfg['npm'] as string
+            : '@ai-sdk/openai-compatible';
+          const apiStr = typeof cfg['api'] === 'string' ? cfg['api'] as string : undefined;
+          merged[id] = {
+            id,
+            name: id,
+            env: envArr,
+            npm: npmStr,
+            api: apiStr,
+            models: modelsMap,
+          } as ModelsDevProvider;
+        }
+        return merged;
+      },
+      loadConfig: () =>
+        Promise.resolve({ ok: true, value: {} as ConfigFile } as Result<ConfigFile, Error>),
+      logger: {
+        log: (...args: unknown[]) => {
+          logs.push(args.map(String).join(' '));
+        },
+        error: (...args: unknown[]) => {
+          errors.push(args.map(String).join(' '));
+        },
+      },
+      ...overrides,
+    };
+
+    return handleModel(deps);
+  }
+
+  return { logs, errors, run };
+}

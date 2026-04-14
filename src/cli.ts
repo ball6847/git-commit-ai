@@ -85,7 +85,7 @@ cli
 cli
   .command('version', 'Show version information')
   .alias('v')
-  .action(handleVersion);
+  .action(() => handleVersion());
 
 // Add commit command
 cli
@@ -95,19 +95,19 @@ cli
   .option('-p, --provider <provider:string>', 'AI provider to use')
   .option('--staged', 'Only commit staged changes (default: stage all)')
   .option('-d, --debug', 'Enable debug output')
-  .action(handleCommit);
+  .action((opts) => handleCommit(opts));
 
 // Add model command
 cli
   .command('model', 'List all available AI models')
   .alias('m')
-  .action(handleModel);
+  .action(() => handleModel());
 
 // Add status command
 cli
   .command('status', 'Show current git status and staged changes')
   .alias('s')
-  .action(handleStatus);
+  .action(() => handleStatus());
 
 // Handle main execution
 if (import.meta.main) {

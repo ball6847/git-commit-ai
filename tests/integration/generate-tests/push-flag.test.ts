@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts';
+import { assertEquals } from '@std/assert';
 import { unwrap } from '../../../src/result.ts';
 import { createHarness } from '../helpers/test-harness.ts';
 import { getRemoteLog } from '../helpers/temp-repo.ts';
