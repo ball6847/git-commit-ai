@@ -1,3 +1,7 @@
+---
+status: In Progress
+---
+
 # STORY-011: Result Pattern — models-dev.ts
 
 **Story ID:** STORY-011

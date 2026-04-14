@@ -261,7 +261,8 @@ deno test --allow-run --allow-env --allow-read
 
 **"No staged changes found"**
 
-- Stage your changes first: `git add <files>`
+- `generate` automatically stages all changes when nothing is staged
+- If you prefer manual control, stage your changes first: `git add <files>`
 - Check status: `git status`
 
 **"OPENROUTER_API_KEY not found"**
@@ -360,15 +361,3 @@ MIT License - feel free to use this project however you'd like!
 Author: Porawit Poboonma
 
 Made with ❤️ using Deno and TypeScript
-
-# test
-
-# test mistral extension
-
-# test ollama cloud
-
-test readme
-
-# auto commit test
-
-test readme

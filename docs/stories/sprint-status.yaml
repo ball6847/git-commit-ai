@@ -1,83 +1,51 @@
 # Sprint Status: git-commit-ai
-# Generated: 2026-04-12
+# Generated: 2026-04-14
 
 # Sprint Information
-sprint: 1
+sprint: 3
 project: git-commit-ai
 project_level: 0
 status: active
-created: '2026-04-12'
-target_completion: '2026-04-26'
+created: '2026-04-14'
+target_completion: '2026-05-11'
 
 # Sprint Goal
-goal: 'Replace hardcoded provider list with models.dev-driven dynamic provider resolution, so the CLI automatically supports all providers as models.dev grows — without code changes when new providers are added.'
+goal: 'Simplify the CLI by removing the redundant commit command and consolidating its behavior into generate via smart auto-staging. Add integration tests to verify config file loading and custom provider merging work correctly in isolation.'
 
 # Sprint Plan Reference
-sprint_plan: 'docs/stories/sprint-1-plan.md'
+sprint_plan: 'docs/stories/sprint-3-plan.md'
 
 # Key Design Decisions
 key_decisions:
-  - "Additive approach — models.dev integration adds on top of existing providers, doesn't replace them"
-  - 'Cache-first — Aggressive caching (24h) minimizes API calls to models.dev'
-  - 'Env var discovery — Providers auto-activate when their API key env var is set'
-  - '@ai-sdk/openai-compatible fallback — Any provider with an api base URL can work via this universal adapter'
-  - 'No dynamic npm install — Only use pre-bundled AI SDK packages (simpler, Deno-compatible)'
+  - 'Remove commit command — generate --commit is equivalent'
+  - 'Smart auto-staging — auto-stage all changes when nothing is staged, respect explicit staging when present'
+  - 'Isolated integration tests — use temp directories for config and provider tests'
 
 # Story Status Tracking
 stories:
-  - id: STORY-001
-    name: 'Fetch and Cache models.dev Database'
-    status: not_started
+  - id: STORY-023
+    name: 'Remove commit command and add --stage flag to generate'
+    status: completed
     priority: high
-    file: 'docs/stories/STORY-001-fetch-cache-models-dev.md'
+    file: 'docs/stories/STORY-023-remove-commit-add-stage-flag.md'
 
-  - id: STORY-002
-    name: 'Dynamic Provider Resolution'
-    status: not_started
-    priority: high
-    file: 'docs/stories/STORY-002-dynamic-provider-resolution.md'
-
-  - id: STORY-003
-    name: 'Vercel AI SDK Provider Loading'
-    status: not_started
-    priority: high
-    file: 'docs/stories/STORY-003-vercel-ai-sdk-provider-loading.md'
-
-  - id: STORY-004
-    name: 'Update Model Listing Command'
-    status: not_started
+  - id: STORY-024
+    name: 'Integration tests for config file loading and custom provider merging'
+    status: completed
     priority: medium
-    file: 'docs/stories/STORY-004-update-model-listing-command.md'
-
-  - id: STORY-005
-    name: 'Update Generate/Commit to Use models.dev'
-    status: not_started
-    priority: high
-    file: 'docs/stories/STORY-005-update-generate-commit-use-models-dev.md'
-
-  - id: STORY-006
-    name: 'Update Tests'
-    status: not_started
-    priority: medium
-    file: 'docs/stories/STORY-006-tests-models-dev-integration.md'
+    file: 'docs/stories/STORY-024-integration-tests-config-custom-provider.md'
 
 # Sprint Metrics
 metrics:
-  total_stories: 6
-  story_points: 13
-  sprint_duration: '1-2 weeks'
+  total_stories: 2
+  story_points: 5
+  sprint_duration: '1 week'
 
 # Risks
 risks:
-  - risk: 'models.dev API downtime'
-    impact: medium
-    mitigation: 'Cache aggressively, fallback to hardcoded providers'
-  - risk: 'Provider SDK incompatibility'
+  - risk: 'Users depend on commit command'
     impact: low
-    mitigation: 'Use @ai-sdk/openai-compatible as universal fallback'
-  - risk: 'Breaking existing model selection'
-    impact: high
-    mitigation: 'Keep existing provider modules, add models.dev as layer on top'
-  - risk: 'Rate limiting on models.dev'
+    mitigation: 'generate --commit is equivalent'
+  - risk: 'Integration tests touch real FS'
     impact: low
-    mitigation: '24-hour cache, only fetch on cache miss'
+    mitigation: 'Use temp directories in tests'

@@ -2,7 +2,7 @@
 story_id: STORY-021
 title: Integration Tests for status Command
 created_at: 2026-04-14
-status: Not Started
+status: Completed
 sprint: Sprint 2
 epic: Epic 4 - Testing Infrastructure
 ---

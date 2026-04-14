@@ -1,3 +1,7 @@
+---
+status: In Progress
+---
+
 # STORY-013: Result Pattern — git.ts & cmd/*.ts
 
 **Story ID:** STORY-013

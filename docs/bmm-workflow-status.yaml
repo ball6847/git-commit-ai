@@ -374,6 +374,12 @@ workflow_status:
     description: 'Integration tests for config file loading and custom provider merging'
     command: '/create-story'
 
+  - name: dev-story-023
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-023: Remove commit command and add smart auto-staging'
+    command: '/dev-story'
+
   - name: dev-story-024
     phase: 4
     status: 'completed'

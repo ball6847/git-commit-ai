@@ -2,7 +2,7 @@
 story_id: STORY-016
 title: Integration Testing with ts-mockito
 created_at: 2026-04-13
-status: Not Started
+status: Completed
 sprint: Sprint 2
 epic: Epic 4 - Testing Infrastructure
 ---

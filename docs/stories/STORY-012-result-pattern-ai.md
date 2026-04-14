@@ -1,3 +1,7 @@
+---
+status: In Progress
+---
+
 # STORY-012: Result Pattern — ai.ts
 
 **Story ID:** STORY-012

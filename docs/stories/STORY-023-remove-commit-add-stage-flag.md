@@ -2,7 +2,7 @@
 story_id: STORY-023
 title: Remove commit command and add --stage flag to generate
 created_at: 2026-04-14
-status: Not Started
+status: Completed
 sprint: Sprint 3
 epic: Epic 1 - CLI Simplification
 ---
