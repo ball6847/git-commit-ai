@@ -131,7 +131,6 @@ src/
 ├── models-dev.ts   # Models.dev fetching, caching, provider resolution, SDK loading
 ├── types.ts        # TypeScript type definitions
 ├── cmd/
-│   ├── commit.ts   # Commit command implementation
 │   ├── generate.ts # Generate commit message command
 │   ├── model.ts    # Model management command
 │   ├── status.ts   # Status check command

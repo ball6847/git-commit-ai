@@ -359,13 +359,13 @@ workflow_status:
   - name: sprint-3-planning
     phase: 4
     status: 'docs/stories/sprint-3-plan.md'
-    description: 'Sprint 3: Remove commit command, add --stage to generate, config file integration tests'
+    description: 'Sprint 3: Remove commit command, smart auto-staging, config file integration tests'
     command: '/sprint-planning'
 
   - name: create-story-023
     phase: 4
     status: 'docs/stories/STORY-023-remove-commit-add-stage-flag.md'
-    description: 'Remove commit command and add --stage flag to generate'
+    description: 'Remove commit command and add smart auto-staging to generate'
     command: '/create-story'
 
   - name: create-story-024

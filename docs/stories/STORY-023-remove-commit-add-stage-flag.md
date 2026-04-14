@@ -17,11 +17,14 @@ epic: Epic 1 - CLI Simplification
 
 ## User Story
 
-As a user of git-commit-ai, I want a single `generate` command that can optionally stage all my changes so that I don't need to remember a separate `commit` command.
+As a user of git-commit-ai, I want the `generate` command to automatically handle staging so that I don't need to remember a separate `commit` command or manually stage files.
 
 ## Context
 
-The `commit` command was originally a "quick commit" shortcut that automatically staged all changes, generated a message, and committed. This functionality overlaps with `generate --commit`. To simplify the CLI surface, we will remove the `commit` command entirely and add a `--stage` flag to `generate` so users can opt into staging unstaged changes before generation.
+The `commit` command was originally a "quick commit" shortcut that automatically staged all changes, generated a message, and committed. This functionality overlaps with `generate --commit`. To simplify the CLI surface, we will remove the `commit` command entirely and make `generate` smart about staging:
+
+- If no files are staged, `generate` automatically stages all changes before generating the commit message.
+- If files are already staged, `generate` respects the user's selection and only considers those staged files.
 
 The old workflow:
 
@@ -32,21 +35,21 @@ git-commit-ai commit --model gpt-4o
 Becomes:
 
 ```bash
-git-commit-ai generate --stage --commit --model gpt-4o
+git-commit-ai generate --commit --model gpt-4o
 ```
 
 ## Acceptance Criteria
 
-- [ ] `commit` command removed from `src/cli.ts`
-- [ ] `src/cmd/commit.ts` file removed
-- [ ] `--stage` flag added to `generate` command in `src/cli.ts`
-- [ ] `handleGenerate` stages all changes before reading diff when `--stage` is passed
-- [ ] `generate --stage --commit` produces the same behavior as the old `commit` command
-- [ ] Existing `generate` behavior without `--stage` is unchanged (still requires pre-staged changes)
-- [ ] `tests/integration/commit-tests/` directory removed
-- [ ] Any useful commit-test logic migrated to `generate-tests/` if not already covered
-- [ ] `AGENTS.md` updated to remove references to `commit` command
-- [ ] `README.md` updated to remove references to `commit` command and document `--stage`
+- [x] `commit` command removed from `src/cli.ts`
+- [x] `src/cmd/commit.ts` file removed
+- [x] `handleGenerate` automatically stages all changes when no files are staged
+- [x] `handleGenerate` respects existing staged files and does not auto-stage when staged files exist
+- [x] `generate --commit` on unstaged changes replicates the old `commit` command behavior
+- [x] `generate` exits gracefully with "No changes to commit" when there are no changes at all
+- [x] `tests/integration/commit-tests/` directory removed
+- [x] Smart staging tests added to `generate-tests/`
+- [x] `AGENTS.md` updated to remove references to `commit` command
+- [x] `README.md` updated to remove references to `commit` command and document smart staging
 
 ## Technical Design
 
@@ -57,13 +60,14 @@ git-commit-ai generate --stage --commit --model gpt-4o
 3. Generate commit message
 4. Commit changes
 
-### New `generate --stage --commit` flow
+### New `generate --commit` flow
 
-1. If `--stage` is passed, run `git add .` before reading diff
-2. Get change summary and diff
-3. Generate commit message
-4. If `--commit` is passed, commit without prompting
-5. Handle push logic as today
+1. Try to get change summary and diff
+2. If no staged changes are found, run `git add .` and retry
+3. If still no changes after staging, exit gracefully with "No changes to commit"
+4. Generate commit message
+5. If `--commit` is passed, commit without prompting
+6. Handle push logic as today
 
 ### `src/cli.ts` Changes
 
@@ -81,11 +85,7 @@ cli
   .action((opts) => handleCommit(opts));
 ```
 
-Add to generate command:
-
-```typescript
-.option('--stage', 'Stage all changes before generating commit message')
-```
+Remove commit command block entirely (no `--stage` flag needed).
 
 ### `src/cmd/generate.ts` Changes
 
@@ -98,14 +98,41 @@ export interface GenerateDependencies {
 }
 ```
 
-Before reading diff:
+When catching "No staged changes" error after reading diff:
 
 ```typescript
-if (options.stageAll) {
-  logger.log(cyan('📝 Staging all changes...'));
-  const success = await stageAllChanges(cwd);
-  if (!success) {
-    logger.log(red('❌ Failed to stage changes'));
+} catch (error) {
+  if (
+    error instanceof Error &&
+    error.message.includes('No staged changes')
+  ) {
+    logger.log(cyan('📝 No staged changes found. Staging all changes...'));
+    const success = await stageAllChanges(cwd);
+    if (!success) {
+      logger.log(red('❌ Failed to stage changes'));
+      exit(1);
+    }
+    // Retry getting summary and diff
+    try {
+      changeSummary = getSummary(cwd);
+      if (!changeSummary.allDeletions) {
+        diff = getDiff(cwd);
+      }
+    } catch (retryError) {
+      if (
+        retryError instanceof Error &&
+        retryError.message.includes('No staged changes')
+      ) {
+        logger.log(cyan('No changes to commit.'));
+        exit(0);
+      }
+      logger.log(
+        red(`❌ ${retryError instanceof Error ? retryError.message : 'Unknown error'}`),
+      );
+      exit(1);
+    }
+  } else {
+    logger.log(red(`❌ ${error instanceof Error ? error.message : 'Unknown error'}`));
     exit(1);
   }
 }
@@ -118,11 +145,11 @@ if (options.stageAll) {
 
 ## Files to Modify
 
-- `src/cli.ts` — Remove commit command, add `--stage` to generate
-- `src/cmd/generate.ts` — Add `stageAllChanges` dependency and stage logic
-- `tests/integration/generate-tests/` — Add `--stage` tests if needed
+- `src/cli.ts` — Remove commit command
+- `src/cmd/generate.ts` — Add `stageAllChanges` dependency and smart auto-staging logic
+- `tests/integration/generate-tests/` — Add smart staging tests
 - `AGENTS.md` — Remove commit command references
-- `README.md` — Document `--stage`, remove `commit` command docs
+- `README.md` — Document smart staging, remove `commit` command docs
 
 ## Story Points
 

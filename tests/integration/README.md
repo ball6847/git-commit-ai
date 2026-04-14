@@ -28,6 +28,7 @@ tests/integration/
 │   ├── commit-flag.test.ts
 │   ├── push-flag.test.ts
 │   ├── no-push-flag.test.ts
+│   ├── stage-flag.test.ts
 │   └── combinations.test.ts
 └── README.md
 ```

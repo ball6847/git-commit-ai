@@ -17,6 +17,7 @@ export interface GenerateDependencies {
   isGitRepository?: typeof isGitRepository;
   getChangeSummary?: typeof getChangeSummary;
   getStagedDiff?: typeof getStagedDiff;
+  stageAllChanges?: (cwd?: string) => Promise<boolean>;
   cwd?: string;
   setupSignalHandlers?: boolean;
   logger?: {
@@ -34,6 +35,15 @@ const defaultDeps: Required<Omit<GenerateDependencies, 'cwd'>> & { cwd: string |
   isGitRepository,
   getChangeSummary,
   getStagedDiff,
+  stageAllChanges: async (cwd?: string): Promise<boolean> => {
+    const { success } = await new Deno.Command('git', {
+      args: ['add', '.'],
+      stdout: 'inherit',
+      stderr: 'inherit',
+      cwd,
+    }).output();
+    return success;
+  },
   cwd: undefined,
   setupSignalHandlers: true,
   logger: globalThis.console,
@@ -60,6 +70,7 @@ export async function handleGenerate(
     isGitRepository: checkGitRepo = defaultDeps.isGitRepository,
     getChangeSummary: getSummary = defaultDeps.getChangeSummary,
     getStagedDiff: getDiff = defaultDeps.getStagedDiff,
+    stageAllChanges = defaultDeps.stageAllChanges,
     cwd = defaultDeps.cwd,
     setupSignalHandlers: shouldSetupSignalHandlers = defaultDeps.setupSignalHandlers,
     logger = defaultDeps.logger,
@@ -88,18 +99,40 @@ export async function handleGenerate(
         diff = getDiff(cwd);
       }
     } catch (error) {
-      logger.log(
-        red(`❌ ${error instanceof Error ? error.message : 'Unknown error'}`),
-      );
       if (
         error instanceof Error &&
         error.message.includes('No staged changes')
       ) {
+        logger.log(cyan('📝 No staged changes found. Staging all changes...'));
+        const success = await stageAllChanges(cwd);
+        if (!success) {
+          logger.log(red('❌ Failed to stage changes'));
+          exit(1);
+        }
+        try {
+          changeSummary = getSummary(cwd);
+          if (!changeSummary.allDeletions) {
+            diff = getDiff(cwd);
+          }
+        } catch (retryError) {
+          if (
+            retryError instanceof Error &&
+            retryError.message.includes('No staged changes')
+          ) {
+            logger.log(cyan('No changes to commit.'));
+            exit(0);
+          }
+          logger.log(
+            red(`❌ ${retryError instanceof Error ? retryError.message : 'Unknown error'}`),
+          );
+          exit(1);
+        }
+      } else {
         logger.log(
-          yellow('💡 Tip: Use "git add <files>" to stage your changes first.'),
+          red(`❌ ${error instanceof Error ? error.message : 'Unknown error'}`),
         );
+        exit(1);
       }
-      exit(1);
     }
 
     displayChangeSummary(changeSummary);
