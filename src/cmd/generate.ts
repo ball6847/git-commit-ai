@@ -313,10 +313,12 @@ async function pushChanges(
     return;
   }
 
-  const shouldPushResult = await Result.wrap(Confirm.prompt)({
-    message: 'Push changes to remote?',
-    default: true,
-  });
+  const shouldPushResult = await Result.wrap(() =>
+    Confirm.prompt({
+      message: 'Push changes to remote?',
+      default: true,
+    })
+  )();
 
   if (!shouldPushResult.ok || !shouldPushResult.value) {
     logger.log(blue('📋 Push cancelled.'));
