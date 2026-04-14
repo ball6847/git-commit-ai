@@ -9,7 +9,7 @@
     "start": "deno run --allow-run --allow-env --allow-read --allow-write --allow-net src/cli.ts",
     "dev": "deno run --allow-run --allow-env --allow-read --allow-write --allow-net --watch src/cli.ts",
     "install:local": "deno install --global --allow-run --allow-env --allow-read --allow-write --allow-net -n git-commit-ai-local --config deno.json --force ./src/cli.ts",
-    "test": "deno test --allow-run --allow-env --allow-read --allow-write --coverage=cov_profile --coverage-raw-data-only && deno coverage cov_profile --include='src/' --exclude='tests/' && deno coverage cov_profile --include='src/' --exclude='tests/' --html",
+    "test": "deno test --quiet --allow-run --allow-env --allow-read --allow-write --coverage=cov_profile --coverage-raw-data-only && deno coverage cov_profile --include='src/' --exclude='tests/' && deno coverage cov_profile --include='src/' --exclude='tests/' --html",
     "test:open": "xdg-open cov_profile/html/index.html 2>/dev/null || open cov_profile/html/index.html 2>/dev/null",
     "check": "deno check src/cli.ts",
     "lint": "deno lint",
