@@ -5,16 +5,16 @@ import { Result } from 'typescript-result';
 const DEFAULT_MAX_TOKENS = 200;
 const DEFAULT_TEMPERATURE = 0.3;
 
-export async function loadConfig(): Promise<Result<ConfigFile, Error>> {
-  const configPath = getConfigFile();
+export async function loadConfig(configPath?: string): Promise<Result<ConfigFile, Error>> {
+  const path = configPath ?? getConfigFile();
 
   try {
-    const fileContent = await Deno.readTextFile(configPath);
+    const fileContent = await Deno.readTextFile(path);
 
     try {
       const configFile = JSON.parse(fileContent) as ConfigFile;
 
-      if (!configFile || typeof configFile !== 'object') {
+      if (!configFile || typeof configFile !== 'object' || Array.isArray(configFile)) {
         return Result.error(new Error('Config file must be a JSON object'));
       }
 
