@@ -1,0 +1,399 @@
+# BMAD Method Workflow Status
+# Generated: 2026-04-12
+# Project: git-commit-ai
+
+# Project Information
+project_name: 'git-commit-ai'
+project_type: 'cli'
+project_level: 0
+communication_language: 'English'
+output_language: 'English'
+last_updated: '2026-04-14T13:56:43Z'
+
+# Workflow Status Tracking
+workflow_status:
+  # Phase 1: Analysis
+  - name: product-brief
+    phase: 1
+    status: 'optional'
+    description: 'Create comprehensive product brief with vision and high-level requirements'
+    command: '/product-brief'
+
+  - name: brainstorm-project
+    phase: 1
+    status: 'optional'
+    description: 'Structured brainstorming session for features and solutions'
+    command: '/brainstorm'
+
+  - name: research
+    phase: 1
+    status: 'optional'
+    description: 'Market analysis, competitive research, and technical investigation'
+    command: '/research'
+
+  # Phase 2: Planning
+  - name: prd
+    phase: 2
+    status: 'optional'
+    description: 'Product Requirements Document - comprehensive requirements for multi-feature projects'
+    command: '/prd'
+    notes: 'Use for Level 2+ projects or when stakeholder alignment needed'
+
+  - name: tech-spec
+    phase: 2
+    status: 'docs/tech-spec-git-commit-ai-2026-04-12.md'
+    description: 'Technical Specification - detailed technical design for implementation'
+    command: '/tech-spec'
+    notes: 'Use for Level 0-1 projects or as supplement to PRD'
+
+  - name: create-ux-design
+    phase: 2
+    status: 'optional'
+    description: 'UX/UI design workflow with wireframes and user flows'
+    command: '/create-ux-design'
+
+  # Phase 3: Solutioning
+  - name: architecture
+    phase: 3
+    status: 'optional'
+    description: 'System architecture design with components and integrations'
+    command: '/architecture'
+
+  - name: solutioning-gate-check
+    phase: 3
+    status: 'optional'
+    description: 'Validate architecture against requirements before implementation'
+    command: '/solutioning-gate-check'
+
+  # Phase 4: Implementation
+  - name: sprint-planning
+    phase: 4
+    status: 'docs/stories/sprint-1-plan.md'
+    description: 'Break down requirements into epics and stories, create sprint plan'
+    command: '/sprint-planning'
+
+  - name: create-story-001
+    phase: 4
+    status: 'docs/stories/STORY-001-fetch-cache-models-dev.md'
+    description: 'Fetch and Cache models.dev Database'
+    command: '/create-story'
+
+  - name: create-story-002
+    phase: 4
+    status: 'docs/stories/STORY-002-dynamic-provider-resolution.md'
+    description: 'Dynamic Provider Resolution'
+    command: '/create-story'
+
+  - name: create-story-003
+    phase: 4
+    status: 'docs/stories/STORY-003-vercel-ai-sdk-provider-loading.md'
+    description: 'Vercel AI SDK Provider Loading'
+    command: '/create-story'
+
+  - name: create-story-004
+    phase: 4
+    status: 'docs/stories/STORY-004-update-model-listing-command.md'
+    description: 'Update Model Listing Command'
+    command: '/create-story'
+
+  - name: create-story-005
+    phase: 4
+    status: 'docs/stories/STORY-005-update-generate-commit-use-models-dev.md'
+    description: 'Update Generate/Commit to Use models.dev'
+    command: '/create-story'
+
+  - name: create-story-006
+    phase: 4
+    status: 'docs/stories/STORY-006-tests-models-dev-integration.md'
+    description: 'Update Tests for models.dev Integration'
+    command: '/create-story'
+
+  - name: dev-story-006
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-006: Tests for models.dev Integration'
+    command: '/dev-story'
+
+  - name: create-story-007
+    phase: 4
+    status: 'docs/stories/STORY-007-credit-models-dev-ai-sdk.md'
+    description: 'Add attribution/credits for models.dev and AI SDK to README'
+    command: '/create-story'
+
+  - name: dev-story-001
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-001: Fetch and Cache models.dev Database'
+    command: '/dev-story'
+
+  - name: dev-story-002
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-002: Dynamic Provider Resolution'
+    command: '/dev-story'
+
+  - name: dev-story-003
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-003: Vercel AI SDK Provider Loading'
+    command: '/dev-story'
+
+  - name: dev-story-004
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-004: Update Model Listing Command'
+    command: '/dev-story'
+
+  - name: dev-story-005
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-005: Update Generate/Commit to Use models.dev'
+    command: '/dev-story'
+
+  - name: dev-story-007
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-007: Credit models.dev and AI SDK in README'
+    command: '/dev-story'
+
+  - name: dev-story
+    phase: 4
+    status: 'conditional'
+    description: 'Implement specific user story with code generation'
+    command: '/dev-story'
+
+  - name: code-review
+    phase: 4
+    status: 'optional'
+    description: 'Review implemented code for quality and standards'
+    command: '/code-review'
+
+  # Sprint 2 Stories
+  - name: sprint-2-planning
+    phase: 4
+    status: 'docs/stories/sprint-2-plan.md'
+    description: 'Sprint 2: XDG paths, config file, custom providers & Result refactoring'
+    command: '/sprint-planning'
+
+  - name: create-story-008
+    phase: 4
+    status: 'docs/stories/STORY-008-xdg-paths-cache-migration.md'
+    description: 'XDG Base Directory Paths & Cache Migration'
+    command: '/create-story'
+
+  - name: dev-story-008
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-008: XDG Base Directory Paths & Cache Migration'
+    command: '/dev-story'
+
+  - name: create-story-009
+    phase: 4
+    status: 'docs/stories/STORY-009-config-file-support.md'
+    description: 'Config File Loading & Merging (~/.config/git-commit-ai/config.json)'
+    command: '/create-story'
+
+  - name: dev-story-009
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-009: Config File Loading & Merging'
+    command: '/dev-story'
+
+  - name: create-story-010
+    phase: 4
+    status: 'docs/stories/STORY-010-custom-provider-extension.md'
+    description: 'Custom Provider & Extension Registration'
+    command: '/create-story'
+
+  - name: dev-story-010
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-010: Custom Provider & Extension Registration'
+    command: '/dev-story'
+
+  - name: create-story-011
+    phase: 4
+    status: 'docs/stories/STORY-011-result-pattern-models-dev.md'
+    description: 'Result Pattern — models-dev.ts'
+    command: '/create-story'
+
+  - name: dev-story-011
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-011: Result Pattern — models-dev.ts'
+    command: '/dev-story'
+
+  - name: create-story-012
+    phase: 4
+    status: 'docs/stories/STORY-012-result-pattern-ai.md'
+    description: 'Result Pattern — ai.ts'
+    command: '/create-story'
+
+  - name: dev-story-012
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-012: Result Pattern — ai.ts'
+    command: '/dev-story'
+
+  - name: create-story-013
+    phase: 4
+    status: 'docs/stories/STORY-013-result-pattern-git-cmd.md'
+    description: 'Result Pattern — git.ts & cmd/*.ts'
+    command: '/create-story'
+
+  - name: dev-story-013
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-013: Result Pattern — git.ts & cmd/*.ts'
+    command: '/dev-story'
+
+  - name: create-story-014
+    phase: 4
+    status: 'docs/stories/STORY-014-rename-yes-to-commit-flag.md'
+    description: 'Rename --yes flag to --commit in generate command'
+    command: '/create-story'
+
+  - name: dev-story-014
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-014: Rename --yes flag to --commit'
+    command: '/dev-story'
+
+  - name: create-story-015
+    phase: 4
+    status: 'docs/stories/STORY-015-dependency-injection-refactor.md'
+    description: 'Dependency Injection Refactor for Testability'
+    command: '/create-story'
+
+  - name: dev-story-015
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-015: Dependency Injection Refactor'
+    command: '/dev-story'
+
+  - name: create-story-016
+    phase: 4
+    status: 'docs/stories/STORY-016-integration-testing-ts-mockito.md'
+    description: 'Integration Testing Framework with ts-mockito'
+    command: '/create-story'
+
+  - name: dev-story-016
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-016: Integration Testing Framework'
+    command: '/dev-story'
+
+  - name: create-story-017
+    phase: 4
+    status: 'docs/stories/STORY-017-dry-run-priority.md'
+    description: 'Ensure --dry-run takes priority over --commit and --push'
+    command: '/create-story'
+
+  - name: dev-story-017
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-017: dry-run priority over --commit and --push'
+    command: '/dev-story'
+
+  - name: create-story-018
+    phase: 4
+    status: 'docs/stories/STORY-018-no-push-flag.md'
+    description: 'Add --no-push flag and GIT_COMMIT_AI_NO_PUSH env var'
+    command: '/create-story'
+
+  - name: dev-story-018
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-018: --no-push flag and env var support'
+    command: '/dev-story'
+
+  - name: create-story-019
+    phase: 4
+    status: 'docs/stories/STORY-019-integration-tests-commit-command.md'
+    description: 'Integration Tests for commit Command'
+    command: '/create-story'
+
+  - name: dev-story-019
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-019: Integration Tests for commit Command'
+    command: '/dev-story'
+
+  - name: create-story-020
+    phase: 4
+    status: 'docs/stories/STORY-020-integration-tests-model-command.md'
+    description: 'Integration Tests for model Command'
+    command: '/create-story'
+
+  - name: dev-story-020
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-020: Integration Tests for model Command'
+    command: '/dev-story'
+
+  - name: create-story-021
+    phase: 4
+    status: 'docs/stories/STORY-021-integration-tests-status-command.md'
+    description: 'Integration Tests for status Command'
+    command: '/create-story'
+
+  - name: dev-story-021
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-021: Integration Tests for status Command'
+    command: '/dev-story'
+
+  - name: create-story-022
+    phase: 4
+    status: 'docs/stories/STORY-022-integration-tests-version-command.md'
+    description: 'Integration Tests for version Command'
+    command: '/create-story'
+
+  - name: dev-story-022
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-022: Integration Tests for version Command'
+    command: '/dev-story'
+
+  # Sprint 3 Stories
+  - name: sprint-3-planning
+    phase: 4
+    status: 'docs/stories/sprint-3-plan.md'
+    description: 'Sprint 3: Remove commit command, smart auto-staging, config file integration tests'
+    command: '/sprint-planning'
+
+  - name: create-story-023
+    phase: 4
+    status: 'docs/stories/STORY-023-remove-commit-add-stage-flag.md'
+    description: 'Remove commit command and add smart auto-staging to generate'
+    command: '/create-story'
+
+  - name: create-story-024
+    phase: 4
+    status: 'docs/stories/STORY-024-integration-tests-config-custom-provider.md'
+    description: 'Integration tests for config file loading and custom provider merging'
+    command: '/create-story'
+
+  - name: dev-story-023
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-023: Remove commit command and add smart auto-staging'
+    command: '/dev-story'
+
+  - name: create-story-025
+    phase: 4
+    status: 'docs/stories/STORY-025-fix-env-model-variable.md'
+    description: 'Fix model resolution from env var and config file'
+    command: '/create-story'
+
+  - name: dev-story-025
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-025: Fix model resolution from env var and config file'
+    command: '/dev-story'
+
+  - name: dev-story-024
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-024: Integration tests for config and custom providers'
+    command: '/dev-story'

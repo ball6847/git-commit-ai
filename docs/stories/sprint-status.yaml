@@ -1,0 +1,57 @@
+# Sprint Status: git-commit-ai
+# Generated: 2026-04-14
+
+# Sprint Information
+sprint: 3
+project: git-commit-ai
+project_level: 0
+status: completed
+created: '2026-04-14'
+target_completion: '2026-05-11'
+
+# Sprint Goal
+goal: 'Simplify the CLI by removing the redundant commit command and consolidating its behavior into generate via smart auto-staging. Add integration tests to verify config file loading and custom provider merging work correctly in isolation.'
+
+# Sprint Plan Reference
+sprint_plan: 'docs/stories/sprint-3-plan.md'
+
+# Key Design Decisions
+key_decisions:
+  - 'Remove commit command — generate --commit is equivalent'
+  - 'Smart auto-staging — auto-stage all changes when nothing is staged, respect explicit staging when present'
+  - 'Isolated integration tests — use temp directories for config and provider tests'
+
+# Story Status Tracking
+stories:
+  - id: STORY-023
+    name: 'Remove commit command and add --stage flag to generate'
+    status: completed
+    priority: high
+    file: 'docs/stories/STORY-023-remove-commit-add-stage-flag.md'
+
+  - id: STORY-024
+    name: 'Integration tests for config file loading and custom provider merging'
+    status: completed
+    priority: medium
+    file: 'docs/stories/STORY-024-integration-tests-config-custom-provider.md'
+
+  - id: STORY-025
+    name: 'Fix GIT_COMMIT_AI_MODEL environment variable ignored'
+    status: completed
+    priority: high
+    file: 'docs/stories/STORY-025-fix-env-model-variable.md'
+
+# Sprint Metrics
+metrics:
+  total_stories: 3
+  story_points: 6
+  sprint_duration: '1 week'
+
+# Risks
+risks:
+  - risk: 'Users depend on commit command'
+    impact: low
+    mitigation: 'generate --commit is equivalent'
+  - risk: 'Integration tests touch real FS'
+    impact: low
+    mitigation: 'Use temp directories in tests'

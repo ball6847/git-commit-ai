@@ -1,0 +1,6 @@
+---
+version: '1.0'
+defaults:
+  base_dir: ../git-commit-ai-worktrees
+hooks:
+  post_create:

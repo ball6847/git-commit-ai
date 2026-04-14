@@ -1,10 +1,13 @@
-import { generateCommitMessage } from '../ai.ts';
+import { generateCommitMessage as aiGenerateCommitMessage } from '../ai.ts';
 import { getChangeSummary, getStagedDiff, isGitRepository } from '../git.ts';
-import { AIConfig } from '../types.ts';
+import type { AIConfig, ChangeSummary, CustomProviderConfig } from '../types.ts';
+import { mergeConfig } from '../config.ts';
+import { ENV } from '../cli.ts';
 import { bold, cyan, red } from '@std/fmt/colors';
+import { ProcessExitError } from './generate.ts';
+import type { AIService, CommitService, GitReader, Logger, ProcessRunner } from '../services.ts';
 
-const DEFAULT_MAX_TOKENS = 200;
-const DEFAULT_TEMPERATURE = 0.3;
+export { ProcessExitError };
 
 export interface CommitOptions {
   model?: string;
@@ -13,119 +16,178 @@ export interface CommitOptions {
   debug?: boolean;
   provider?: string;
   staged?: boolean;
-  message?: string;
 }
 
-export async function handleCommit(options: CommitOptions) {
-  try {
-    // Print header
-    console.log(
-      cyan(bold('\n🚀 Git Commit AI - Quick Commit\n')),
+export interface CommitDependencies {
+  ai?: AIService;
+  git?: GitReader;
+  commit?: CommitService;
+  cwd?: string;
+  logger?: Logger;
+  process?: ProcessRunner;
+}
+
+async function stageAllChanges(cwd?: string): Promise<boolean> {
+  const { success } = await new Deno.Command('git', {
+    args: ['add', '.'],
+    stdout: 'inherit',
+    stderr: 'inherit',
+    cwd,
+  }).output();
+  return success;
+}
+
+async function commitChanges(message: string, cwd?: string): Promise<boolean> {
+  const { success } = await new Deno.Command('git', {
+    args: ['commit', '-m', message],
+    stdout: 'inherit',
+    stderr: 'inherit',
+    cwd,
+  }).output();
+  return success;
+}
+
+async function pushChanges(cwd?: string): Promise<boolean> {
+  const { success } = await new Deno.Command('git', {
+    args: ['push'],
+    stdout: 'inherit',
+    stderr: 'inherit',
+    cwd,
+  }).output();
+  return success;
+}
+
+const defaultDeps: Required<Omit<CommitDependencies, 'cwd'>> & { cwd: string | undefined } = {
+  ai: { generateCommitMessage: aiGenerateCommitMessage },
+  git: { isRepository: isGitRepository, getChangeSummary, getStagedDiff },
+  commit: {
+    stageAllChanges,
+    commitChanges,
+    pushChanges,
+  },
+  cwd: undefined,
+  logger: globalThis.console,
+  process: { exit: Deno.exit },
+};
+
+export async function handleCommit(
+  options: CommitOptions,
+  deps: CommitDependencies = {},
+): Promise<void> {
+  const {
+    ai = defaultDeps.ai,
+    git = defaultDeps.git,
+    commit = defaultDeps.commit,
+    cwd = defaultDeps.cwd,
+    logger = defaultDeps.logger,
+    process = defaultDeps.process,
+  } = deps;
+
+  logger.log(cyan(bold('\n🚀 Git Commit AI - Quick Commit\n')));
+
+  const isRepoResult = git.isRepository(cwd);
+  if (!isRepoResult.ok || !isRepoResult.value) {
+    logger.log(red('❌ Error: Not in a git repository.'));
+    return process.exit(1);
+  }
+
+  if (!options.model) {
+    logger.log(
+      red(
+        '❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.',
+      ),
     );
+    return process.exit(1);
+  }
 
-    // Check if we're in a git repository
-    if (!isGitRepository()) {
-      console.log(red('❌ Error: Not in a git repository.'));
-      Deno.exit(1);
+  const envVars = {
+    model: Deno.env.get('GIT_COMMIT_AI_MODEL'),
+    temperature: Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')
+      ? Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE'))
+      : undefined,
+    maxTokens: Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')
+      ? Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS'))
+      : undefined,
+    thinkingEffort: undefined as string | undefined,
+  };
+
+  const defaults = {
+    model: ENV.model,
+    maxTokens: ENV.maxTokens,
+    temperature: ENV.temperature,
+    thinkingEffort: ENV.thinkingEffort,
+    providers: ENV.providers as Record<string, CustomProviderConfig>,
+  };
+
+  const aiConfig: AIConfig = mergeConfig(
+    { model: options.model, temperature: options.temperature, maxTokens: options.maxTokens },
+    envVars,
+    undefined,
+    defaults,
+  );
+
+  if (!options.staged) {
+    logger.log(cyan('📝 Staging all changes...'));
+    const success = await commit.stageAllChanges(cwd);
+    if (!success) {
+      logger.log(red('❌ Failed to stage changes'));
+      return process.exit(1);
     }
+  }
 
-    if (!options.model && !Deno.env.get('GIT_COMMIT_AI_MODEL')) {
-      console.log(
-        red(
-          '❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.',
-        ),
-      );
-      Deno.exit(1);
-    }
+  let diff = '';
+  let changeSummary: ChangeSummary = { files: [], totalFiles: 0, allDeletions: false };
 
-    // Initialize AI config
-    const config: AIConfig = {
-      model: options.model || Deno.env.get('GIT_COMMIT_AI_MODEL')!,
-      maxTokens: options.maxTokens ||
-        Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')) ||
-        DEFAULT_MAX_TOKENS,
-      temperature: options.temperature ||
-        Number(Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')) ||
-        DEFAULT_TEMPERATURE,
-    };
+  const summaryResult = git.getChangeSummary(cwd);
+  if (!summaryResult.ok) {
+    logger.log(red(`❌ ${summaryResult.error.message}`));
+    return process.exit(1);
+  }
+  changeSummary = summaryResult.value;
 
-    // By default, stage all changes unless --staged is explicitly specified
-    if (!options.staged) {
-      console.log(cyan('📝 Staging all changes...'));
-      const { success } = await new Deno.Command('git', {
-        args: ['add', '.'],
-        stdout: 'inherit',
-        stderr: 'inherit',
-      }).output();
-
-      if (!success) {
-        console.log(red('❌ Failed to stage changes'));
-        Deno.exit(1);
+  if (!changeSummary.allDeletions) {
+    const diffResult = git.getStagedDiff(cwd);
+    if (!diffResult.ok) {
+      if (diffResult.error.message.includes('No staged changes')) {
+        logger.log(cyan('No changes to commit.'));
+        return;
       }
+      logger.log(red(`❌ ${diffResult.error.message}`));
+      return process.exit(1);
     }
+    diff = diffResult.value;
+  }
 
-    // Get staged changes
-    let diff = '';
-    let changeSummary;
-    try {
-      changeSummary = getChangeSummary();
-      if (!changeSummary.allDeletions) {
-        diff = getStagedDiff();
-      }
-    } catch (error) {
-      console.log(
-        red(`❌ ${error instanceof Error ? error.message : 'Unknown error'}`),
-      );
-      if (
-        error instanceof Error &&
-        error.message.includes('No staged changes')
-      ) {
-        console.log(
-          cyan('💡 Tip: Use "git add <files>" to stage your changes first.'),
-        );
-      }
-      Deno.exit(1);
-    }
+  if (!diff.trim()) {
+    logger.log(cyan('No changes to commit.'));
+    return;
+  }
 
-    if (!diff.trim()) {
-      console.log(cyan('No changes to commit.'));
-      return;
-    }
+  if (options.debug) {
+    logger.log(cyan('Debug: Git diff preview:'));
+    logger.log(cyan(diff.substring(0, 500) + '...'));
+    logger.log(cyan(`Debug: Using model: ${options.model}`));
+    logger.log();
+  }
 
-    if (options.debug) {
-      console.log(cyan('Debug: Git diff preview:'));
-      console.log(cyan(diff.substring(0, 500) + '...'));
-      console.log(cyan(`Debug: Using model: ${options.model}`));
-      console.log();
-    }
-
-    console.log(cyan('Generating commit message...'));
-    const commitMessage = await generateCommitMessage(
-      config,
-      diff,
-      changeSummary,
-      options.message,
+  logger.log(cyan('Generating commit message...'));
+  const commitResult = await ai.generateCommitMessage(aiConfig, diff, changeSummary);
+  if (!commitResult.ok) {
+    logger.log(red(`❌ AI Generation Error: ${commitResult.error.message}`));
+    logger.log(
+      cyan('💡 Please check your API key and internet connection.'),
     );
+    return process.exit(1);
+  }
+  const commitMessage = commitResult.value;
 
-    console.log(`\n${commitMessage}\n`);
+  logger.log(`\n${commitMessage}\n`);
 
-    const { success } = await new Deno.Command('git', {
-      args: ['commit', '-m', commitMessage],
-      stdout: 'inherit',
-      stderr: 'inherit',
-    }).output();
-
-    if (success) {
-      console.log(cyan('✅ Changes committed successfully!'));
-    } else {
-      console.log(red('❌ Commit failed'));
-      Deno.exit(1);
-    }
-  } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error',
-    );
-    Deno.exit(1);
+  const success = await commit.commitChanges(commitMessage, cwd);
+  if (success) {
+    logger.log(cyan('✅ Changes committed successfully!'));
+  } else {
+    logger.log(red('❌ Commit failed'));
+    process.exit(1);
   }
 }

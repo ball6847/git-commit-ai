@@ -21,6 +21,7 @@ pids
 # Coverage directory used by tools like deno coverage
 coverage/
 .coverage/
+cov_profile/
 
 # Temporary folders
 tmp/
@@ -54,3 +55,4 @@ yarn-debug.log*
 yarn-error.log*
 
 node_modules
+arms_cache

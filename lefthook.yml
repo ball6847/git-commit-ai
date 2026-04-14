@@ -1,0 +1,10 @@
+pre-commit:
+  parallel: false
+  commands:
+    format:
+      run: deno fmt && git add -u
+    lint:
+      run: deno task lint
+      glob: '*.{ts,tsx,js,jsx}'
+    test:
+      run: deno task test
