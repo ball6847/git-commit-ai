@@ -9,6 +9,7 @@ Deno.test('version command output', async (t) => {
         log: (...args: unknown[]) => {
           logs.push(args.map(String).join(' '));
         },
+        error: () => {},
       },
     });
     assertEquals(logs.length, 1);
@@ -22,6 +23,7 @@ Deno.test('version command output', async (t) => {
         log: (...args: unknown[]) => {
           logs.push(args.map(String).join(' '));
         },
+        error: () => {},
       },
     });
     assertStringIncludes(logs[0], 'git-commit-ai v');

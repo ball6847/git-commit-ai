@@ -27,7 +27,7 @@ Passing `--model` on the CLI works fine, but setting `GIT_COMMIT_AI_MODEL` in th
 ❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.
 ```
 
-This is contradictory because the user *did* set `GIT_COMMIT_AI_MODEL`.
+This is contradictory because the user _did_ set `GIT_COMMIT_AI_MODEL`.
 
 The root cause is in `src/cmd/generate.ts`: the validation check `if (!options.model)` runs **before** the merged `aiConfig` is used. It should instead check `aiConfig.model` (which already correctly prioritizes CLI options > env vars > config file > defaults).
 
@@ -54,7 +54,7 @@ if (!options.model) {
 }
 ```
 
-`options.model` is the raw CLI option. The merged `aiConfig` is computed *after* this check, so the env var is never consulted for validation.
+`options.model` is the raw CLI option. The merged `aiConfig` is computed _after_ this check, so the env var is never consulted for validation.
 
 ### Fix
 

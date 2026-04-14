@@ -36,11 +36,15 @@ function createGenerateRunner(
 ): (opts: GenerateOptions) => Promise<void> {
   return (opts: GenerateOptions) =>
     handleGenerate(opts, {
-      generateCommitMessage: (config, diff, summary) =>
-        ai.instance.generateCommitMessage(config, diff, summary),
-      isGitRepository: () => isGitRepository(repo.dir),
-      getChangeSummary: () => getChangeSummary(repo.dir),
-      getStagedDiff: () => getStagedDiff(repo.dir),
+      ai: {
+        generateCommitMessage: (config, diff, summary) =>
+          ai.instance.generateCommitMessage(config, diff, summary),
+      },
+      git: {
+        isRepository: () => isGitRepository(repo.dir),
+        getChangeSummary: () => getChangeSummary(repo.dir),
+        getStagedDiff: () => getStagedDiff(repo.dir),
+      },
       stageAllChanges: () => {
         stageAllCalledRef.value = true;
         const { success } = new Deno.Command('git', {
@@ -61,7 +65,7 @@ function createGenerateRunner(
           errors.push(args.map(String).join(' '));
         },
       },
-      exit: createExitHandler(),
+      process: { exit: createExitHandler() },
     });
 }
 
