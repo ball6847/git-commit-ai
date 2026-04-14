@@ -8,7 +8,7 @@ project_type: 'cli'
 project_level: 0
 communication_language: 'English'
 output_language: 'English'
-last_updated: '2026-04-14T12:00:00Z'
+last_updated: '2026-04-14T12:30:00Z'
 
 # Workflow Status Tracking
 workflow_status:
@@ -373,3 +373,9 @@ workflow_status:
     status: 'docs/stories/STORY-024-integration-tests-config-custom-provider.md'
     description: 'Integration tests for config file loading and custom provider merging'
     command: '/create-story'
+
+  - name: dev-story-024
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-024: Integration tests for config and custom providers'
+    command: '/dev-story'

@@ -2,7 +2,7 @@
 story_id: STORY-024
 title: Integration tests for config file loading and custom provider merging
 created_at: 2026-04-14
-status: Not Started
+status: Completed
 sprint: Sprint 3
 epic: Epic 2 - Config Integration Tests
 ---
