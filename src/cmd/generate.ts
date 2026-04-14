@@ -3,7 +3,7 @@ import { displayChangeSummary, getChangeSummary, getStagedDiff, isGitRepository 
 import { Confirm, Input } from '@cliffy/prompt';
 import type { AIConfig, ChangeSummary, CustomProviderConfig } from '../types.ts';
 import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
-import { mergeConfig } from '../config.ts';
+import { loadConfig, mergeConfig } from '../config.ts';
 import { ENV } from '../cli.ts';
 import type { AIService, GitReader, Logger, ProcessRunner } from '../services.ts';
 
@@ -123,22 +123,6 @@ export async function handleGenerate(
 
     displayChangeSummary(changeSummary);
 
-    if (options.debug) {
-      logger.log(yellow('Debug: Git diff preview:'));
-      logger.log(yellow(diff.substring(0, 500) + '...'));
-      logger.log(yellow(`Debug: Using model: ${options.model}`));
-      logger.log();
-    }
-
-    if (!options.model) {
-      logger.log(
-        red(
-          '❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.',
-        ),
-      );
-      process.exit(1);
-    }
-
     const envVars = {
       model: Deno.env.get('GIT_COMMIT_AI_MODEL'),
       temperature: Deno.env.get('GIT_COMMIT_AI_TEMPERATURE')
@@ -158,12 +142,31 @@ export async function handleGenerate(
       providers: ENV.providers as Record<string, CustomProviderConfig>,
     };
 
+    const configFileResult = await loadConfig();
+    const configFile = configFileResult.ok ? configFileResult.value : undefined;
+
     const aiConfig: AIConfig = mergeConfig(
       { model: options.model, temperature: options.temperature, maxTokens: options.maxTokens },
       envVars,
-      undefined,
+      configFile,
       defaults,
     );
+
+    if (options.debug) {
+      logger.log(yellow('Debug: Git diff preview:'));
+      logger.log(yellow(diff.substring(0, 500) + '...'));
+      logger.log(yellow(`Debug: Using model: ${aiConfig.model}`));
+      logger.log();
+    }
+
+    if (!aiConfig.model) {
+      logger.log(
+        red(
+          '❌ Error: No model specified. Please provide a model using the --model option, set GIT_COMMIT_AI_MODEL environment variable, or add "model" to your config file.',
+        ),
+      );
+      process.exit(1);
+    }
 
     let commitMessage = '';
     try {

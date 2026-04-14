@@ -8,7 +8,7 @@ project_type: 'cli'
 project_level: 0
 communication_language: 'English'
 output_language: 'English'
-last_updated: '2026-04-14T12:30:00Z'
+last_updated: '2026-04-14T13:56:43Z'
 
 # Workflow Status Tracking
 workflow_status:
@@ -383,13 +383,13 @@ workflow_status:
   - name: create-story-025
     phase: 4
     status: 'docs/stories/STORY-025-fix-env-model-variable.md'
-    description: 'Fix GIT_COMMIT_AI_MODEL environment variable ignored'
+    description: 'Fix model resolution from env var and config file'
     command: '/create-story'
 
   - name: dev-story-025
     phase: 4
-    status: 'not-started'
-    description: 'Implement STORY-025: Fix GIT_COMMIT_AI_MODEL environment variable ignored'
+    status: 'completed'
+    description: 'Implement STORY-025: Fix model resolution from env var and config file'
     command: '/dev-story'
 
   - name: dev-story-024

@@ -1,48 +1,59 @@
 ---
 story_id: STORY-025
-title: Fix GIT_COMMIT_AI_MODEL environment variable ignored
+title: Fix model resolution from env var and config file
 created_at: 2026-04-14
-status: Not Started
+status: Completed
 sprint: Sprint 3
 epic: Epic 1 - CLI Simplification
 ---
 
-# Story 3.3: Fix `GIT_COMMIT_AI_MODEL` environment variable being ignored
+# Story 3.3: Fix model resolution from environment variable and config file
 
 **Story ID:** STORY-025
 **Priority:** High
-**Status:** Not Started
+**Status:** Completed
 **Sprint:** Sprint 3
 **Epic:** Epic 1 — CLI Simplification
 
 ## User Story
 
-As a user, I want the `GIT_COMMIT_AI_MODEL` environment variable to work correctly so that I don't have to pass `--model` every time I run `git-commit-ai generate`.
+As a user, I want to configure the model via environment variable or config file so that I don't have to pass `--model` every time I run `git-commit-ai generate`.
 
 ## Context
 
-Passing `--model` on the CLI works fine, but setting `GIT_COMMIT_AI_MODEL` in the environment currently fails with:
+Two issues were discovered:
 
-```
-❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.
-```
+1. **Env var ignored**: Setting `GIT_COMMIT_AI_MODEL` in the environment fails with:
+   ```
+   ❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.
+   ```
+   The validation check `if (!options.model)` runs **before** the merged `aiConfig` is computed.
 
-This is contradictory because the user _did_ set `GIT_COMMIT_AI_MODEL`.
+2. **Config file not loaded**: The `mergeConfig` function supports `configFile?.model`, but the config file is never loaded in `handleGenerate` — it passes `undefined` for the `configFile` parameter.
 
-The root cause is in `src/cmd/generate.ts`: the validation check `if (!options.model)` runs **before** the merged `aiConfig` is used. It should instead check `aiConfig.model` (which already correctly prioritizes CLI options > env vars > config file > defaults).
+## Model Resolution Priority
+
+The model value should be resolved in this priority order:
+
+1. `--model` CLI flag (highest) — explicit user intent for this run
+2. `GIT_COMMIT_AI_MODEL` environment variable — environment-specific settings
+3. `model` field in config file (`~/.config/git-commit-ai/config.json`) — persistent defaults
+4. Built-in default model (lowest)
 
 ## Acceptance Criteria
 
-- [ ] `GIT_COMMIT_AI_MODEL=provider/model git-commit-ai generate` succeeds without `--model`
-- [ ] `--model` still overrides `GIT_COMMIT_AI_MODEL` when both are provided
-- [ ] Config file `model` field still works when neither CLI option nor env var is set
-- [ ] When no model is provided via any source, the error message remains helpful
-- [ ] Existing tests pass
-- [ ] Add regression test for env-var model resolution
+- [x] `GIT_COMMIT_AI_MODEL=provider/model git-commit-ai generate` succeeds without `--model`
+- [x] `--model` CLI flag overrides `GIT_COMMIT_AI_MODEL` env var
+- [x] `--model` CLI flag overrides config file `model` field
+- [x] `GIT_COMMIT_AI_MODEL` env var overrides config file `model` field
+- [x] Config file `model` field works when neither CLI flag nor env var is set
+- [x] When no model is provided via any source, the error message remains helpful
+- [x] Existing tests pass
+- [x] Add regression tests for all model resolution paths
 
 ## Technical Design
 
-### Root Cause
+### Issue 1: Validation Before Merge
 
 In `src/cmd/generate.ts`:
 
@@ -54,44 +65,64 @@ if (!options.model) {
 }
 ```
 
-`options.model` is the raw CLI option. The merged `aiConfig` is computed _after_ this check, so the env var is never consulted for validation.
+`options.model` is the raw CLI option. The merged `aiConfig` is computed _after_ this check, so env vars and config files are never consulted for validation.
 
-### Fix
-
-Move or change the validation to check `aiConfig.model`:
+### Issue 2: Config File Not Loaded
 
 ```typescript
 const aiConfig: AIConfig = mergeConfig(
   { model: options.model, temperature: options.temperature, maxTokens: options.maxTokens },
   envVars,
-  undefined,
+  undefined,  // <-- configFile is never loaded!
+  defaults,
+);
+```
+
+The `loadConfig` function exists in `src/config.ts` but is not called in `handleGenerate`.
+
+### Fix
+
+1. Import `loadConfig` from `config.ts`
+2. Load config file before computing `aiConfig`
+3. Move validation to check `aiConfig.model` after merge
+
+```typescript
+import { loadConfig, mergeConfig } from '../config.ts';
+
+// ... in handleGenerate:
+
+const configFileResult = await loadConfig();
+const configFile = configFileResult.isOk() ? configFileResult.getValue() : undefined;
+
+const aiConfig: AIConfig = mergeConfig(
+  { model: options.model, temperature: options.temperature, maxTokens: options.maxTokens },
+  envVars,
+  configFile,
   defaults,
 );
 
 if (!aiConfig.model) {
   logger.log(
     red(
-      '❌ Error: No model specified. Please provide a model using the --model option or set GIT_COMMIT_AI_MODEL environment variable.',
+      '❌ Error: No model specified. Please provide a model using the --model option, set GIT_COMMIT_AI_MODEL environment variable, or add "model" to your config file.',
     ),
   );
   exit(1);
 }
 ```
 
-Then replace all subsequent references from `options.model` to `aiConfig.model` inside `handleGenerate` where appropriate (e.g., debug logging).
-
 ### Files to Modify
 
-- `src/cmd/generate.ts` — Fix validation to use `aiConfig.model` instead of `options.model`
-- `tests/integration/generate-tests/` — Add regression test for env-var model
+- `src/cmd/generate.ts` — Load config file and fix validation to use `aiConfig.model`
+- `tests/integration/generate-tests/env-model.test.ts` — Add tests for config file model resolution
 
 ## Files to Create
 
-- None (or new test file if creating a dedicated env-var test)
+- None (tests added to existing test file)
 
 ## Story Points
 
-1
+2
 
 ## Dependencies
 
