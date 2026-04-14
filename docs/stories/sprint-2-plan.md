@@ -16,533 +16,84 @@ Migrate application data to XDG-compliant directories, add configuration file su
 
 ## Epic 1: Configuration File Support
 
+**Epic ID:** EPIC-002
+**Priority:** High
+
 Migrate to XDG Base Directory layout, enable global config at `~/.config/git-commit-ai/config.json`, and support custom provider registration.
 
+### Stories
+
+| Story     | Title                                      | File                                                                               |
+| --------- | ------------------------------------------ | ---------------------------------------------------------------------------------- |
+| STORY-008 | XDG Base Directory Paths & Cache Migration | [STORY-008-xdg-paths-cache-migration.md](./STORY-008-xdg-paths-cache-migration.md) |
+| STORY-009 | Config File Loading & Merging              | [STORY-009-config-file-support.md](./STORY-009-config-file-support.md)             |
+| STORY-010 | Custom Provider & Extension Registration   | [STORY-010-custom-provider-extension.md](./STORY-010-custom-provider-extension.md) |
+
+---
+
+## Epic 2: Result Pattern Refactoring
+
+**Epic ID:** EPIC-003
 **Priority:** High
 
-### Story 2.1: XDG Base Directory Paths & Cache Migration
+Eliminate all try-catch blocks and migrate to `typescript-result` for type-safe error handling across the codebase.
 
-**Story ID:** STORY-008
-**Priority:** High
-**Status:** Not Started
+### Stories
 
-**User Story:**
-As a user of git-commit-ai, I want application data stored in standard XDG-compliant directories so that my system stays organized and follows platform conventions.
-
-**Acceptance Criteria:**
-
-- [ ] New `src/paths.ts` module provides all application directory paths
-- [ ] Config dir: `$XDG_CONFIG_HOME/git-commit-ai/` or `~/.config/git-commit-ai/`
-- [ ] Cache dir: `$XDG_CACHE_HOME/git-commit-ai/` or `~/.cache/git-commit-ai/`
-- [ ] Cache file: `<cache_dir>/models.json` (was `~/.git-commit-ai/models-cache.json`)
-- [ ] Config file: `<config_dir>/config.json`
-- [ ] One-time migration: if old `~/.git-commit-ai/models-cache.json` exists and new cache doesn't, move it
-- [ ] Old directory `~/.git-commit-ai/` removed after successful migration (if empty)
-- [ ] All hardcoded path strings removed from `src/models-dev.ts`
-
-**Technical Notes:**
-
-- Create `src/paths.ts` with `getConfigDir()`, `getCacheDir()`, `getConfigFile()`, `getModelsCacheFile()`, `getLegacyCacheDir()`, `getLegacyCacheFile()`
-- Respect `$XDG_CONFIG_HOME` and `$XDG_CACHE_HOME` environment variables
-- Use `@std/path` `join()` for path construction
-- `migrateLegacyCache()` runs on startup, moves old cache to new location
-- Update `src/models-dev.ts` to use `paths.ts` instead of hardcoded `CACHE_DIR`/`CACHE_FILE`
-
-**Files to Create:**
-
-- `src/paths.ts`
-
-**Files to Modify:**
-
-- `src/models-dev.ts` (replace hardcoded paths with paths.ts imports)
-- `deno.json` (add `@std/path` import)
+| Story     | Title                              | File                                                                               |
+| --------- | ---------------------------------- | ---------------------------------------------------------------------------------- |
+| STORY-011 | Result Pattern — models-dev.ts     | [STORY-011-result-pattern-models-dev.md](./STORY-011-result-pattern-models-dev.md) |
+| STORY-012 | Result Pattern — ai.ts             | [STORY-012-result-pattern-ai.md](./STORY-012-result-pattern-ai.md)                 |
+| STORY-013 | Result Pattern — git.ts & cmd/*.ts | [STORY-013-result-pattern-git-cmd.md](./STORY-013-result-pattern-git-cmd.md)       |
 
 ---
 
-### Story 2.2: Config File Loading & Merging
+## Epic 3: CLI Polish
 
-**Story ID:** STORY-009
-**Priority:** High
-**Status:** Not Started
-
-**User Story:**
-As a user of git-commit-ai, I want to configure default settings in a global config file so that I don't have to pass CLI flags or set env vars every time I run the tool.
-
-**Acceptance Criteria:**
-
-- [ ] Load config from `~/.config/git-commit-ai/config.json` (using `paths.ts`)
-- [ ] Respect `$XDG_CONFIG_HOME` override for config directory
-- [ ] Merge priority: CLI flags > env vars > config file > defaults
-- [ ] Support `model`, `temperature`, `maxTokens`, `thinkingEffort` in config
-- [ ] Support `providers` section for custom provider definitions
-- [ ] Clear error message if config file has invalid JSON
-- [ ] Config file is optional — tool works without it (current behavior preserved)
-
-**Technical Notes:**
-
-- Create `src/config.ts` module with `loadConfig()` and `mergeConfig()` functions
-- Use `Result` from `typescript-result` for all error handling (no try-catch)
-- Config schema:
-
-```json
-{
-  "model": "anthropic/claude-sonnet-4-5",
-  "temperature": 0.3,
-  "maxTokens": 200,
-  "thinkingEffort": "medium",
-  "providers": {
-    "my-custom-provider": {
-      "npm": "@ai-sdk/openai-compatible",
-      "api": "https://api.my-provider.com/v1",
-      "env": ["MY_PROVIDER_API_KEY"]
-    }
-  }
-}
-```
-
-- Single global config location (no walk-up directory search)
-- Use `Result.wrap(Deno.readTextFile)` for file reads
-- Update `src/types.ts` with `ConfigFile` and `ResolvedConfig` interfaces
-
-**Files to Create:**
-
-- `src/config.ts`
-
-**Files to Modify:**
-
-- `src/types.ts` (add ConfigFile, CustomProviderConfig, CustomModelConfig, ResolvedConfig)
-- `src/cli.ts` (load config at startup, pass `ResolvedConfig` into commands)
-- `src/cmd/generate.ts` (use merged config instead of only env/flags)
-- `src/cmd/commit.ts` (use merged config)
-- `deno.json` (add `typescript-result` import)
-
----
-
-### Story 2.3: Custom Provider & Extension Registration
-
-**Story ID:** STORY-010
-**Priority:** High
-**Status:** Not Started
-
-**User Story:**
-As a user of git-commit-ai, I want to define custom providers in my config file so that I can use new AI models that aren't yet listed in models.dev, without waiting for an upstream update.
-
-**Acceptance Criteria:**
-
-- [ ] Custom providers in config file are resolved alongside models.dev providers
-- [ ] Custom providers can specify `npm` (bundled SDK), `api` (openai-compatible URL), and `env` (env var names for API key)
-- [ ] Custom providers appear in `model` command output with a custom marker (e.g., `[custom]`)
-- [ ] Custom providers work with `--model custom-provider/model-id`
-- [ ] Provider extension: can add models to an existing models.dev provider via `extend: true`
-- [ ] Conflicting provider IDs: config definition merges/extends models.dev, with a console warning for full overrides
-
-**Technical Notes:**
-
-- Extend `src/models-dev.ts` to accept custom providers from config
-- Add `mergeCustomProviders(data, customProviders)` function
-- In `BUNDLED_SDK_FACTORIES`, support custom provider resolution path
-- Add `extend` field in provider config to add models to existing provider:
-
-```json
-{
-  "providers": {
-    "anthropic": {
-      "extend": true,
-      "models": {
-        "my-fine-tuned-model": {
-          "name": "My Fine-Tuned Model",
-          "reasoning": true,
-          "tool_call": true
-        }
-      }
-    }
-  }
-}
-```
-
-- When `extend: true`, models are merged into the existing models.dev provider
-- When `extend` is absent or `false`, the provider is treated as a completely new entry
-
-**Files to Create:**
-
-- None
-
-**Files to Modify:**
-
-- `src/models-dev.ts` (add custom provider merging and extension logic)
-- `src/config.ts` (export custom providers from config)
-- `src/cmd/model.ts` (display custom providers with marker, show extended models)
-- `src/ai.ts` (resolve custom providers in model lookup)
-- `src/types.ts` (add CustomProviderConfig, ProviderExtension types)
-
----
-
-## Epic 2: TypeScript Result Pattern Refactoring
-
-Refactor all error handling across the codebase to use `typescript-result` with `Result.wrap()`, eliminating all try-catch blocks and enforcing the project's Result pattern guide.
-
+**Epic ID:** EPIC-004
 **Priority:** Medium
 
-### Story 2.4: Result Pattern — models-dev.ts
-
-**Story ID:** STORY-011
-**Priority:** Medium
-**Status:** Not Started
-
-**User Story:**
-As a developer, I want `models-dev.ts` to use the `Result` pattern throughout so that all errors are handled in a type-safe manner without any try-catch blocks.
-
-**Acceptance Criteria:**
-
-- [ ] `fetchFromApi()` returns `Promise<Result<ModelsDevResponse, Error>>`
-- [ ] `getModelsDevData()` returns `Promise<Result<ModelsDevResponse, Error>>`
-- [ ] `refreshModelsDevCache()` returns `Promise<Result<ModelsDevResponse, Error>>`
-- [ ] `saveCache()` uses `Result.wrap()` for file operations
-- [ ] `loadCache()` uses `Result.wrap()` for file operations
-- [ ] `clearModelsDevCache()` uses `Result.wrap()` for file operations
-- [ ] No `try-catch` blocks remain in `models-dev.ts`
-- [ ] All callers updated to handle `Result` return types
-- [ ] Tests updated for `Result` return types (check `.ok` property)
-
-**Technical Notes:**
-
-- Import `Result` from `npm:typescript-result`
-- Replace all `try { ... } catch { ... }` with `Result.wrap()` pattern
-- Update function signatures to return `Result<T, Error>` or `Promise<Result<T, Error>>`
-- Key functions to refactor:
-  - `loadCache()` — wrap `Deno.readTextFile`
-  - `saveCache()` — wrap `Deno.mkdir`, `Deno.writeTextFile`
-  - `fetchFromApi()` — wrap `fetch` and `response.json()`
-  - `getModelsDevData()` — chain Results instead of try-catch
-  - `refreshModelsDevCache()` — same pattern
-  - `clearModelsDevCache()` — wrap `Deno.remove`
-- Cache paths use `getCacheDir()` / `getModelsCacheFile()` from `src/paths.ts` (STORY-008)
-- Update callers in `src/ai.ts` and `src/cmd/model.ts` to check `.ok` property
-
-**Files to Create:**
-
-- None
-
-**Files to Modify:**
-
-- `src/models-dev.ts` (refactor all functions to Result pattern)
-- `src/ai.ts` (handle Result from models-dev functions)
-- `src/cmd/model.ts` (handle Result from models-dev functions)
-- `tests/main_test.ts` (update tests for Result pattern)
-
----
-
-### Story 2.5: Result Pattern — ai.ts
-
-**Story ID:** STORY-012
-**Priority:** Medium
-**Status:** Not Started
-
-**User Story:**
-As a developer, I want `ai.ts` to use the `Result` pattern throughout so that AI generation errors are handled in a type-safe manner and callers can decide how to present errors.
-
-**Acceptance Criteria:**
-
-- [ ] `generateCommitMessage()` returns `Promise<Result<string, Error>>`
-- [ ] `getLanguageModel()` returns `Promise<Result<LanguageModel, Error>>`
-- [ ] No `try-catch` blocks remain in `ai.ts`
-- [ ] All `throw new Error()` replaced with `Result.error()`
-- [ ] `generateText()` call wrapped with `Result.wrap()`
-- [ ] Callers in `cmd/generate.ts` and `cmd/commit.ts` updated to handle Result
-
-**Technical Notes:**
-
-- Replace `throw` with `Result.error()` for expected error cases
-- Wrap `generateText()` from AI SDK with `Result.wrap()` since it may throw
-- `getLanguageModel()` — instead of throwing, return `Result.error()` for "not found" and "no API key"
-- `generateCommitMessage()` — remove try-catch, return Result chain
-- Update `cmd/generate.ts` and `cmd/commit.ts` to check `.ok` on Result before proceeding
-
-**Files to Create:**
-
-- None
-
-**Files to Modify:**
-
-- `src/ai.ts` (refactor to Result pattern)
-- `src/cmd/generate.ts` (handle Result from generateCommitMessage)
-- `src/cmd/commit.ts` (handle Result from generateCommitMessage)
-- `tests/main_test.ts` (update test assertions)
-
----
-
-### Story 2.6: Result Pattern — git.ts & cmd/*.ts
-
-**Story ID:** STORY-013
-**Priority:** Medium
-**Status:** Not Started
-
-**User Story:**
-As a developer, I want `git.ts` and all command handlers to use the `Result` pattern so that the entire codebase follows consistent, type-safe error handling with zero try-catch blocks.
-
-**Acceptance Criteria:**
-
-- [ ] `getStagedDiff()` returns `Result<string, Error>`
-- [ ] `getChangeSummary()` returns `Result<ChangeSummary, Error>`
-- [ ] `isGitRepository()` returns `Result<boolean, Error>` (never throws)
-- [ ] No `try-catch` blocks remain in `git.ts`
-- [ ] No `try-catch` blocks remain in any file under `src/cmd/`
-- [ ] Command handlers handle `Result` types at the top level and present errors to users
-- [ ] All tests updated for `Result` return types
-
-**Technical Notes:**
-
-- `git.ts` functions use `Deno.Command.outputSync()` — wrap with `Result.wrap()` pattern
-- Since `outputSync()` is synchronous, create a wrapper: `const runGitCmd = Result.wrap(function(...))` or use a helper
-- Note: `Deno.Command.outputSync()` doesn't return a Promise, so use `Result.wrap()` on a function that calls it
-- For command handlers (`cmd/generate.ts`, `cmd/commit.ts`, `cmd/status.ts`):
-  - Replace top-level try-catch with Result-based flow
-  - Present errors to users based on `result.ok` / `result.error`
-  - `Deno.exit(1)` remains for fatal errors, but only after checking Result
-- `cmd/version.ts` likely doesn't need changes (simple version output)
-
-**Files to Create:**
-
-- None
-
-**Files to Modify:**
-
-- `src/git.ts` (refactor all functions to Result pattern)
-- `src/cmd/generate.ts` (Result-based flow, remove try-catch)
-- `src/cmd/commit.ts` (Result-based flow, remove try-catch)
-- `src/cmd/status.ts` (handle Result from git functions)
-- `tests/main_test.ts` (update all test assertions for Result)
-
----
-
-## XDG Directory Layout
-
-```
-~/.config/git-commit-ai/
-├── config.json                  # User configuration (STORY-009)
-└── cache/                       # → moved to ~/.cache/git-commit-ai/
-    └── models.json              # models.dev API cache (STORY-008)
-```
-
-Actual layout (config and cache are separate per XDG spec):
-
-```
-~/.config/git-commit-ai/
-└── config.json                  # User configuration
-
-~/.cache/git-commit-ai/
-└── models.json                  # models.dev API cache
-```
-
-With XDG env overrides:
-
-```
-$XDG_CONFIG_HOME/git-commit-ai/config.json
-$XDG_CACHE_HOME/git-commit-ai/models.json
-```
-
-Migration from old layout:
-
-```
-~/.git-commit-ai/models-cache.json → ~/.cache/git-commit-ai/models.json
-~/.git-commit-ai/ (removed if empty after migration)
-```
-
----
-
-## Epic 3: CLI UX Improvement
-
-Improve CLI flag naming for consistency and discoverability.
-
-**Priority:** Medium
-
-### Story 2.7: Rename `--yes` Flag to `--commit`
-
-**Story ID:** STORY-014
-**Priority:** Medium
-**Status:** Not Started
-
-**User Story:**
-As a user of git-commit-ai, I want the `--yes` flag renamed to `--commit` so that the flag naming is consistent with `--push` — both flags describe the action being auto-confirmed without prompting.
-
-**Acceptance Criteria:**
-
-- [x] `--yes` / `-y` flag removed from `generate` command
-- [x] `--commit` flag added to `generate` command
-- [x] `GenerateOptions` interface updated: `yes` → `commit`
-- [x] `handleGenerate()` uses `options.commit` instead of `options.yes`
-- [x] Output message updated to reflect new flag name
-- [x] No references to `--yes` or `-y` remain in source code
-- [ ] `deno lint` and `deno check` pass
-
-**Technical Notes:**
-
-- Replace `-y, --yes` with `--commit` (no short flag — explicit and self-documenting)
-- Update `src/cli.ts` flag definition
-- Update `src/cmd/generate.ts` interface and logic
-- This is a breaking change but acceptable at v0.2.0
-
-**Files to Create:**
-
-- None
-
-**Files to Modify:**
-
-- `src/cli.ts`
-- `src/cmd/generate.ts`
-- `FLAG_ANALYSIS_REPORT.md` (if exists)
-
----
-
-### Story 2.8: Ensure `--dry-run` Takes Priority Over `--commit` and `--push`
-
-**Story ID:** STORY-017
-**Priority:** Medium
-**Status:** Completed
-
-**User Story:**
-As a user of git-commit-ai, I want `--dry-run` to always take priority over `--commit` and `--push` so that passing `--dry-run --commit --push` safely generates a message without committing or pushing.
-
-**Acceptance Criteria:**
-
-- [x] `--dry-run` always exits before commit/push, regardless of other flags
-- [x] When `--dry-run` is combined with `--commit` and/or `--push`, a warning is displayed listing the ignored flags
-- [x] Warning format: `--dry-run is active: ignoring --commit and --push flags`
-- [x] Existing `--dry-run` solo behavior preserved
-
-**Technical Notes:**
-
-- Add explicit guard in `handleGenerate()` that checks for conflicting flags when `--dry-run` is active
-- Display warning before dry-run exit message
-
-**Files to Create:**
-
-- None
-
-**Files to Modify:**
-
-- `src/cmd/generate.ts`
-
----
-
-### Story 2.9: Add `--no-push` Flag & `GIT_COMMIT_AI_NO_PUSH` Environment Variable
-
-**Story ID:** STORY-018
-**Priority:** Medium
-**Status:** Completed
-
-**User Story:**
-As a user of git-commit-ai, I want a `--no-push` flag and `GIT_COMMIT_AI_NO_PUSH` environment variable so that I can skip the push step entirely without being prompted, unless I explicitly override with `--push`.
-
-**Acceptance Criteria:**
-
-- [x] `--no-push` flag added to `generate` command
-- [x] `GIT_COMMIT_AI_NO_PUSH=true` env var skips push prompt
-- [x] `--push` flag overrides `--no-push` and `GIT_COMMIT_AI_NO_PUSH`
-- [x] Push skipped message: `Push skipped (--no-push).`
-- [x] Conflict warning: `--push overrides --no-push.`
-- [x] `GenerateOptions` interface updated with `noPush?: boolean`
-
-**Technical Notes:**
-
-- Priority: `--push` > `--no-push` > `GIT_COMMIT_AI_NO_PUSH` > default prompt
-- No short flag for `--no-push` — explicit and self-documenting
-- `GIT_COMMIT_AI_NO_PUSH` only respects the exact string `'true'`
-
-**Files to Create:**
-
-- None
-
-**Files to Modify:**
-
-- `src/cli.ts`
-- `src/cmd/generate.ts`
+Refine CLI flags and behavior for better usability and predictability.
+
+### Stories
+
+| Story     | Title                                                    | File                                                                               |
+| --------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| STORY-014 | Rename --yes flag to --commit                            | [STORY-014-rename-yes-to-commit-flag.md](./STORY-014-rename-yes-to-commit-flag.md) |
+| STORY-017 | Ensure --dry-run takes priority over --commit and --push | [STORY-017-dry-run-priority.md](./STORY-017-dry-run-priority.md)                   |
+| STORY-018 | Add --no-push flag and GIT_COMMIT_AI_NO_PUSH env var     | [STORY-018-no-push-flag.md](./STORY-018-no-push-flag.md)                           |
 
 ---
 
 ## Epic 4: Testing Infrastructure
 
-Establish comprehensive integration testing for all generate command flags using dependency injection and ts-mockito.
-
+**Epic ID:** EPIC-005
 **Priority:** High
 
-### Story 2.10: Dependency Injection Refactor for generate.ts
+Add dependency injection for testability and build a comprehensive integration testing framework using ts-mockito.
 
-**Story ID:** STORY-015
-**Priority:** High
-**Status:** Not Started
+### Stories
 
-**User Story:**
-As a developer, I want `src/cmd/generate.ts` refactored to support dependency injection so that the generate command can be tested with mocked AI and console output without relying on real network calls or git repositories.
-
-**Acceptance Criteria:**
-
-- [ ] `GenerateDependencies` interface exported from `src/cmd/generate.ts`
-- [ ] Interface includes optional `generateCommitMessage` function and `console` object
-- [ ] `defaultDeps` object created with real implementations as defaults
-- [ ] `handleGenerate()` accepts optional `deps` parameter
-- [ ] All `console.log/error` calls use injected `cons.log/error`
-- [ ] `deno check`, `deno lint`, and `deno task test` all pass
-
-**Technical Notes:**
-
-- Non-breaking change: optional parameter with defaults
-- See full story: [STORY-015-dependency-injection-refactor.md](./STORY-015-dependency-injection-refactor.md)
-
-**Files to Modify:**
-
-- `src/cmd/generate.ts`
-
-**Story Points:** 2
-
----
-
-### Story 2.11: Integration Testing with ts-mockito
-
-**Story ID:** STORY-016
-**Priority:** High
-**Status:** Not Started
-
-**User Story:**
-As a developer, I want comprehensive integration tests for all `generate` command flags using ts-mockito and real git sandboxes so that flag behaviors are verified behaviorally and regressions are caught early.
-
-**Acceptance Criteria:**
-
-- [ ] `ts-mockito` added to `deno.json` imports
-- [ ] `test:integration` task added to `deno.json`
-- [ ] Test helpers created: `temp-repo.ts`, `mockito-harness.ts`, `test-harness.ts`
-- [ ] Flag tests created for all 8 flags: `--model`, `--message`, `--temperature`, `--max-tokens`, `--debug`, `--dry-run`, `--yes`, `--push`
-- [ ] Combination tests for multiple flags
-- [ ] All tests pass with `deno task test:integration`
-
-**Technical Notes:**
-
-- Uses real git repositories (not mocks) for behavioral testing
-- ts-mockito mocks external AI service only
-- See full story: [STORY-016-integration-testing-ts-mockito.md](./STORY-016-integration-testing-ts-mockito.md)
-
-**Dependencies:**
-
-- **STORY-015** (Dependency Injection Refactor) - BLOCKING
-
-**Story Points:** 5
+| Story     | Title                                         | File                                                                                               |
+| --------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| STORY-015 | Dependency Injection Refactor for Testability | [STORY-015-dependency-injection-refactor.md](./STORY-015-dependency-injection-refactor.md)         |
+| STORY-016 | Integration Testing Framework with ts-mockito | [STORY-016-integration-testing-ts-mockito.md](./STORY-016-integration-testing-ts-mockito.md)       |
+| STORY-019 | Integration Tests for commit Command          | [STORY-019-integration-tests-commit-command.md](./STORY-019-integration-tests-commit-command.md)   |
+| STORY-020 | Integration Tests for model Command           | [STORY-020-integration-tests-model-command.md](./STORY-020-integration-tests-model-command.md)     |
+| STORY-021 | Integration Tests for status Command          | [STORY-021-integration-tests-status-command.md](./STORY-021-integration-tests-status-command.md)   |
+| STORY-022 | Integration Tests for version Command         | [STORY-022-integration-tests-version-command.md](./STORY-022-integration-tests-version-command.md) |
 
 ---
 
 ## Sprint Metrics
 
-| Metric            | Value                      |
-| ----------------- | -------------------------- |
-| Total Stories     | 11                         |
-| Story Points      | 29 (3+5+5+2+2+1+1+1+1+2+5) |
-| Sprint Duration   | 2-3 weeks                  |
-| Target Completion | 2026-05-04                 |
+| Metric            | Value      |
+| ----------------- | ---------- |
+| Total Stories     | 15         |
+| Sprint Duration   | 2-3 weeks  |
+| Target Completion | 2026-05-04 |
 
-## Dependencies
-
-- `typescript-result` npm package (to add to `deno.json`)
-- `@std/path` for path joining in `src/paths.ts`
-- XDG Base Directory specification for path conventions
+---
 
 ## Story Dependency Graph
 
@@ -555,24 +106,35 @@ STORY-008 (XDG paths + cache migration)
           └── STORY-013 (Result: git.ts + cmds) — depends on 011, 012
 
 STORY-014 (Rename --yes to --commit) — independent
-
-STORY-017 (dry-run priority) — depends on 014
-  └── STORY-018 (--no-push flag) — depends on 017
+  └── STORY-017 (dry-run priority) — depends on 014
+    └── STORY-018 (--no-push flag) — depends on 017
 
 STORY-015 (Dependency Injection Refactor) — independent
-  └── STORY-016 (Integration Testing) — depends on 015
+  └── STORY-016 (Integration Testing Framework) — depends on 015
+    └── STORY-019..022 (Command integration tests) — depend on 016
 ```
+
+---
+
+## Dependencies
+
+- `typescript-result` npm package
+- `@std/path` for path joining in `src/paths.ts`
+- XDG Base Directory specification for path conventions
+
+---
 
 ## Risks
 
-| Risk                                      | Impact | Mitigation                                                     |
-| ----------------------------------------- | ------ | -------------------------------------------------------------- |
-| Legacy cache migration fails              | Medium | Graceful fallback: re-fetch from models.dev if migration fails |
-| XDG env vars set to unexpected values     | Low    | Validate paths, fall back to defaults if XDG vars are empty    |
-| Config file schema changes needed         | Medium | Start with minimal schema, extend iteratively                  |
-| Result refactor breaks existing callers   | Medium | Refactor module-by-module, run tests after each                |
-| Custom provider SDK not bundled           | Low    | Use `@ai-sdk/openai-compatible` as universal fallback          |
-| Synchronous Deno.Command wrapping awkward | Low    | Use inline `Result.wrap()` pattern with wrapper functions      |
+| Risk                                    | Impact | Mitigation                                                     |
+| --------------------------------------- | ------ | -------------------------------------------------------------- |
+| Legacy cache migration fails            | Medium | Graceful fallback: re-fetch from models.dev if migration fails |
+| XDG env vars set to unexpected values   | Low    | Validate paths, fall back to defaults if XDG vars are empty    |
+| Config file schema changes needed       | Medium | Start with minimal schema, extend iteratively                  |
+| Result refactor breaks existing callers | Medium | Refactor module-by-module, run tests after each                |
+| Custom provider SDK not bundled         | Low    | Use `@ai-sdk/openai-compatible` as universal fallback          |
+
+---
 
 ## Key Design Decisions
 
@@ -580,11 +142,12 @@ STORY-015 (Dependency Injection Refactor) — independent
 2. **XDG env var support** — Respect `$XDG_CONFIG_HOME` and `$XDG_CACHE_HOME` if set
 3. **Global config only** — `~/.config/git-commit-ai/config.json` (no per-project walk-up)
 4. **JSON config format** — Simple, widely supported, easy to validate
-5. **Provider extension model** — `extend: true` merges models into existing providers; `extend: false/absent` creates new provider
-6. **Result pattern everywhere** — No try-catch blocks, all errors are `Result.error()`, callers check `.ok`
-7. **Module-by-module refactor** — Result pattern applied incrementally (models-dev → ai → git + cmds)
-8. **Thinking effort** — New concept mapped to `providerOptions` in AI SDK, allows controlling reasoning depth
-9. **Cache migration** — One-time automatic move from `~/.git-commit-ai/` to `~/.cache/git-commit-ai/`
+5. **Provider extension model** — `extend: true` merges models into existing providers
+6. **Result pattern everywhere** — No try-catch blocks, all errors are `Result.error()`
+7. **Module-by-module refactor** — Result pattern applied incrementally
+8. **Cache migration** — One-time automatic move from `~/.git-commit-ai/` to `~/.cache/git-commit-ai/`
+
+---
 
 ## Definition of Done
 
@@ -593,11 +156,8 @@ STORY-015 (Dependency Injection Refactor) — independent
 - [ ] Lint passing (`deno lint`)
 - [ ] Type check passing (`deno check src/cli.ts`)
 - [ ] No try-catch blocks anywhere in `src/`
-- [ ] All functions returning `Result<T, Error>` or `Promise<Result<T, Error>>`
 - [ ] Application data in XDG-compliant directories
 - [ ] Legacy cache migrated (or gracefully handled)
-- [ ] Config file loading and merging works (with and without config file)
+- [ ] Config file loading and merging works
 - [ ] Custom providers work alongside models.dev providers
 - [ ] Existing functionality preserved (backward compatible)
-- [ ] `model` command shows custom providers
-- [ ] `generate --model custom/model-id` works with config-defined providers

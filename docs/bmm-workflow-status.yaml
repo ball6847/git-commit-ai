@@ -358,18 +358,18 @@ workflow_status:
   # Sprint 3 Stories
   - name: sprint-3-planning
     phase: 4
-    status: 'not-started'
-    description: 'Sprint 3: Remove commit command, add --stage-all to generate, config file integration tests'
+    status: 'docs/stories/sprint-3-plan.md'
+    description: 'Sprint 3: Remove commit command, add --stage to generate, config file integration tests'
     command: '/sprint-planning'
 
   - name: create-story-023
     phase: 4
-    status: 'not-started'
-    description: 'Remove commit command and add --stage-all flag to generate'
+    status: 'docs/stories/STORY-023-remove-commit-add-stage-flag.md'
+    description: 'Remove commit command and add --stage flag to generate'
     command: '/create-story'
 
   - name: create-story-024
     phase: 4
-    status: 'not-started'
+    status: 'docs/stories/STORY-024-integration-tests-config-custom-provider.md'
     description: 'Integration tests for config file loading and custom provider merging'
     command: '/create-story'
