@@ -1,6 +1,6 @@
 {
   "name": "@ball6847/git-commit-ai",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "exports": "./src/cli.ts",
   "publish": {
     "include": ["src/**/*.ts", "README.md"]
