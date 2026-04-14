@@ -74,7 +74,7 @@ export function createTempRepo(): TempRepo {
 
 export function getRemoteLog(remoteDir: string): Result<string[], Error> {
   const command = new Deno.Command('git', {
-    args: ['log', '--pretty=format:%s'],
+    args: ['log', '--all', '--pretty=format:%s'],
     cwd: remoteDir,
     stdout: 'piped',
     stderr: 'piped',

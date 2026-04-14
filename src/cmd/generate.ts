@@ -328,8 +328,11 @@ async function pushChanges(
 ): Promise<Result<boolean, Error>> {
   if (autoPush) {
     logger.log(green('✅ Using --push - auto-accepting push'));
+    // TODO: Currently hardcodes 'origin HEAD' for push.
+    // Should only allow pushing if the branch has an upstream tracking remote configured,
+    // rather than assuming 'origin' and the current branch.
     const command = new Deno.Command('git', {
-      args: ['push'],
+      args: ['push', 'origin', 'HEAD'],
       stdout: 'inherit',
       stderr: 'inherit',
       cwd,
@@ -352,8 +355,11 @@ async function pushChanges(
     return Result.ok(false);
   }
 
+  // TODO: Currently hardcodes 'origin HEAD' for push.
+  // Should only allow pushing if the branch has an upstream tracking remote configured,
+  // rather than assuming 'origin' and the current branch.
   const pushCommand = new Deno.Command('git', {
-    args: ['push'],
+    args: ['push', 'origin', 'HEAD'],
     stdout: 'inherit',
     stderr: 'inherit',
     cwd,
