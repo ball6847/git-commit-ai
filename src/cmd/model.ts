@@ -67,9 +67,15 @@ export async function handleModel(deps: ModelDependencies = {}): Promise<void> {
     for (const model of models) {
       const modelRef = `${providerId}/${model.id}`;
       const features: string[] = [];
-      if (model.reasoning) features.push('reasoning');
-      if (model.tool_call) features.push('tools');
-      if (model.attachment) features.push('attachments');
+      if (model.reasoning) {
+        features.push('reasoning');
+      }
+      if (model.tool_call) {
+        features.push('tools');
+      }
+      if (model.attachment) {
+        features.push('attachments');
+      }
 
       const featureStr = features.length > 0 ? dim(` [${features.join(', ')}]`) : '';
       logger.log(`  ${modelRef}${featureStr}`);

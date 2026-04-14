@@ -1,8 +1,10 @@
 import { assertEquals } from '@std/assert';
 import { capture } from 'ts-mockito';
 import { createHarness } from '../helpers/test-harness.ts';
+import { Result } from 'typescript-result';
 
-// Helper to create a temp config directory with a config file
+const removeSync = Result.wrap(Deno.removeSync);
+
 function setupConfigFile(model: string): { configHome: string; cleanup: () => void } {
   const configHome = Deno.makeTempDirSync();
   const configDir = `${configHome}/git-commit-ai`;
@@ -14,10 +16,9 @@ function setupConfigFile(model: string): { configHome: string; cleanup: () => vo
   return {
     configHome,
     cleanup: () => {
-      try {
-        Deno.removeSync(configHome, { recursive: true });
-      } catch {
-        // ignore
+      const removeResult = removeSync(configHome, { recursive: true });
+      if (!removeResult.ok) {
+        // ignore cleanup failures
       }
     },
   };

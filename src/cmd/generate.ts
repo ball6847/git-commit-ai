@@ -24,18 +24,20 @@ export interface GenerateDependencies {
   process?: ProcessRunner;
 }
 
+async function stageAllChanges(cwd?: string): Promise<boolean> {
+  const { success } = await new Deno.Command('git', {
+    args: ['add', '.'],
+    stdout: 'inherit',
+    stderr: 'inherit',
+    cwd,
+  }).output();
+  return success;
+}
+
 const defaultDeps: Required<Omit<GenerateDependencies, 'cwd'>> & { cwd: string | undefined } = {
   ai: { generateCommitMessage: aiGenerateCommitMessage },
   git: { isRepository: isGitRepository, getChangeSummary, getStagedDiff },
-  stageAllChanges: async (cwd?: string): Promise<boolean> => {
-    const { success } = await new Deno.Command('git', {
-      args: ['add', '.'],
-      stdout: 'inherit',
-      stderr: 'inherit',
-      cwd,
-    }).output();
-    return success;
-  },
+  stageAllChanges,
   cwd: undefined,
   setupSignalHandlers: true,
   logger: globalThis.console,
@@ -225,38 +227,74 @@ export async function handleGenerate(
     }
   }
 
-  commitChanges(finalMessage, logger, process, cwd);
+  const commitChangesResult = commitChanges(finalMessage, logger, cwd);
+  if (!commitChangesResult.ok) {
+    return process.exit(1);
+  }
 
   if (options.push) {
     if (options.noPush) {
       logger.log(yellow('⚠️  --push overrides --no-push.'));
     }
-    await pushChanges(true, logger, process, cwd);
+    const pushResult = await pushChanges(true, logger, cwd);
+    if (!pushResult.ok) {
+      return process.exit(1);
+    }
   } else if (options.noPush || Deno.env.get('GIT_COMMIT_AI_NO_PUSH') === 'true') {
     logger.log(blue('📋 Push skipped (--no-push).'));
   } else {
-    await pushChanges(false, logger, process, cwd);
+    const pushResult = await pushChanges(false, logger, cwd);
+    if (!pushResult.ok) {
+      return process.exit(1);
+    }
   }
+}
+
+function handleSigint(ctrlCCount: number, logger: Logger, process: ProcessRunner): number {
+  ctrlCCount++;
+  if (ctrlCCount === 1) {
+    logger.log(
+      yellow('\n⚠️  Press Ctrl+C again to cancel without committing...'),
+    );
+  } else {
+    logger.log(blue('\n📋 Operation cancelled. No commit was made.'));
+    process.exit(0);
+  }
+
+  setTimeout(() => {
+    ctrlCCount = 0;
+  }, 3000);
+
+  return ctrlCCount;
 }
 
 function setupSignalHandlers(logger: Logger, process: ProcessRunner): void {
   let ctrlCCount = 0;
 
   Deno.addSignalListener('SIGINT', () => {
-    ctrlCCount++;
-    if (ctrlCCount === 1) {
-      logger.log(
-        yellow('\n⚠️  Press Ctrl+C again to cancel without committing...'),
-      );
-    } else {
-      logger.log(blue('\n📋 Operation cancelled. No commit was made.'));
-      process.exit(0);
-    }
-
-    setTimeout(() => {
-      ctrlCCount = 0;
-    }, 3000);
+    ctrlCCount = handleSigint(ctrlCCount, logger, process);
   });
+}
+
+async function promptForCommitMessageInput(
+  generatedMessage: string,
+): Promise<Result<string, Error>> {
+  return await Result.wrap(() =>
+    Input.prompt({
+      message: 'Commit message:',
+      default: generatedMessage,
+      suggestions: [generatedMessage],
+    })
+  )();
+}
+
+async function promptForPushConfirmation(): Promise<Result<boolean, Error>> {
+  return await Result.wrap(() =>
+    Confirm.prompt({
+      message: 'Push changes to remote?',
+      default: true,
+    })
+  )();
 }
 
 async function promptForCommitMessage(
@@ -272,13 +310,9 @@ async function promptForCommitMessage(
     yellow('💡 Tip: You can modify the message before pressing Enter\n'),
   );
 
-  const result = await Result.wrap(() =>
-    Input.prompt({
-      message: 'Commit message:',
-      default: generatedMessage,
-      suggestions: [generatedMessage],
-    })
-  )();
+  const result = await promptForCommitMessageInput(
+    generatedMessage,
+  );
 
   if (!result.ok) {
     return null;
@@ -290,9 +324,8 @@ async function promptForCommitMessage(
 async function pushChanges(
   autoPush: boolean,
   logger: Logger,
-  process: ProcessRunner,
   cwd?: string,
-): Promise<void> {
+): Promise<Result<boolean, Error>> {
   if (autoPush) {
     logger.log(green('✅ Using --push - auto-accepting push'));
     const command = new Deno.Command('git', {
@@ -306,23 +339,17 @@ async function pushChanges(
 
     if (pushSuccess) {
       logger.log(green('🚀 Successfully pushed changes!'));
-    } else {
-      logger.log(red('❌ Push failed'));
-      return process.exit(1);
+      return Result.ok(true);
     }
-    return;
+    logger.log(red('❌ Push failed'));
+    return Result.error(new Error('Push failed'));
   }
 
-  const shouldPushResult = await Result.wrap(() =>
-    Confirm.prompt({
-      message: 'Push changes to remote?',
-      default: true,
-    })
-  )();
+  const shouldPushResult = await promptForPushConfirmation();
 
   if (!shouldPushResult.ok || !shouldPushResult.value) {
     logger.log(blue('📋 Push cancelled.'));
-    process.exit(0);
+    return Result.ok(false);
   }
 
   const pushCommand = new Deno.Command('git', {
@@ -336,19 +363,18 @@ async function pushChanges(
 
   if (pushSuccess) {
     logger.log(green('🚀 Successfully pushed changes!'));
-  } else {
-    logger.log(red('❌ Push failed'));
-    process.exit(1);
+    return Result.ok(true);
   }
+  logger.log(red('❌ Push failed'));
+  return Result.error(new Error('Push failed'));
 }
 
 function commitChanges(
   commitMessage: string,
   logger: Logger,
-  process: ProcessRunner,
   cwd?: string,
-): void {
-  const runCommand = () => {
+): Result<void, Error> {
+  const result = Result.wrap(() => {
     const command = new Deno.Command('git', {
       args: ['commit', '-m', commitMessage],
       stdout: 'inherit',
@@ -356,19 +382,19 @@ function commitChanges(
       cwd,
     });
     return command.outputSync();
-  };
+  })();
 
-  const result = Result.wrap(runCommand)();
   if (!result.ok) {
     logger.log(red(`❌ Operation failed: ${result.error.message}`));
-    return process.exit(1);
+    return Result.error(new Error('Operation failed'));
   }
 
   const { success } = result.value;
   if (success) {
     logger.log(green('✅ Successfully committed!'));
-  } else {
-    logger.log(red('❌ Commit failed'));
-    process.exit(1);
+    return Result.ok(undefined);
   }
+
+  logger.log(red('❌ Commit failed'));
+  return Result.error(new Error('Commit failed'));
 }

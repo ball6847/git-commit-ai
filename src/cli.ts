@@ -3,6 +3,7 @@
 import { Command } from '@cliffy/command';
 import { load } from '@std/dotenv';
 import { red } from '@std/fmt/colors';
+import { Result } from 'typescript-result';
 
 import { handleGenerate } from './cmd/generate.ts';
 import { handleModel } from './cmd/model.ts';
@@ -100,9 +101,9 @@ cli
 
 // Handle main execution
 if (import.meta.main) {
-  try {
-    await cli.parse(Deno.args);
-  } catch (error) {
+  const parseResult = await Result.wrap(() => cli.parse(Deno.args))();
+  if (!parseResult.ok) {
+    const error = parseResult.error;
     console.log(
       red('❌ CLI Error:'),
       error instanceof Error ? error.message : 'Unknown error',

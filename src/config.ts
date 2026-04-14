@@ -5,41 +5,43 @@ import { Result } from 'typescript-result';
 const DEFAULT_MAX_TOKENS = 200;
 const DEFAULT_TEMPERATURE = 0.3;
 
+const readTextFile = Result.wrap(Deno.readTextFile);
+
+function parseConfigContent(fileContent: string): Result<ConfigFile, Error> {
+  const parseResult = Result.wrap((text: string): unknown => JSON.parse(text))(fileContent);
+  if (!parseResult.ok) {
+    return Result.error(
+      new Error(
+        `Failed to parse config file: ${parseResult.error.message}\n\nConfig file type: ${typeof fileContent}, is not valid JSON`,
+      ),
+    );
+  }
+
+  const configFile = parseResult.value as ConfigFile;
+  if (!configFile || typeof configFile !== 'object' || Array.isArray(configFile)) {
+    return Result.error(new Error('Config file must be a JSON object'));
+  }
+
+  return Result.ok(configFile);
+}
+
 export async function loadConfig(configPath?: string): Promise<Result<ConfigFile, Error>> {
   const path = configPath ?? getConfigFile();
 
-  try {
-    const fileContent = await Deno.readTextFile(path);
-
-    try {
-      const configFile = JSON.parse(fileContent) as ConfigFile;
-
-      if (!configFile || typeof configFile !== 'object' || Array.isArray(configFile)) {
-        return Result.error(new Error('Config file must be a JSON object'));
-      }
-
-      return Result.ok(configFile);
-    } catch (parseError) {
-      if (parseError instanceof Error) {
-        return Result.error(
-          new Error(
-            `Failed to parse config file: ${parseError.message}\n\nConfig file type: ${typeof fileContent}, is not valid JSON`,
-          ),
-        );
-      }
-      return Result.error(new Error('Invalid JSON in config file'));
+  const fileResult = await readTextFile(path);
+  if (!fileResult.ok) {
+    if (fileResult.error instanceof Error && fileResult.error.message.includes('No such file')) {
+      return Result.ok({} as ConfigFile);
     }
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message.includes('No such file')) {
-        return Result.ok({} as ConfigFile);
-      }
+    if (fileResult.error instanceof Error) {
       return Result.error(
-        new Error(`Failed to read config file: ${error.message}`),
+        new Error(`Failed to read config file: ${fileResult.error.message}`),
       );
     }
     return Result.error(new Error('Unknown error reading config file'));
   }
+
+  return parseConfigContent(fileResult.value);
 }
 
 export function mergeConfig(

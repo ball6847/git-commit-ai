@@ -11,6 +11,24 @@ import {
 
 import type { AIConfig, ChangeSummary, ConventionalCommitType } from './types.ts';
 
+async function callGenerateText(
+  model: LanguageModel,
+  system: string,
+  prompt: string,
+  temperature: number,
+): Promise<Result<GenerateTextResult, Error>> {
+  return await Result.wrap(() =>
+    generateText({
+      model,
+      system,
+      prompt,
+      temperature,
+    })
+  )();
+}
+
+type GenerateTextResult = Awaited<ReturnType<typeof generateText>>;
+
 async function resolveCustomProviders(): Promise<Result<ModelsDevResponse, Error>> {
   const dataResult = await getModelsDevData();
   if (!dataResult.ok) {
@@ -104,14 +122,12 @@ export async function generateCommitMessage(
     );
   }
 
-  const generateResult = await Result.wrap(() =>
-    generateText({
-      model: languageModelResult.value,
-      system: getSystemPrompt(),
-      prompt: prompt,
-      temperature: config.temperature,
-    })
-  )();
+  const generateResult = await callGenerateText(
+    languageModelResult.value,
+    getSystemPrompt(),
+    prompt,
+    config.temperature,
+  );
 
   if (!generateResult.ok) {
     return Result.error(

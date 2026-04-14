@@ -1,4 +1,8 @@
 import { join } from '@std/path';
+import { Result } from 'typescript-result';
+
+const stat = Result.wrap(Deno.stat);
+const remove = Result.wrap(Deno.remove);
 
 function getConfigHome(): string {
   return Deno.env.get('XDG_CONFIG_HOME') || `${Deno.env.get('HOME')}/.config`;
@@ -34,32 +38,31 @@ export function getLegacyCacheFile(): string {
   return `${getLegacyCacheDir()}/models-cache.json`;
 }
 
+async function checkFileExists(path: string): Promise<boolean> {
+  const result = await stat(path);
+  return result.ok;
+}
+
 export async function migrateLegacyCache(): Promise<void> {
   const legacyFile = getLegacyCacheFile();
   const newFile = getModelsCacheFile();
   const newDir = getCacheDir();
 
   const legacyExists = await checkFileExists(legacyFile);
-  if (!legacyExists) return;
+  if (!legacyExists) {
+    return;
+  }
 
   const newExists = await checkFileExists(newFile);
-  if (newExists) return;
+  if (newExists) {
+    return;
+  }
 
   await Deno.mkdir(newDir, { recursive: true });
   await Deno.rename(legacyFile, newFile);
 
-  try {
-    await Deno.remove(getLegacyCacheDir());
-  } catch {
+  const removeResult = await remove(getLegacyCacheDir());
+  if (!removeResult.ok) {
     console.warn('Legacy cache directory not empty or cannot be removed');
-  }
-}
-
-async function checkFileExists(path: string): Promise<boolean> {
-  try {
-    await Deno.stat(path);
-    return true;
-  } catch {
-    return false;
   }
 }

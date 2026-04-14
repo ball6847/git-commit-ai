@@ -27,37 +27,43 @@ export interface CommitDependencies {
   process?: ProcessRunner;
 }
 
+async function stageAllChanges(cwd?: string): Promise<boolean> {
+  const { success } = await new Deno.Command('git', {
+    args: ['add', '.'],
+    stdout: 'inherit',
+    stderr: 'inherit',
+    cwd,
+  }).output();
+  return success;
+}
+
+async function commitChanges(message: string, cwd?: string): Promise<boolean> {
+  const { success } = await new Deno.Command('git', {
+    args: ['commit', '-m', message],
+    stdout: 'inherit',
+    stderr: 'inherit',
+    cwd,
+  }).output();
+  return success;
+}
+
+async function pushChanges(cwd?: string): Promise<boolean> {
+  const { success } = await new Deno.Command('git', {
+    args: ['push'],
+    stdout: 'inherit',
+    stderr: 'inherit',
+    cwd,
+  }).output();
+  return success;
+}
+
 const defaultDeps: Required<Omit<CommitDependencies, 'cwd'>> & { cwd: string | undefined } = {
   ai: { generateCommitMessage: aiGenerateCommitMessage },
   git: { isRepository: isGitRepository, getChangeSummary, getStagedDiff },
   commit: {
-    stageAllChanges: async (cwd?: string): Promise<boolean> => {
-      const { success } = await new Deno.Command('git', {
-        args: ['add', '.'],
-        stdout: 'inherit',
-        stderr: 'inherit',
-        cwd,
-      }).output();
-      return success;
-    },
-    commitChanges: async (message: string, cwd?: string): Promise<boolean> => {
-      const { success } = await new Deno.Command('git', {
-        args: ['commit', '-m', message],
-        stdout: 'inherit',
-        stderr: 'inherit',
-        cwd,
-      }).output();
-      return success;
-    },
-    pushChanges: async (cwd?: string): Promise<boolean> => {
-      const { success } = await new Deno.Command('git', {
-        args: ['push'],
-        stdout: 'inherit',
-        stderr: 'inherit',
-        cwd,
-      }).output();
-      return success;
-    },
+    stageAllChanges,
+    commitChanges,
+    pushChanges,
   },
   cwd: undefined,
   logger: globalThis.console,

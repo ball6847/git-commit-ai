@@ -225,7 +225,9 @@ export function getProviderApiKey(provider: ModelsDevProvider): string | null {
   }
   for (const envVar of provider.env) {
     const value = Deno.env.get(envVar);
-    if (value) return value;
+    if (value) {
+      return value;
+    }
   }
   return null;
 }
@@ -234,7 +236,9 @@ export function getAvailableProviders(data: ModelsDevResponse): AvailableProvide
   const providers: AvailableProvider[] = [];
   for (const provider of Object.values(data)) {
     const apiKey = getProviderApiKey(provider);
-    if (apiKey === null) continue;
+    if (apiKey === null) {
+      continue;
+    }
     providers.push({
       id: provider.id,
       name: provider.name,
@@ -249,7 +253,9 @@ export function getAvailableProviders(data: ModelsDevResponse): AvailableProvide
 
 export function isProviderAvailable(data: ModelsDevResponse, providerId: string): boolean {
   const provider = data[providerId];
-  if (!provider) return false;
+  if (!provider) {
+    return false;
+  }
   return getProviderApiKey(provider) !== null;
 }
 
@@ -350,10 +356,14 @@ export function mergeCustomProviders(
 
   for (const providerId of Object.keys(customProviders)) {
     const customConfig = customProviders[providerId];
-    if (!customConfig) continue;
+    if (!customConfig) {
+      continue;
+    }
 
     const customConfigObj = customConfig as unknown as Record<string, unknown>;
-    if (!customConfigObj) continue;
+    if (!customConfigObj) {
+      continue;
+    }
 
     const shouldExtend = customConfigObj['extend'] === true;
     const existingProvider = modelsDevData[providerId] as ModelsDevProvider | undefined;

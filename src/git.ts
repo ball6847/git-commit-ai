@@ -6,12 +6,15 @@ import type { ChangeSummary, FileChange, GitStatus } from './types.ts';
  * Get the current git diff for staged changes
  */
 export function getStagedDiff(cwd?: string): Result<string, Error> {
-  const runCommand = (args: string[]) => {
-    const command = new Deno.Command('git', { args, stdout: 'piped', stderr: 'piped', cwd });
+  const result = Result.wrap(() => {
+    const command = new Deno.Command('git', {
+      args: ['diff', '--cached', '--diff-filter=d'],
+      stdout: 'piped',
+      stderr: 'piped',
+      cwd,
+    });
     return command.outputSync();
-  };
-
-  const result = Result.wrap(() => runCommand(['diff', '--cached', '--diff-filter=d']))();
+  })();
   if (!result.ok) {
     return Result.error(new Error(`Git error: ${result.error.message}`));
   }
@@ -37,12 +40,15 @@ export function getStagedDiff(cwd?: string): Result<string, Error> {
  * Get a summary of changed files
  */
 export function getChangeSummary(cwd?: string): Result<ChangeSummary, Error> {
-  const runCommand = (args: string[]) => {
-    const command = new Deno.Command('git', { args, stdout: 'piped', stderr: 'piped', cwd });
+  const result = Result.wrap(() => {
+    const command = new Deno.Command('git', {
+      args: ['diff', '--cached', '--name-status'],
+      stdout: 'piped',
+      stderr: 'piped',
+      cwd,
+    });
     return command.outputSync();
-  };
-
-  const result = Result.wrap(() => runCommand(['diff', '--cached', '--name-status']))();
+  })();
   if (!result.ok) {
     return Result.error(new Error(`Failed to get change summary: ${result.error.message}`));
   }

@@ -34,7 +34,9 @@ export function createModelHarness(mockData: ModelsDevResponse): ModelHarness {
         for (const [id, config] of Object.entries(custom)) {
           const cfg = config as Record<string, unknown>;
           const modelsCfg = cfg['models'] as Record<string, unknown> | undefined;
-          if (!modelsCfg) continue;
+          if (!modelsCfg) {
+            continue;
+          }
           const modelsMap: Record<string, ModelsDevModel> = {};
           for (const [modelId, modelUnknown] of Object.entries(modelsCfg)) {
             const m = modelUnknown as Record<string, unknown>;

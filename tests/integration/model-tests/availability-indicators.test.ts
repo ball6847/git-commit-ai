@@ -42,7 +42,9 @@ Deno.test('availability-indicators: shows check for providers with API keys', as
   await harness.run({
     modelService: {
       getProviderApiKey: (provider) => {
-        if (provider.id === 'openai') return 'sk-test-key';
+        if (provider.id === 'openai') {
+          return 'sk-test-key';
+        }
         return null;
       },
     },
