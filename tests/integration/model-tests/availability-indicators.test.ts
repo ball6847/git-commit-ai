@@ -40,9 +40,11 @@ const MOCK_DATA: ModelsDevResponse = {
 Deno.test('availability-indicators: shows check for providers with API keys', async () => {
   const harness = createModelHarness(MOCK_DATA);
   await harness.run({
-    getProviderApiKey: (provider) => {
-      if (provider.id === 'openai') return 'sk-test-key';
-      return null;
+    modelService: {
+      getProviderApiKey: (provider) => {
+        if (provider.id === 'openai') return 'sk-test-key';
+        return null;
+      },
     },
   });
 
@@ -58,7 +60,9 @@ Deno.test('availability-indicators: shows check for providers with API keys', as
 Deno.test('availability-indicators: shows cross for providers without API keys', async () => {
   const harness = createModelHarness(MOCK_DATA);
   await harness.run({
-    getProviderApiKey: () => null,
+    modelService: {
+      getProviderApiKey: () => null,
+    },
   });
 
   const output = harness.logs.join('\n');

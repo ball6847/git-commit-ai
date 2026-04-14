@@ -1,55 +1,38 @@
 import { getModelsDevData, getProviderApiKey, mergeCustomProviders } from '../models-dev.ts';
-import type { ModelsDevResponse } from '../models-dev.ts';
 import { bold, cyan, dim, green, red } from '@std/fmt/colors';
-import { Result } from 'typescript-result';
-import type { ConfigFile } from '../types.ts';
+import type { Logger, ModelsService } from '../services.ts';
 
 export interface ModelDependencies {
-  getModelsDevData?: () => Promise<ModelsDevResponse>;
-  getProviderApiKey?: (provider: Parameters<typeof getProviderApiKey>[0]) => string | null;
-  mergeCustomProviders?: typeof mergeCustomProviders;
-  loadConfig?: () => Promise<Result<ConfigFile, Error>>;
-  logger?: {
-    log: (...args: unknown[]) => void;
-    error: (...args: unknown[]) => void;
-  };
+  modelService?: ModelsService;
+  logger?: Logger;
 }
 
-type DepsLogger = NonNullable<ModelDependencies['logger']>;
-
-const defaultDeps: {
-  getModelsDevData: () => Promise<ModelsDevResponse>;
-  getProviderApiKey: (provider: Parameters<typeof getProviderApiKey>[0]) => string | null;
-  mergeCustomProviders: typeof mergeCustomProviders;
-  loadConfig: () => Promise<Result<ConfigFile, Error>>;
-  logger: DepsLogger;
-} = {
-  getModelsDevData,
-  getProviderApiKey,
-  mergeCustomProviders,
-  loadConfig: async () => {
-    const { loadConfig: realLoadConfig } = await import('../config.ts');
-    return realLoadConfig();
+const defaultDeps: Required<ModelDependencies> = {
+  modelService: {
+    getModelsDevData,
+    getProviderApiKey,
+    mergeCustomProviders,
+    loadConfig: async () => {
+      const { loadConfig: realLoadConfig } = await import('../config.ts');
+      return realLoadConfig();
+    },
   },
   logger: globalThis.console,
 };
 
 export async function handleModel(deps: ModelDependencies = {}): Promise<void> {
   const {
-    getModelsDevData: fetchModelsDevData = defaultDeps.getModelsDevData,
-    getProviderApiKey: resolveProviderApiKey = defaultDeps.getProviderApiKey,
-    mergeCustomProviders: doMergeCustomProviders = defaultDeps.mergeCustomProviders,
-    loadConfig: loadCfg = defaultDeps.loadConfig,
+    modelService = defaultDeps.modelService,
     logger = defaultDeps.logger,
   } = deps;
 
   logger.log(cyan(bold('\n🤖 Available AI Models\n')));
 
-  const data = await fetchModelsDevData();
+  const data = await modelService.getModelsDevData();
 
   let customProviders: Record<string, unknown> | undefined = undefined;
   try {
-    const configResult = await loadCfg();
+    const configResult = await modelService.loadConfig();
     if (configResult.ok && configResult.value) {
       customProviders = configResult.value.providers;
     }
@@ -59,7 +42,7 @@ export async function handleModel(deps: ModelDependencies = {}): Promise<void> {
 
   const mergedData = (!customProviders || Object.keys(customProviders).length === 0)
     ? data
-    : doMergeCustomProviders(data, customProviders);
+    : modelService.mergeCustomProviders(data, customProviders);
 
   if (Object.keys(mergedData).length === 0) {
     logger.log(red('Could not fetch models.dev data. Check your network connection.'));
@@ -68,7 +51,7 @@ export async function handleModel(deps: ModelDependencies = {}): Promise<void> {
 
   const availableIds = new Set<string>();
   for (const provider of Object.values(mergedData)) {
-    const apiKey = resolveProviderApiKey(provider);
+    const apiKey = modelService.getProviderApiKey(provider);
     if (apiKey !== null) {
       availableIds.add(provider.id);
     }

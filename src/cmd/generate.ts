@@ -5,6 +5,7 @@ import type { AIConfig, ChangeSummary, CustomProviderConfig } from '../types.ts'
 import { blue, bold, cyan, green, red, yellow } from '@std/fmt/colors';
 import { loadConfig, mergeConfig } from '../config.ts';
 import { ENV } from '../cli.ts';
+import type { AIService, GitReader, Logger, ProcessRunner } from '../services.ts';
 
 export class ProcessExitError extends Error {
   constructor(public code: number) {
@@ -13,28 +14,18 @@ export class ProcessExitError extends Error {
 }
 
 export interface GenerateDependencies {
-  generateCommitMessage?: typeof aiGenerateCommitMessage;
-  isGitRepository?: typeof isGitRepository;
-  getChangeSummary?: typeof getChangeSummary;
-  getStagedDiff?: typeof getStagedDiff;
+  ai?: AIService;
+  git?: GitReader;
   stageAllChanges?: (cwd?: string) => Promise<boolean>;
   cwd?: string;
   setupSignalHandlers?: boolean;
-  logger?: {
-    log: (...args: unknown[]) => void;
-    error: (...args: unknown[]) => void;
-  };
-  exit?: (code?: number) => never;
+  logger?: Logger;
+  process?: ProcessRunner;
 }
 
-type DepsLogger = NonNullable<GenerateDependencies['logger']>;
-type DepsExit = NonNullable<GenerateDependencies['exit']>;
-
 const defaultDeps: Required<Omit<GenerateDependencies, 'cwd'>> & { cwd: string | undefined } = {
-  generateCommitMessage: aiGenerateCommitMessage,
-  isGitRepository,
-  getChangeSummary,
-  getStagedDiff,
+  ai: { generateCommitMessage: aiGenerateCommitMessage },
+  git: { isRepository: isGitRepository, getChangeSummary, getStagedDiff },
   stageAllChanges: async (cwd?: string): Promise<boolean> => {
     const { success } = await new Deno.Command('git', {
       args: ['add', '.'],
@@ -47,7 +38,7 @@ const defaultDeps: Required<Omit<GenerateDependencies, 'cwd'>> & { cwd: string |
   cwd: undefined,
   setupSignalHandlers: true,
   logger: globalThis.console,
-  exit: Deno.exit,
+  process: { exit: Deno.exit },
 };
 
 export interface GenerateOptions {
@@ -66,37 +57,35 @@ export async function handleGenerate(
   deps: GenerateDependencies = {},
 ): Promise<void> {
   const {
-    generateCommitMessage = defaultDeps.generateCommitMessage,
-    isGitRepository: checkGitRepo = defaultDeps.isGitRepository,
-    getChangeSummary: getSummary = defaultDeps.getChangeSummary,
-    getStagedDiff: getDiff = defaultDeps.getStagedDiff,
+    ai = defaultDeps.ai,
+    git = defaultDeps.git,
     stageAllChanges = defaultDeps.stageAllChanges,
     cwd = defaultDeps.cwd,
     setupSignalHandlers: shouldSetupSignalHandlers = defaultDeps.setupSignalHandlers,
     logger = defaultDeps.logger,
-    exit = defaultDeps.exit,
+    process = defaultDeps.process,
   } = deps;
 
   try {
     if (shouldSetupSignalHandlers) {
-      setupSignalHandlers(logger);
+      setupSignalHandlers(logger, process);
     }
 
     logger.log(
       cyan(bold('\n🚀 Git Commit AI - Conventional Commit Generator\n')),
     );
 
-    if (!checkGitRepo(cwd)) {
+    if (!git.isRepository(cwd)) {
       logger.log(red('❌ Error: Not in a git repository.'));
-      exit(1);
+      process.exit(1);
     }
 
     let diff = '';
     let changeSummary: ChangeSummary = { files: [], totalFiles: 0, allDeletions: false };
     try {
-      changeSummary = getSummary(cwd);
+      changeSummary = git.getChangeSummary(cwd);
       if (!changeSummary.allDeletions) {
-        diff = getDiff(cwd);
+        diff = git.getStagedDiff(cwd);
       }
     } catch (error) {
       if (
@@ -107,31 +96,28 @@ export async function handleGenerate(
         const success = await stageAllChanges(cwd);
         if (!success) {
           logger.log(red('❌ Failed to stage changes'));
-          exit(1);
+          process.exit(1);
         }
         try {
-          changeSummary = getSummary(cwd);
+          changeSummary = git.getChangeSummary(cwd);
           if (!changeSummary.allDeletions) {
-            diff = getDiff(cwd);
+            diff = git.getStagedDiff(cwd);
           }
         } catch (retryError) {
           if (
             retryError instanceof Error &&
             retryError.message.includes('No staged changes')
           ) {
-            logger.log(cyan('No changes to commit.'));
-            exit(0);
+            logger.log(blue('📋 No changes to commit.'));
+            process.exit(0);
           }
-          logger.log(
-            red(`❌ ${retryError instanceof Error ? retryError.message : 'Unknown error'}`),
-          );
-          exit(1);
+          throw retryError;
         }
       } else {
         logger.log(
           red(`❌ ${error instanceof Error ? error.message : 'Unknown error'}`),
         );
-        exit(1);
+        process.exit(1);
       }
     }
 
@@ -179,12 +165,12 @@ export async function handleGenerate(
           '❌ Error: No model specified. Please provide a model using the --model option, set GIT_COMMIT_AI_MODEL environment variable, or add "model" to your config file.',
         ),
       );
-      exit(1);
+      process.exit(1);
     }
 
     let commitMessage = '';
     try {
-      commitMessage = await generateCommitMessage(
+      commitMessage = await ai.generateCommitMessage(
         aiConfig,
         diff,
         changeSummary,
@@ -198,7 +184,7 @@ export async function handleGenerate(
       logger.log(
         yellow('💡 Please check your API key and internet connection.'),
       );
-      exit(1);
+      process.exit(1);
     }
 
     displayCommitMessage(commitMessage);
@@ -219,7 +205,7 @@ export async function handleGenerate(
       logger.log(
         blue('🏃 Dry run completed. Use without --dry-run to commit.'),
       );
-      exit(0);
+      process.exit(0);
     }
 
     let finalMessage: string;
@@ -231,21 +217,21 @@ export async function handleGenerate(
       finalMessage = result ?? '';
       if (finalMessage === '') {
         logger.log(blue('📋 Commit cancelled.'));
-        exit(0);
+        process.exit(0);
       }
     }
 
-    commitChanges(finalMessage, logger, exit, cwd);
+    commitChanges(finalMessage, logger, process, cwd);
 
     if (options.push) {
       if (options.noPush) {
         logger.log(yellow('⚠️  --push overrides --no-push.'));
       }
-      await pushChanges(true, logger, exit, cwd);
+      await pushChanges(true, logger, process, cwd);
     } else if (options.noPush || Deno.env.get('GIT_COMMIT_AI_NO_PUSH') === 'true') {
       logger.log(blue('📋 Push skipped (--no-push).'));
     } else {
-      await pushChanges(false, logger, exit, cwd);
+      await pushChanges(false, logger, process, cwd);
     }
   } catch (error) {
     if (error instanceof ProcessExitError) {
@@ -259,11 +245,11 @@ export async function handleGenerate(
     if (options.debug && error instanceof Error) {
       logger.log(yellow(error.stack || 'No stack trace available'));
     }
-    exit(1);
+    process.exit(1);
   }
 }
 
-function setupSignalHandlers(logger: DepsLogger): void {
+function setupSignalHandlers(logger: Logger, process: ProcessRunner): void {
   let ctrlCCount = 0;
 
   Deno.addSignalListener('SIGINT', () => {
@@ -274,7 +260,7 @@ function setupSignalHandlers(logger: DepsLogger): void {
       );
     } else {
       logger.log(blue('\n📋 Operation cancelled. No commit was made.'));
-      Deno.exit(0);
+      process.exit(0);
     }
 
     setTimeout(() => {
@@ -285,7 +271,7 @@ function setupSignalHandlers(logger: DepsLogger): void {
 
 async function promptForCommitMessage(
   generatedMessage: string,
-  logger: DepsLogger,
+  logger: Logger,
 ): Promise<string | null> {
   try {
     logger.log(
@@ -311,8 +297,8 @@ async function promptForCommitMessage(
 
 async function pushChanges(
   autoPush: boolean,
-  logger: DepsLogger,
-  exit: DepsExit,
+  logger: Logger,
+  process: ProcessRunner,
   cwd?: string,
 ): Promise<void> {
   if (autoPush) {
@@ -330,7 +316,7 @@ async function pushChanges(
       logger.log(green('🚀 Successfully pushed changes!'));
     } else {
       logger.log(red('❌ Push failed'));
-      exit(1);
+      process.exit(1);
     }
     return;
   }
@@ -342,7 +328,7 @@ async function pushChanges(
 
   if (!shouldPush) {
     logger.log(blue('📋 Push cancelled.'));
-    exit(0);
+    process.exit(0);
   }
 
   const pushCommand = new Deno.Command('git', {
@@ -358,14 +344,14 @@ async function pushChanges(
     logger.log(green('🚀 Successfully pushed changes!'));
   } else {
     logger.log(red('❌ Push failed'));
-    exit(1);
+    process.exit(1);
   }
 }
 
 function commitChanges(
   commitMessage: string,
-  logger: DepsLogger,
-  exit: DepsExit,
+  logger: Logger,
+  process: ProcessRunner,
   cwd?: string,
 ): void {
   try {
@@ -382,7 +368,7 @@ function commitChanges(
       logger.log(green('✅ Successfully committed!'));
     } else {
       logger.log(red('❌ Commit failed'));
-      exit(1);
+      process.exit(1);
     }
   } catch (error) {
     logger.log(
@@ -390,6 +376,6 @@ function commitChanges(
         `❌ Operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       ),
     );
-    exit(1);
+    process.exit(1);
   }
 }

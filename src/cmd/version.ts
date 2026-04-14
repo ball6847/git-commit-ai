@@ -1,11 +1,10 @@
 import { bold, cyan } from '@std/fmt/colors';
+import type { Logger } from '../services.ts';
 
 export const VERSION = '0.2.0';
 
 export interface VersionDependencies {
-  logger?: {
-    log: (...args: unknown[]) => void;
-  };
+  logger?: Logger;
 }
 
 const defaultDeps: Required<VersionDependencies> = {

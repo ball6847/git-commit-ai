@@ -6,22 +6,27 @@ import type {
 } from '../../../src/models-dev.ts';
 import { Result } from 'typescript-result';
 import type { ConfigFile } from '../../../src/types.ts';
+import type { ModelsService } from '../../../src/services.ts';
 
 export interface ModelHarness {
   logs: string[];
   errors: string[];
-  run(overrides?: Partial<ModelDependencies>): Promise<void>;
+  run(
+    overrides?: { modelService?: Partial<ModelsService>; logger?: ModelDependencies['logger'] },
+  ): Promise<void>;
 }
 
 export function createModelHarness(mockData: ModelsDevResponse): ModelHarness {
   const logs: string[] = [];
   const errors: string[] = [];
 
-  function run(overrides: Partial<ModelDependencies> = {}): Promise<void> {
+  function run(
+    overrides: { modelService?: Partial<ModelsService>; logger?: ModelDependencies['logger'] } = {},
+  ): Promise<void> {
     logs.length = 0;
     errors.length = 0;
 
-    const deps: ModelDependencies = {
+    const defaultModelService: ModelsService = {
       getModelsDevData: () => Promise.resolve(mockData),
       getProviderApiKey: () => null,
       mergeCustomProviders: (data, custom) => {
@@ -60,15 +65,23 @@ export function createModelHarness(mockData: ModelsDevResponse): ModelHarness {
       },
       loadConfig: () =>
         Promise.resolve({ ok: true, value: {} as ConfigFile } as Result<ConfigFile, Error>),
-      logger: {
-        log: (...args: unknown[]) => {
-          logs.push(args.map(String).join(' '));
-        },
-        error: (...args: unknown[]) => {
-          errors.push(args.map(String).join(' '));
-        },
+    };
+
+    const defaultLogger = {
+      log: (...args: unknown[]) => {
+        logs.push(args.map(String).join(' '));
       },
-      ...overrides,
+      error: (...args: unknown[]) => {
+        errors.push(args.map(String).join(' '));
+      },
+    };
+
+    const deps: ModelDependencies = {
+      modelService: {
+        ...defaultModelService,
+        ...overrides.modelService,
+      },
+      logger: overrides.logger ?? defaultLogger,
     };
 
     return handleModel(deps);

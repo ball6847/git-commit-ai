@@ -45,12 +45,14 @@ Deno.test('custom-providers: merges and displays custom providers from config', 
   };
 
   await harness.run({
-    loadConfig: () =>
-      Promise.resolve({
-        ok: true,
-        value: { providers: customProviders } as ConfigFile,
-      } as Result<ConfigFile, Error>),
-    mergeCustomProviders: (data, custom) => mergeCustomProviders(data, custom),
+    modelService: {
+      loadConfig: () =>
+        Promise.resolve({
+          ok: true,
+          value: { providers: customProviders } as ConfigFile,
+        } as Result<ConfigFile, Error>),
+      mergeCustomProviders: (data, custom) => mergeCustomProviders(data, custom),
+    },
   });
 
   const output = harness.logs.join('\n');
@@ -80,12 +82,14 @@ Deno.test('custom-providers: shows custom provider models alongside built-in pro
   };
 
   await harness.run({
-    loadConfig: () =>
-      Promise.resolve({
-        ok: true,
-        value: { providers: customProviders } as ConfigFile,
-      } as Result<ConfigFile, Error>),
-    mergeCustomProviders: (data, custom) => mergeCustomProviders(data, custom),
+    modelService: {
+      loadConfig: () =>
+        Promise.resolve({
+          ok: true,
+          value: { providers: customProviders } as ConfigFile,
+        } as Result<ConfigFile, Error>),
+      mergeCustomProviders: (data, custom) => mergeCustomProviders(data, custom),
+    },
   });
 
   const output = harness.logs.join('\n');

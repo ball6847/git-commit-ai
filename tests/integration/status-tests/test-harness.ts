@@ -35,8 +35,10 @@ export function createStatusHarness(): StatusHarness {
   ): Result<void, Error> {
     const result = Result.wrap(() =>
       handleStatus({
-        isGitRepository: () => isGitRepository(repo.dir),
-        getChangeSummary: () => getChangeSummary(repo.dir),
+        git: {
+          isRepository: () => isGitRepository(repo.dir),
+          getChangeSummary: () => getChangeSummary(repo.dir),
+        },
         cwd: repo.dir,
         logger: {
           log: (...args: unknown[]) => {
@@ -46,7 +48,7 @@ export function createStatusHarness(): StatusHarness {
             errors.push(args.map(String).join(' '));
           },
         },
-        exit: createExitHandler(),
+        process: { exit: createExitHandler() },
         ...overrides,
       })
     )();
@@ -86,12 +88,14 @@ export function createNoRepoHarness(): {
   function run(): Result<void, Error> {
     const result = Result.wrap(() =>
       handleStatus({
-        isGitRepository: () => false,
-        getChangeSummary: () => ({
-          files: [],
-          totalFiles: 0,
-          allDeletions: false,
-        }),
+        git: {
+          isRepository: () => false,
+          getChangeSummary: () => ({
+            files: [],
+            totalFiles: 0,
+            allDeletions: false,
+          }),
+        },
         logger: {
           log: (...args: unknown[]) => {
             logs.push(args.map(String).join(' '));
@@ -100,7 +104,7 @@ export function createNoRepoHarness(): {
             errors.push(args.map(String).join(' '));
           },
         },
-        exit: createExitHandler(),
+        process: { exit: createExitHandler() },
       })
     )();
 
