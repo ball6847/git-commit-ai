@@ -1,7 +1,7 @@
 import { getModelsDevData, getProviderApiKey, mergeCustomProviders } from '../models-dev.ts';
 import type { ModelsDevResponse } from '../models-dev.ts';
 import { bold, cyan, dim, green, red } from '@std/fmt/colors';
-import type { Result } from '../result.ts';
+import { Result } from 'typescript-result';
 import type { ConfigFile } from '../types.ts';
 
 export interface ModelDependencies {

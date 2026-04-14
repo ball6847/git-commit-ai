@@ -4,7 +4,7 @@ import type {
   ModelsDevProvider,
   ModelsDevResponse,
 } from '../../../src/models-dev.ts';
-import type { Result } from '../../../src/result.ts';
+import { Result } from 'typescript-result';
 import type { ConfigFile } from '../../../src/types.ts';
 
 export interface ModelHarness {

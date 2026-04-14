@@ -1,6 +1,6 @@
 import { getConfigFile } from './paths.ts';
 import type { ConfigFile, ResolvedConfig } from './types.ts';
-import { err, ok, Result } from './result.ts';
+import { Result } from 'typescript-result';
 
 const DEFAULT_MAX_TOKENS = 200;
 const DEFAULT_TEMPERATURE = 0.3;
@@ -15,30 +15,30 @@ export async function loadConfig(): Promise<Result<ConfigFile, Error>> {
       const configFile = JSON.parse(fileContent) as ConfigFile;
 
       if (!configFile || typeof configFile !== 'object') {
-        return err(new Error('Config file must be a JSON object'));
+        return Result.error(new Error('Config file must be a JSON object'));
       }
 
-      return ok(configFile);
+      return Result.ok(configFile);
     } catch (parseError) {
       if (parseError instanceof Error) {
-        return err(
+        return Result.error(
           new Error(
             `Failed to parse config file: ${parseError.message}\n\nConfig file type: ${typeof fileContent}, is not valid JSON`,
           ),
         );
       }
-      return err(new Error('Invalid JSON in config file'));
+      return Result.error(new Error('Invalid JSON in config file'));
     }
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('No such file')) {
-        return ok({} as ConfigFile);
+        return Result.ok({} as ConfigFile);
       }
-      return err(
+      return Result.error(
         new Error(`Failed to read config file: ${error.message}`),
       );
     }
-    return err(new Error('Unknown error reading config file'));
+    return Result.error(new Error('Unknown error reading config file'));
   }
 }
 

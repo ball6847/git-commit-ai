@@ -1,4 +1,4 @@
-import { err, ok, type Result, unwrap, wrap } from '../../../src/result.ts';
+import { Result } from 'typescript-result';
 
 export interface TempRepo {
   dir: string;
@@ -44,11 +44,11 @@ export function createTempRepo(): TempRepo {
   }
 
   function getLog(): string[] {
-    const result = wrap(() => runGit(['log', '--pretty=format:%s']));
+    const result = Result.wrap(() => runGit(['log', '--pretty=format:%s']))();
     if (!result.ok) {
       return [];
     }
-    return unwrap(result).split('\n').filter(Boolean);
+    return result.value.split('\n').filter(Boolean);
   }
 
   function isCommitted(message: string): boolean {
@@ -78,9 +78,9 @@ export function getRemoteLog(remoteDir: string): Result<string[], Error> {
   if (!success) {
     const errText = new TextDecoder().decode(stderr);
     if (errText.includes('does not have any commits yet')) {
-      return ok([]);
+      return Result.ok([]);
     }
-    return err(new Error(`git log failed: ${errText}`));
+    return Result.error(new Error(`git log failed: ${errText}`));
   }
-  return ok(new TextDecoder().decode(stdout).split('\n').filter(Boolean));
+  return Result.ok(new TextDecoder().decode(stdout).split('\n').filter(Boolean));
 }

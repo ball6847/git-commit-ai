@@ -1,4 +1,4 @@
-import { type Result, wrapAsync } from '../../../src/result.ts';
+import { Result } from 'typescript-result';
 import { getChangeSummary, getStagedDiff, isGitRepository } from '../../../src/git.ts';
 import {
   type CommitDependencies,
@@ -81,15 +81,15 @@ export function createHarness(): CommitHarness {
       ...overrides,
     };
 
-    const result = await wrapAsync(() => handleCommit(options, deps));
+    const result = await Result.wrap(() => handleCommit(options, deps))();
     if (!result.ok) {
       if (result.error instanceof ProcessExitError) {
         exitCode = result.error.code;
-        return { ok: true, value: undefined };
+        return Result.ok(undefined);
       }
       return result;
     }
-    return { ok: true, value: undefined };
+    return Result.ok(undefined);
   }
 
   return {
@@ -120,7 +120,7 @@ export function createNoRepoHarness(): {
   let exitCode: number | null = null;
 
   async function run(options: CommitOptions): Promise<Result<void, Error>> {
-    const result = await wrapAsync(() =>
+    const result = await Result.wrap(() =>
       handleCommit(options, {
         isGitRepository: () => false,
         getChangeSummary: () => ({
@@ -140,16 +140,16 @@ export function createNoRepoHarness(): {
         },
         exit: createExitHandler(),
       })
-    );
+    )();
 
     if (!result.ok) {
       if (result.error instanceof ProcessExitError) {
         exitCode = result.error.code;
-        return { ok: true, value: undefined };
+        return Result.ok(undefined);
       }
       return result;
     }
-    return { ok: true, value: undefined };
+    return Result.ok(undefined);
   }
 
   return {

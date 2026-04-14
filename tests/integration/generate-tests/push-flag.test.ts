@@ -1,5 +1,4 @@
 import { assertEquals } from '@std/assert';
-import { unwrap } from '../../../src/result.ts';
 import { createHarness } from '../helpers/test-harness.ts';
 import { getRemoteLog } from '../helpers/temp-repo.ts';
 
@@ -29,7 +28,7 @@ Deno.test('push flag: commits and pushes to bare remote', async () => {
     assertEquals(harness.repo.isCommitted('feat: test'), true);
     const remoteLogResult = getRemoteLog(remoteDir);
     assertEquals(remoteLogResult.ok, true);
-    assertEquals(unwrap(remoteLogResult).includes('feat: test'), true);
+    assertEquals(remoteLogResult.value!.includes('feat: test'), true);
   } finally {
     await harness.cleanup();
     await Deno.remove(remoteDir, { recursive: true }).catch(() => {});

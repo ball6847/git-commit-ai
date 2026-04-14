@@ -8,7 +8,7 @@ project_type: 'cli'
 project_level: 0
 communication_language: 'English'
 output_language: 'English'
-last_updated: '2026-04-14T00:00:00Z'
+last_updated: '2026-04-14T12:00:00Z'
 
 # Workflow Status Tracking
 workflow_status:
@@ -313,11 +313,23 @@ workflow_status:
     description: 'Integration Tests for commit Command'
     command: '/create-story'
 
+  - name: dev-story-019
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-019: Integration Tests for commit Command'
+    command: '/dev-story'
+
   - name: create-story-020
     phase: 4
     status: 'docs/stories/STORY-020-integration-tests-model-command.md'
     description: 'Integration Tests for model Command'
     command: '/create-story'
+
+  - name: dev-story-020
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-020: Integration Tests for model Command'
+    command: '/dev-story'
 
   - name: create-story-021
     phase: 4
@@ -325,8 +337,39 @@ workflow_status:
     description: 'Integration Tests for status Command'
     command: '/create-story'
 
+  - name: dev-story-021
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-021: Integration Tests for status Command'
+    command: '/dev-story'
+
   - name: create-story-022
     phase: 4
     status: 'docs/stories/STORY-022-integration-tests-version-command.md'
     description: 'Integration Tests for version Command'
+    command: '/create-story'
+
+  - name: dev-story-022
+    phase: 4
+    status: 'completed'
+    description: 'Implement STORY-022: Integration Tests for version Command'
+    command: '/dev-story'
+
+  # Sprint 3 Stories
+  - name: sprint-3-planning
+    phase: 4
+    status: 'not-started'
+    description: 'Sprint 3: Remove commit command, add --stage-all to generate, config file integration tests'
+    command: '/sprint-planning'
+
+  - name: create-story-023
+    phase: 4
+    status: 'not-started'
+    description: 'Remove commit command and add --stage-all flag to generate'
+    command: '/create-story'
+
+  - name: create-story-024
+    phase: 4
+    status: 'not-started'
+    description: 'Integration tests for config file loading and custom provider merging'
     command: '/create-story'

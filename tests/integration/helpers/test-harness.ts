@@ -1,4 +1,4 @@
-import { type Result, wrapAsync } from '../../../src/result.ts';
+import { Result } from 'typescript-result';
 import { getChangeSummary, getStagedDiff, isGitRepository } from '../../../src/git.ts';
 import {
   type GenerateOptions,
@@ -61,15 +61,15 @@ export function createHarness(): Harness {
   let exitCode: number | null = null;
 
   async function run(options: GenerateOptions): Promise<Result<void, Error>> {
-    const result = await wrapAsync(() => createGenerateRunner(repo, ai, logs, errors)(options));
+    const result = await Result.wrap(() => createGenerateRunner(repo, ai, logs, errors)(options))();
     if (!result.ok) {
       if (result.error instanceof ProcessExitError) {
         exitCode = result.error.code;
-        return { ok: true, value: undefined };
+        return Result.ok(undefined);
       }
       return result;
     }
-    return { ok: true, value: undefined };
+    return Result.ok(undefined);
   }
 
   return {

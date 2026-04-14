@@ -1,4 +1,4 @@
-import { type Result, wrap } from '../../../src/result.ts';
+import { Result } from 'typescript-result';
 import { getChangeSummary, isGitRepository } from '../../../src/git.ts';
 import {
   handleStatus,
@@ -33,7 +33,7 @@ export function createStatusHarness(): StatusHarness {
   function run(
     overrides: Partial<StatusDependencies> = {},
   ): Result<void, Error> {
-    const result = wrap(() =>
+    const result = Result.wrap(() =>
       handleStatus({
         isGitRepository: () => isGitRepository(repo.dir),
         getChangeSummary: () => getChangeSummary(repo.dir),
@@ -49,16 +49,16 @@ export function createStatusHarness(): StatusHarness {
         exit: createExitHandler(),
         ...overrides,
       })
-    );
+    )();
 
     if (!result.ok) {
       if (result.error instanceof ProcessExitError) {
         exitCode = result.error.code;
-        return { ok: true, value: undefined };
+        return Result.ok(undefined);
       }
       return result;
     }
-    return { ok: true, value: undefined };
+    return Result.ok(undefined);
   }
 
   return {
@@ -84,7 +84,7 @@ export function createNoRepoHarness(): {
   let exitCode: number | null = null;
 
   function run(): Result<void, Error> {
-    const result = wrap(() =>
+    const result = Result.wrap(() =>
       handleStatus({
         isGitRepository: () => false,
         getChangeSummary: () => ({
@@ -102,16 +102,16 @@ export function createNoRepoHarness(): {
         },
         exit: createExitHandler(),
       })
-    );
+    )();
 
     if (!result.ok) {
       if (result.error instanceof ProcessExitError) {
         exitCode = result.error.code;
-        return { ok: true, value: undefined };
+        return Result.ok(undefined);
       }
       return result;
     }
-    return { ok: true, value: undefined };
+    return Result.ok(undefined);
   }
 
   return {
