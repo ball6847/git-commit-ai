@@ -45,7 +45,7 @@ export async function loadConfig(configPath?: string): Promise<Result<ConfigFile
 }
 
 export function mergeConfig(
-  cliOptions: { model?: string; temperature?: number; maxTokens?: number },
+  cliOptions: { model?: string; temperature?: number; maxTokens?: number; thinkingEffort?: string },
   envVars: { model?: string; temperature?: number; maxTokens?: number; thinkingEffort?: string },
   configFile?: ConfigFile,
   defaults?: {
@@ -65,7 +65,17 @@ export function mergeConfig(
     defaults?.maxTokens ??
     DEFAULT_MAX_TOKENS;
 
-  const thinkingEffort = configFile?.thinkingEffort ?? defaults?.thinkingEffort;
+  const validThinkingEfforts = ['low', 'medium', 'high'] as const;
+  const isValidThinkingEffort = (
+    value: string | undefined,
+  ): value is 'low' | 'medium' | 'high' =>
+    value !== undefined && validThinkingEfforts.includes(value as 'low' | 'medium' | 'high');
+
+  const thinkingEffort = isValidThinkingEffort(cliOptions.thinkingEffort)
+    ? cliOptions.thinkingEffort
+    : isValidThinkingEffort(envVars.thinkingEffort)
+    ? envVars.thinkingEffort
+    : configFile?.thinkingEffort ?? defaults?.thinkingEffort;
 
   let providers = {};
   if (configFile?.providers) {

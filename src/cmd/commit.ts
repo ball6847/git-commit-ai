@@ -13,6 +13,7 @@ export interface CommitOptions {
   model?: string;
   maxTokens?: number;
   temperature?: number;
+  thinkingEffort?: string;
   debug?: boolean;
   provider?: string;
   staged?: boolean;
@@ -108,7 +109,7 @@ export async function handleCommit(
     maxTokens: Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')
       ? Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS'))
       : undefined,
-    thinkingEffort: undefined as string | undefined,
+    thinkingEffort: Deno.env.get('GIT_COMMIT_AI_THINKING_EFFORT') ?? undefined,
   };
 
   const defaults = {
@@ -120,11 +121,17 @@ export async function handleCommit(
   };
 
   const aiConfig: AIConfig = mergeConfig(
-    { model: options.model, temperature: options.temperature, maxTokens: options.maxTokens },
+    {
+      model: options.model,
+      temperature: options.temperature,
+      maxTokens: options.maxTokens,
+      thinkingEffort: options.thinkingEffort,
+    },
     envVars,
     undefined,
     defaults,
   );
+  aiConfig.debug = options.debug;
 
   if (!options.staged) {
     logger.log(cyan('📝 Staging all changes...'));

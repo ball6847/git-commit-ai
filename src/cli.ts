@@ -81,6 +81,10 @@ cli
   .option('-m, --model <model:string>', 'AI model to use')
   .option('--max-tokens <maxTokens:number>', 'Maximum tokens for AI response')
   .option('--temperature <temperature:number>', 'AI temperature (0.0-1.0)')
+  .option(
+    '--thinking-effort <thinkingEffort:string>',
+    'Thinking effort for reasoning models (low, medium, high)',
+  )
   .option('-d, --debug', 'Enable debug output')
   .option('--dry-run', 'Generate message without committing')
   .option('--commit', 'Auto-accept generated message without prompting')

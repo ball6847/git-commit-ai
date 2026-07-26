@@ -16,6 +16,8 @@ export interface AIConfig {
   model: string;
   maxTokens: number;
   temperature: number;
+  thinkingEffort?: 'low' | 'medium' | 'high';
+  debug?: boolean;
 }
 
 export interface GitStatus {

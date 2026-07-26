@@ -21,3 +21,57 @@ Deno.test('ai params: passes temperature and maxTokens to AI config', async () =
   assertEquals(config.maxTokens, 500);
   await harness.cleanup();
 });
+
+Deno.test('ai params: passes thinkingEffort to AI config', async () => {
+  const harness = createHarness();
+  harness.repo.stageFile('test.ts', '// test');
+  harness.ai.setResponse('feat: test');
+
+  const result = await harness.run({
+    model: 'test-model',
+    thinkingEffort: 'low',
+    dryRun: true,
+    noPush: true,
+  });
+  assertEquals(result.ok, true);
+
+  const [config] = capture(harness.ai.mock.generateCommitMessage).last();
+  assertEquals(config.thinkingEffort, 'low');
+  await harness.cleanup();
+});
+
+Deno.test('ai params: passes thinkingEffort medium to AI config', async () => {
+  const harness = createHarness();
+  harness.repo.stageFile('test.ts', '// test');
+  harness.ai.setResponse('feat: test');
+
+  const result = await harness.run({
+    model: 'test-model',
+    thinkingEffort: 'medium',
+    dryRun: true,
+    noPush: true,
+  });
+  assertEquals(result.ok, true);
+
+  const [config] = capture(harness.ai.mock.generateCommitMessage).last();
+  assertEquals(config.thinkingEffort, 'medium');
+  await harness.cleanup();
+});
+
+Deno.test('ai params: passes thinkingEffort high to AI config', async () => {
+  const harness = createHarness();
+  harness.repo.stageFile('test.ts', '// test');
+  harness.ai.setResponse('feat: test');
+
+  const result = await harness.run({
+    model: 'test-model',
+    thinkingEffort: 'high',
+    dryRun: true,
+    noPush: true,
+  });
+  assertEquals(result.ok, true);
+
+  const [config] = capture(harness.ai.mock.generateCommitMessage).last();
+  assertEquals(config.thinkingEffort, 'high');
+  await harness.cleanup();
+});

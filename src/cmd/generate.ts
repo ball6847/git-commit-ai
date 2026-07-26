@@ -48,6 +48,7 @@ export interface GenerateOptions {
   model?: string;
   maxTokens?: number;
   temperature?: number;
+  thinkingEffort?: string;
   debug?: boolean;
   dryRun?: boolean;
   commit?: boolean;
@@ -142,7 +143,7 @@ export async function handleGenerate(
     maxTokens: Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS')
       ? Number(Deno.env.get('GIT_COMMIT_AI_MAX_TOKENS'))
       : undefined,
-    thinkingEffort: undefined as string | undefined,
+    thinkingEffort: Deno.env.get('GIT_COMMIT_AI_THINKING_EFFORT') ?? undefined,
   };
 
   const defaults = {
@@ -157,11 +158,17 @@ export async function handleGenerate(
   const configFile = configFileResult.ok ? configFileResult.value : undefined;
 
   const aiConfig: AIConfig = mergeConfig(
-    { model: options.model, temperature: options.temperature, maxTokens: options.maxTokens },
+    {
+      model: options.model,
+      temperature: options.temperature,
+      maxTokens: options.maxTokens,
+      thinkingEffort: options.thinkingEffort,
+    },
     envVars,
     configFile,
     defaults,
   );
+  aiConfig.debug = options.debug;
 
   if (options.debug) {
     logger.log(yellow('Debug: Git diff preview:'));

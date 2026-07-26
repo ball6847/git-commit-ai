@@ -110,3 +110,63 @@ Deno.test('mergeConfig: defaults are used when no overrides provided', () => {
   assertEquals(result.temperature, 0.3);
   assertEquals(result.providers, DEFAULT_PROVIDERS);
 });
+
+Deno.test('mergeConfig: thinkingEffort from CLI options is passed through', () => {
+  const result = mergeConfig(
+    { thinkingEffort: 'low' },
+    {},
+    {},
+    DEFAULT_CONFIG,
+  );
+  assertEquals(result.thinkingEffort, 'low');
+});
+
+Deno.test('mergeConfig: thinkingEffort from env vars is passed through', () => {
+  const result = mergeConfig(
+    {},
+    { thinkingEffort: 'medium' },
+    {},
+    DEFAULT_CONFIG,
+  );
+  assertEquals(result.thinkingEffort, 'medium');
+});
+
+Deno.test('mergeConfig: thinkingEffort from config file is passed through', () => {
+  const result = mergeConfig(
+    {},
+    {},
+    { thinkingEffort: 'high' } as ConfigFile,
+    DEFAULT_CONFIG,
+  );
+  assertEquals(result.thinkingEffort, 'high');
+});
+
+Deno.test('mergeConfig: CLI thinkingEffort overrides env var and config file', () => {
+  const result = mergeConfig(
+    { thinkingEffort: 'low' },
+    { thinkingEffort: 'medium' },
+    { thinkingEffort: 'high' } as ConfigFile,
+    DEFAULT_CONFIG,
+  );
+  assertEquals(result.thinkingEffort, 'low');
+});
+
+Deno.test('mergeConfig: env var thinkingEffort overrides config file but not CLI', () => {
+  const result = mergeConfig(
+    {},
+    { thinkingEffort: 'medium' },
+    { thinkingEffort: 'high' } as ConfigFile,
+    DEFAULT_CONFIG,
+  );
+  assertEquals(result.thinkingEffort, 'medium');
+});
+
+Deno.test('mergeConfig: invalid thinkingEffort values are ignored', () => {
+  const result = mergeConfig(
+    { thinkingEffort: 'invalid' },
+    {},
+    {},
+    DEFAULT_CONFIG,
+  );
+  assertEquals(result.thinkingEffort, undefined);
+});

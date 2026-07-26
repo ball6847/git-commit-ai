@@ -1,177 +1,134 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@117/mutex@^1.0.8": "1.0.8",
-    "jsr:@ball6847/workspace-manager@*": "0.4.1",
-    "jsr:@cliffy/ansi@1.0.0": "1.0.0",
-    "jsr:@cliffy/command@1": "1.0.0",
-    "jsr:@cliffy/command@^1.0.0-rc.8": "1.0.0",
-    "jsr:@cliffy/flags@1.0.0": "1.0.0",
-    "jsr:@cliffy/internal@1.0.0": "1.0.0",
-    "jsr:@cliffy/keycode@1.0.0": "1.0.0",
-    "jsr:@cliffy/prompt@1": "1.0.0",
-    "jsr:@cliffy/prompt@^1.0.0-rc.8": "1.0.0",
-    "jsr:@cliffy/table@1.0.0": "1.0.0",
-    "jsr:@cliffy/table@^1.0.0-rc.8": "1.0.0",
-    "jsr:@std/assert@0.224": "0.224.0",
-    "jsr:@std/assert@^1.0.18": "1.0.19",
-    "jsr:@std/dotenv@~0.225.6": "0.225.6",
-    "jsr:@std/encoding@^1.0.10": "1.0.10",
-    "jsr:@std/fmt@0.224": "0.224.0",
-    "jsr:@std/fmt@^1.0.8": "1.0.9",
-    "jsr:@std/fmt@^1.0.9": "1.0.9",
-    "jsr:@std/internal@0.224": "0.224.0",
-    "jsr:@std/internal@^1.0.12": "1.0.12",
+    "jsr:@cliffy/ansi@1.2.1": "1.2.1",
+    "jsr:@cliffy/command@^1.2.1": "1.2.1",
+    "jsr:@cliffy/flags@1.2.1": "1.2.1",
+    "jsr:@cliffy/internal@1.2.1": "1.2.1",
+    "jsr:@cliffy/keycode@1.2.1": "1.2.1",
+    "jsr:@cliffy/prompt@^1.2.1": "1.2.1",
+    "jsr:@cliffy/table@1.2.1": "1.2.1",
+    "jsr:@std/assert@^1.0.19": "1.0.19",
+    "jsr:@std/dotenv@~0.225.7": "0.225.7",
+    "jsr:@std/encoding@^1.0.10": "1.0.11",
+    "jsr:@std/fmt@^1.0.10": "1.0.10",
+    "jsr:@std/internal@^1.0.12": "1.0.14",
+    "jsr:@std/internal@^1.0.14": "1.0.14",
     "jsr:@std/io@~0.225.3": "0.225.3",
-    "jsr:@std/path@^1.0.7": "1.1.4",
-    "jsr:@std/path@^1.1.1": "1.1.4",
-    "jsr:@std/path@^1.1.4": "1.1.4",
+    "jsr:@std/path@^1.1.5": "1.1.6",
+    "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/semver@^1.0.8": "1.0.8",
-    "jsr:@std/text@^1.0.17": "1.0.17",
-    "jsr:@std/yaml@^1.0.8": "1.0.12",
-    "npm:@ai-sdk/anthropic@^3.0.69": "3.0.69_zod@4.3.6",
-    "npm:@ai-sdk/cerebras@^2.0.45": "2.0.45_zod@4.3.6",
-    "npm:@ai-sdk/mistral@^3.0.30": "3.0.30_zod@4.3.6",
-    "npm:@ai-sdk/openai-compatible@^2.0.41": "2.0.41_zod@4.3.6",
-    "npm:@ai-sdk/openai@^3.0.52": "3.0.52_zod@4.3.6",
-    "npm:@ai-sdk/provider@^3.0.8": "3.0.8",
-    "npm:@openrouter/ai-sdk-provider@^2.5.1": "2.5.1_ai@6.0.158__zod@4.3.6_zod@4.3.6",
+    "jsr:@std/text@^1.0.19": "1.0.19",
+    "npm:@ai-sdk/anthropic@^4.0.9": "4.0.20_zod@4.4.3",
+    "npm:@ai-sdk/cerebras@^3.0.9": "3.0.14_zod@4.4.3",
+    "npm:@ai-sdk/mistral@^4.0.8": "4.0.14_zod@4.4.3",
+    "npm:@ai-sdk/openai-compatible@^3.0.9": "3.0.14_zod@4.4.3",
+    "npm:@ai-sdk/openai@^4.0.9": "4.0.20_zod@4.4.3",
+    "npm:@ai-sdk/provider@^4.0.3": "4.0.3",
+    "npm:@openrouter/ai-sdk-provider@3": "3.0.0_ai@7.0.37__zod@4.4.3_zod@4.4.3",
     "npm:@types/node@*": "22.15.15",
-    "npm:ai@^6.0.158": "6.0.158_zod@4.3.6",
+    "npm:ai@^7.0.9": "7.0.37_zod@4.4.3",
     "npm:mkdirp@*": "3.0.1",
     "npm:ts-mockito@^2.6.1": "2.6.1",
-    "npm:typescript-result@^3.5.1": "3.5.2",
     "npm:typescript-result@^3.5.2": "3.5.2"
   },
   "jsr": {
-    "@117/mutex@1.0.8": {
-      "integrity": "8f14ef3e124ae427c92f93951fbe36b5cfad3aa74f84d443b2acf3034683255d"
-    },
-    "@ball6847/workspace-manager@0.4.1": {
-      "integrity": "8aa608f2e8e07954de20ce7d27f6fae4366f3492b1bdebeb61969948f24c0cab",
-      "dependencies": [
-        "jsr:@117/mutex",
-        "jsr:@cliffy/command@^1.0.0-rc.8",
-        "jsr:@cliffy/prompt@^1.0.0-rc.8",
-        "jsr:@cliffy/table@^1.0.0-rc.8",
-        "jsr:@std/fmt@^1.0.8",
-        "jsr:@std/path@^1.1.1",
-        "jsr:@std/yaml",
-        "npm:typescript-result@^3.5.1"
-      ]
-    },
-    "@cliffy/ansi@1.0.0": {
-      "integrity": "987008f74e50aa72cc1517ffccc769711734a14927bc4599e052efe1b9a840e2",
+    "@cliffy/ansi@1.2.1": {
+      "integrity": "b8702def9c0110b6eeb2b3b71e0b26cbe0a427facbb4f9c0189da0ba19feb549",
       "dependencies": [
         "jsr:@cliffy/internal",
         "jsr:@std/encoding",
         "jsr:@std/io"
       ]
     },
-    "@cliffy/command@1.0.0": {
-      "integrity": "c52a241ea68857fcdaff4f3173eb404f8017d7bc35553b6f533c592b89dde7d2",
+    "@cliffy/command@1.2.1": {
+      "integrity": "b7b017c81560d96580ea810c8564566884d8194416f6fc06bfdc8846e8fd590f",
       "dependencies": [
         "jsr:@cliffy/flags",
         "jsr:@cliffy/internal",
-        "jsr:@cliffy/table@1.0.0",
-        "jsr:@std/fmt@^1.0.9",
+        "jsr:@cliffy/table",
+        "jsr:@std/fmt",
         "jsr:@std/semver",
         "jsr:@std/text"
       ]
     },
-    "@cliffy/flags@1.0.0": {
-      "integrity": "8b57698adc644da8f90422d58976362d41a4ebca39c312ca1c101585d0148feb",
+    "@cliffy/flags@1.2.1": {
+      "integrity": "10034920ef7595db586fecec5a3b10a4ec800c513cbbc368414cd748dac706fb",
       "dependencies": [
         "jsr:@cliffy/internal",
         "jsr:@std/text"
       ]
     },
-    "@cliffy/internal@1.0.0": {
-      "integrity": "1e17ccbcd5420093c0a93e5b3827bbdc9abac5195bacf187edc44665e54bdde6"
+    "@cliffy/internal@1.2.1": {
+      "integrity": "e398f41c6839d3d4d249c963bfcb1058013091425926d53a3cb482b1ca70684b"
     },
-    "@cliffy/keycode@1.0.0": {
-      "integrity": "755dbf007be110dcb5625f87eb61b362b6a0ca6835453af03ebd3b34d399cf14"
+    "@cliffy/keycode@1.2.1": {
+      "integrity": "ce0a1e00986054da31bc767274acefdc923338a47e75ad1fc2046a11c87ace16"
     },
-    "@cliffy/prompt@1.0.0": {
-      "integrity": "48b4cd35199fda7832f35e1fe0a3e8bc2b1ea49ba57b4ec0e29e22db44e8ca9f",
+    "@cliffy/prompt@1.2.1": {
+      "integrity": "e468fae0f52093ff2099f5be0bbc7632348ab82a3b7337b12ddd888aeb5d6eed",
       "dependencies": [
         "jsr:@cliffy/ansi",
         "jsr:@cliffy/internal",
         "jsr:@cliffy/keycode",
-        "jsr:@std/assert@^1.0.18",
-        "jsr:@std/fmt@^1.0.9",
+        "jsr:@std/assert",
+        "jsr:@std/fmt",
         "jsr:@std/io",
-        "jsr:@std/path@^1.1.4",
+        "jsr:@std/path@^1.1.5",
         "jsr:@std/text"
       ]
     },
-    "@cliffy/table@1.0.0": {
-      "integrity": "3fdaa9e1ef1ea62022108adabd826932bdea8dd05497079896febcd41322907f",
+    "@cliffy/table@1.2.1": {
+      "integrity": "be333e62f2c754f8bf75a38c8177515b152040572c9f75298e9bcef1314b82ff",
       "dependencies": [
-        "jsr:@std/fmt@^1.0.9"
-      ]
-    },
-    "@std/assert@0.224.0": {
-      "integrity": "8643233ec7aec38a940a8264a6e3eed9bfa44e7a71cc6b3c8874213ff401967f",
-      "dependencies": [
-        "jsr:@std/fmt@0.224",
-        "jsr:@std/internal@0.224"
+        "jsr:@std/fmt"
       ]
     },
     "@std/assert@1.0.19": {
-      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e"
-    },
-    "@std/dotenv@0.225.6": {
-      "integrity": "1d6f9db72f565bd26790fa034c26e45ecb260b5245417be76c2279e5734c421b"
-    },
-    "@std/encoding@1.0.10": {
-      "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
-    },
-    "@std/fmt@0.224.0": {
-      "integrity": "e20e9a2312a8b5393272c26191c0a68eda8d2c4b08b046bad1673148f1d69851"
-    },
-    "@std/fmt@1.0.9": {
-      "integrity": "2487343e8899fb2be5d0e3d35013e54477ada198854e52dd05ed0422eddcabe0"
-    },
-    "@std/internal@0.224.0": {
-      "integrity": "afc50644f9cdf4495eeb80523a8f6d27226b4b36c45c7c195dfccad4b8509291",
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
       "dependencies": [
-        "jsr:@std/fmt@0.224"
+        "jsr:@std/internal@^1.0.12"
       ]
     },
-    "@std/internal@1.0.12": {
-      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
+    "@std/dotenv@0.225.7": {
+      "integrity": "11d8db03ca4ad5aba9eba809f2e8058b2a4f320b7b09fea4b360e162928329e3"
+    },
+    "@std/encoding@1.0.11": {
+      "integrity": "e7cef2f0b3153bccc17431e7c864a1de03a4b6d9647389c43e08aaa775d37385"
+    },
+    "@std/fmt@1.0.10": {
+      "integrity": "90dfba288802ac6de82fb31d0917eb9e4450b9925b954d5e51fc29ac07419db5"
+    },
+    "@std/internal@1.0.14": {
+      "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
     },
     "@std/io@0.225.3": {
       "integrity": "27b07b591384d12d7b568f39e61dff966b8230559122df1e9fd11cc068f7ddd1"
     },
-    "@std/path@1.1.4": {
-      "integrity": "1d2d43f39efb1b42f0b1882a25486647cb851481862dc7313390b2bb044314b5",
+    "@std/path@1.1.6": {
+      "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
       "dependencies": [
-        "jsr:@std/internal@^1.0.12"
+        "jsr:@std/internal@^1.0.14"
       ]
     },
     "@std/semver@1.0.8": {
       "integrity": "dc830e8b8b6a380c895d53fbfd1258dc253704ca57bbe1629ac65fd7830179b7"
     },
-    "@std/text@1.0.17": {
-      "integrity": "4b2c4ef67ae5b6c1dfd447c81c83a43718f52e3c7e748d8b33f694aba9895f95"
-    },
-    "@std/yaml@1.0.12": {
-      "integrity": "7deabca4545bcedd07c5f69ea53acea71b8b4c67562f224e17b90d75944cb20c"
+    "@std/text@1.0.19": {
+      "integrity": "003a0e032d360e8c3a4e0410fb792c77a66bd6553fee9d60c6ec1bce30d29223"
     }
   },
   "npm": {
-    "@ai-sdk/anthropic@3.0.69_zod@4.3.6": {
-      "integrity": "sha512-LshR7X3pFugY0o41G2VKTmg1XoGpSl7uoYWfzk6zjVZLhCfeFiwgpOga+eTV4XY1VVpZwKVqRnkDbIL7K2eH5g==",
+    "@ai-sdk/anthropic@4.0.20_zod@4.4.3": {
+      "integrity": "sha512-5QdZt6AkWIKIKuwRSjAQIBhN0JSSvthaIcAJKTHP7HPCvWMcNJFF6rz0uKfUlpI3h7nVbY+1Cy5dNl5zjzJ6qA==",
       "dependencies": [
         "@ai-sdk/provider",
         "@ai-sdk/provider-utils",
         "zod"
       ]
     },
-    "@ai-sdk/cerebras@2.0.45_zod@4.3.6": {
-      "integrity": "sha512-GGDGTS9d073lamFVa3VGCPaGubWqIB6WlfKPv23PBd+/yQmBVC0f0vdZfyJs2xPpzdirSQWeE6PsXplMmkcLeA==",
+    "@ai-sdk/cerebras@3.0.14_zod@4.4.3": {
+      "integrity": "sha512-qz82zv1UCgAcRKY8TPNcTPm9AYgFp4mN6owrvr+McbiJyBbvbthqi8w6DT5BpdahZB9LbIfaccJsE6MavNzi4g==",
       "dependencies": [
         "@ai-sdk/openai-compatible",
         "@ai-sdk/provider",
@@ -179,8 +136,8 @@
         "zod"
       ]
     },
-    "@ai-sdk/gateway@3.0.95_zod@4.3.6": {
-      "integrity": "sha512-ZmUNNbZl3V42xwQzPaNUi+s8eqR2lnrxf0bvB6YbLXpLjHYv0k2Y78t12cNOfY0bxGeuVVTLyk856uLuQIuXEQ==",
+    "@ai-sdk/gateway@4.0.28_zod@4.4.3": {
+      "integrity": "sha512-ee9TsNO3mkgHDWmTmJ8Fvltr6PFh52zhrV2+FaKJY3F3iu7kWZi5tCRJCR1HVhhlpj6lHniUb28nLQdPHkA/1Q==",
       "dependencies": [
         "@ai-sdk/provider",
         "@ai-sdk/provider-utils",
@@ -188,54 +145,52 @@
         "zod"
       ]
     },
-    "@ai-sdk/mistral@3.0.30_zod@4.3.6": {
-      "integrity": "sha512-+j4IXRSk9E661cFSafmIr+XHOzwjFagawwzMOlSqwL6U4Sq4PCFLDF+oHbX5NUqNjUL7FD1zi/9lBIfa41pUvw==",
+    "@ai-sdk/mistral@4.0.14_zod@4.4.3": {
+      "integrity": "sha512-7BcH5pV2cUdApvOY6H1Z0Da9Go08KjLI1jw8IYFRr8XBlvDAt3pBhaccT8vB1VFzHFlSpEX2KSu4akr8Uvm3uA==",
       "dependencies": [
         "@ai-sdk/provider",
         "@ai-sdk/provider-utils",
         "zod"
       ]
     },
-    "@ai-sdk/openai-compatible@2.0.41_zod@4.3.6": {
-      "integrity": "sha512-kNAGINk71AlOXx10Dq/PXw4t/9XjdK8uxfpVElRwtSFMdeSiLVt58p9TPx4/FJD+hxZuVhvxYj9r42osxWq79g==",
+    "@ai-sdk/openai-compatible@3.0.14_zod@4.4.3": {
+      "integrity": "sha512-nUl7dBHUDTqcnuWGnEbKMwDDqL94BxRfibLwYv8uWp+kZn8Zqdxy7tUBt4sv2hpHQi+S2P6bUyqW18xmbykErw==",
       "dependencies": [
         "@ai-sdk/provider",
         "@ai-sdk/provider-utils",
         "zod"
       ]
     },
-    "@ai-sdk/openai@3.0.52_zod@4.3.6": {
-      "integrity": "sha512-4Rr8NCGmfWTz6DCUvixn9UmyZcMatiHn0zWoMzI3JCUe9R1P/vsPOpCBALKoSzVYOjyJnhtnVIbfUKujcS39uw==",
+    "@ai-sdk/openai@4.0.20_zod@4.4.3": {
+      "integrity": "sha512-/Hu+btLIO2zuYqCp//vBBAGdM/BeN4gds+NWrlv7Y9WrcTXwnEEwh6P3QZIWh2Tt1I1lswuDIpAJ4t/c/rws3Q==",
       "dependencies": [
         "@ai-sdk/provider",
         "@ai-sdk/provider-utils",
         "zod"
       ]
     },
-    "@ai-sdk/provider-utils@4.0.23_zod@4.3.6": {
-      "integrity": "sha512-z8GlDaCmRSDlqkMF2f4/RFgWxdarvIbyuk+m6WXT1LYgsnGiXRJGTD2Z1+SDl3LqtFuRtGX1aghYvQLoHL/9pg==",
+    "@ai-sdk/provider-utils@5.0.12_zod@4.4.3": {
+      "integrity": "sha512-bbhlOgHeYwrIGheLkM6fhS8hVger8uFPmcOLg+kxc9EFh7y30XYorWhthlYAgpadO3SJhFZrIcEknN7qEqEVvA==",
       "dependencies": [
         "@ai-sdk/provider",
         "@standard-schema/spec",
+        "@workflow/serde",
         "eventsource-parser",
         "zod"
       ]
     },
-    "@ai-sdk/provider@3.0.8": {
-      "integrity": "sha512-oGMAgGoQdBXbZqNG0Ze56CHjDZ1IDYOwGYxYjO5KLSlz5HiNQ9udIXsPZ61VWaHGZ5XW/jyjmr6t2xz2jGVwbQ==",
+    "@ai-sdk/provider@4.0.3": {
+      "integrity": "sha512-e0CpNWJUY7OxAFAnCZkw+ri9QOHWwTs1tXP42782KFGCU07qt8NiXCrCVowyCB5dP2r5/Uls+g2oPd8kOJn9dw==",
       "dependencies": [
         "json-schema"
       ]
     },
-    "@openrouter/ai-sdk-provider@2.5.1_ai@6.0.158__zod@4.3.6_zod@4.3.6": {
-      "integrity": "sha512-r1fJL1Cb3gQDa2MpWH/sfx1BsEW0uzlRriJM6eihaKqbtKDmZoBisF32VcVaQYassighX7NGCkF68EsrZA43uQ==",
+    "@openrouter/ai-sdk-provider@3.0.0_ai@7.0.37__zod@4.4.3_zod@4.4.3": {
+      "integrity": "sha512-m9XTSWoODH2RM5OsZpaGiN7QRR8cdP5paBWq699Tu3JVmGPBKT8xF8XwV0ZBVVsjikD/JgWfak4VSsTR4wAVbg==",
       "dependencies": [
         "ai",
         "zod"
       ]
-    },
-    "@opentelemetry/api@1.9.0": {
-      "integrity": "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="
     },
     "@standard-schema/spec@1.1.0": {
       "integrity": "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="
@@ -246,21 +201,23 @@
         "undici-types"
       ]
     },
-    "@vercel/oidc@3.1.0": {
-      "integrity": "sha512-Fw28YZpRnA3cAHHDlkt7xQHiJ0fcL+NRcIqsocZQUSmbzeIKRpwttJjik5ZGanXP+vlA4SbTg+AbA3bP363l+w=="
+    "@vercel/oidc@3.2.0": {
+      "integrity": "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug=="
     },
-    "ai@6.0.158_zod@4.3.6": {
-      "integrity": "sha512-gLTp1UXFtMqKUi3XHs33K7UFglbvojkxF/aq337TxnLGOhHIW9+GyP2jwW4hYX87f1es+wId3VQoPRRu9zEStQ==",
+    "@workflow/serde@4.1.0": {
+      "integrity": "sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ=="
+    },
+    "ai@7.0.37_zod@4.4.3": {
+      "integrity": "sha512-stF+SEQJgKY3Qfe3FwNzqUrehHviOp2l7LemoI8YMOa0Zk5PxKsRNgUk3cHXz0RAue9RRyCAis2fz6LSCP6EKw==",
       "dependencies": [
         "@ai-sdk/gateway",
         "@ai-sdk/provider",
         "@ai-sdk/provider-utils",
-        "@opentelemetry/api",
         "zod"
       ]
     },
-    "eventsource-parser@3.0.6": {
-      "integrity": "sha512-Vo1ab+QXPzZ4tCa8SwIHJFaSzy4R6SHf7BY79rFBDf0idraZWAkYrDjDj8uWaSm3S2TK+hJ7/t1CEmZ7jXw+pg=="
+    "eventsource-parser@3.1.0": {
+      "integrity": "sha512-kJezFj9YFAMLeORyi7aCLxLbD5/qWMQnoMVlVPyHIll7lgRJCc3JVln9Vgl9nwQi0YkMnhdGTMNn7CkRRAptMg=="
     },
     "json-schema@0.4.0": {
       "integrity": "sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA=="
@@ -284,8 +241,8 @@
     "undici-types@6.21.0": {
       "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="
     },
-    "zod@4.3.6": {
-      "integrity": "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="
+    "zod@4.4.3": {
+      "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="
     }
   },
   "remote": {
@@ -476,20 +433,20 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@cliffy/command@1",
-      "jsr:@cliffy/prompt@1",
-      "jsr:@std/assert@0.224",
-      "jsr:@std/dotenv@~0.225.6",
-      "jsr:@std/fmt@^1.0.9",
-      "jsr:@std/path@^1.0.7",
-      "npm:@ai-sdk/anthropic@^3.0.69",
-      "npm:@ai-sdk/cerebras@^2.0.45",
-      "npm:@ai-sdk/mistral@^3.0.30",
-      "npm:@ai-sdk/openai-compatible@^2.0.41",
-      "npm:@ai-sdk/openai@^3.0.52",
-      "npm:@ai-sdk/provider@^3.0.8",
-      "npm:@openrouter/ai-sdk-provider@^2.5.1",
-      "npm:ai@^6.0.158",
+      "jsr:@cliffy/command@^1.2.1",
+      "jsr:@cliffy/prompt@^1.2.1",
+      "jsr:@std/assert@^1.0.19",
+      "jsr:@std/dotenv@~0.225.7",
+      "jsr:@std/fmt@^1.0.10",
+      "jsr:@std/path@^1.1.6",
+      "npm:@ai-sdk/anthropic@^4.0.9",
+      "npm:@ai-sdk/cerebras@^3.0.9",
+      "npm:@ai-sdk/mistral@^4.0.8",
+      "npm:@ai-sdk/openai-compatible@^3.0.9",
+      "npm:@ai-sdk/openai@^4.0.9",
+      "npm:@ai-sdk/provider@^4.0.3",
+      "npm:@openrouter/ai-sdk-provider@3",
+      "npm:ai@^7.0.9",
       "npm:ts-mockito@^2.6.1",
       "npm:typescript-result@^3.5.2"
     ]

@@ -16,15 +16,42 @@ async function callGenerateText(
   system: string,
   prompt: string,
   temperature: number,
+  thinkingEffort?: 'low' | 'medium' | 'high',
 ): Promise<Result<GenerateTextResult, Error>> {
+  const providerOptions = buildProviderOptions(thinkingEffort);
+
   return await Result.wrap(() =>
     generateText({
       model,
       system,
       prompt,
       temperature,
+      ...(providerOptions ? { providerOptions } : {}),
     })
   )();
+}
+
+function buildProviderOptions(
+  thinkingEffort?: 'low' | 'medium' | 'high',
+): Record<string, { reasoning?: { max_tokens: number }; effort?: string }> | undefined {
+  if (!thinkingEffort) {
+    return undefined;
+  }
+
+  const reasoningMaxTokens = {
+    low: 1000,
+    medium: 4000,
+    high: 8000,
+  }[thinkingEffort];
+
+  return {
+    openrouter: {
+      reasoning: { max_tokens: reasoningMaxTokens },
+    },
+    anthropic: {
+      effort: thinkingEffort,
+    },
+  };
 }
 
 type GenerateTextResult = Awaited<ReturnType<typeof generateText>>;
@@ -127,6 +154,7 @@ export async function generateCommitMessage(
     getSystemPrompt(),
     prompt,
     config.temperature,
+    config.thinkingEffort,
   );
 
   if (!generateResult.ok) {
@@ -136,6 +164,10 @@ export async function generateCommitMessage(
   }
 
   const commitMessage = generateResult.value.text.trim();
+
+  if (config.debug) {
+    displayDebugInfo(generateResult.value);
+  }
 
   const cleanMessage = commitMessage.replace(/^["']|["']$/g, '');
 
@@ -261,5 +293,47 @@ export function initializeAI(model: string): AIConfig {
 export function displayCommitMessage(commitMessage: string): void {
   console.log(green('\n✨ Generated Commit Message:'));
   console.log(white(`"${commitMessage}"`));
+  console.log();
+}
+
+/**
+ * Display debug information including reasoning output and token usage
+ */
+function displayDebugInfo(result: GenerateTextResult): void {
+  const usage = result.usage;
+
+  console.log(yellow('\n🔍 Debug Information:'));
+
+  // Token usage
+  console.log(yellow('  Token Usage:'));
+  console.log(white(`    Input tokens: ${usage.inputTokens ?? 'N/A'}`));
+  console.log(white(`    Output tokens: ${usage.outputTokens ?? 'N/A'}`));
+  console.log(white(`    Total tokens: ${usage.totalTokens ?? 'N/A'}`));
+
+  // Reasoning tokens
+  const reasoningTokens = usage.outputTokenDetails?.reasoningTokens;
+  if (reasoningTokens !== undefined && reasoningTokens !== null) {
+    console.log(white(`    Reasoning tokens: ${reasoningTokens}`));
+  }
+
+  // Cache tokens
+  const cacheRead = usage.inputTokenDetails?.cacheReadTokens;
+  const cacheWrite = usage.inputTokenDetails?.cacheWriteTokens;
+  if (cacheRead !== undefined && cacheRead !== null) {
+    console.log(white(`    Cache read tokens: ${cacheRead}`));
+  }
+  if (cacheWrite !== undefined && cacheWrite !== null) {
+    console.log(white(`    Cache write tokens: ${cacheWrite}`));
+  }
+
+  // Reasoning text
+  if (result.reasoningText) {
+    console.log(yellow('  Reasoning Output:'));
+    const reasoningLines = result.reasoningText.split('\n');
+    for (const line of reasoningLines) {
+      console.log(white(`    ${line}`));
+    }
+  }
+
   console.log();
 }
