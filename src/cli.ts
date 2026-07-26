@@ -10,11 +10,12 @@ import { handleModel } from './cmd/model.ts';
 import { handleStatus } from './cmd/status.ts';
 import { handleVersion } from './cmd/version.ts';
 import { mergeConfig } from './config.ts';
+import denoJson from '../deno.json' with { type: 'json' };
 
 // Load environment variables
 await load({ export: true });
 
-const VERSION = '0.2.0';
+const VERSION = denoJson.version;
 
 function loadConfigAtStartup(): {
   model: string;
