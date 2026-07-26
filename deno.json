@@ -9,7 +9,7 @@
     "start": "deno run --allow-run --allow-env --allow-read --allow-write --allow-net src/cli.ts",
     "dev": "deno run --allow-run --allow-env --allow-read --allow-write --allow-net --watch src/cli.ts",
     "check": "deno fmt --check && deno lint && deno test -A ./",
-    "test": "deno test -A src/",
+    "test": "deno test -A tests/",
     "fmt": "deno fmt",
     "fmt:check": "deno fmt --check",
     "lint": "deno lint",
